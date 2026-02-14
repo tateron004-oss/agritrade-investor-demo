@@ -17,7 +17,6 @@
 
   <style>
     :root{
-      /* Lighter premium theme (not dark/blank-looking) */
       --bg:#0f172a;
       --bg2:#111c33;
       --card:rgba(255,255,255,.06);
@@ -45,7 +44,6 @@
     }
     a{color:inherit; text-decoration:none}
 
-    /* Navbar */
     .navbar{
       position:sticky; top:0; z-index:20;
       display:flex; align-items:center; justify-content:space-between;
@@ -89,12 +87,11 @@
       -webkit-appearance:none;
     }
     select:hover{background: rgba(255,255,255,.14)}
-    option{background:#0f172a; color:var(--text);} /* makes dropdown readable */
+    option{background:#0f172a; color:var(--text);}
 
-    /* Layout */
     .layout{
       display:grid;
-      grid-template-columns: 260px 1fr 320px;
+      grid-template-columns: 260px 1fr 340px;
       gap:14px;
       padding:14px;
       max-width: 1500px;
@@ -145,8 +142,16 @@
     .content-pad{padding:12px 14px}
 
     .grid4{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;}
-    @media(max-width:1180px){ .layout{grid-template-columns: 240px 1fr;} .sidebar-right{display:none} .grid4{grid-template-columns: repeat(2, minmax(0,1fr));} }
-    @media(max-width:760px){ .layout{grid-template-columns: 1fr;} .sidebar-left{display:none} .grid4{grid-template-columns: 1fr;} }
+    @media(max-width:1180px){
+      .layout{grid-template-columns: 240px 1fr;}
+      .sidebar-right{display:none}
+      .grid4{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+    @media(max-width:760px){
+      .layout{grid-template-columns: 1fr;}
+      .sidebar-left{display:none}
+      .grid4{grid-template-columns: 1fr;}
+    }
 
     .stat{
       padding:12px;
@@ -170,7 +175,6 @@
     }
     .action-btn:hover{background: rgba(255,255,255,.12)}
     .action-btn:active{transform: translateY(1px)}
-    .action-btn:disabled{opacity:.6; cursor:not-allowed}
     .badge{
       display:inline-flex; align-items:center; justify-content:center;
       padding:4px 10px;
@@ -181,17 +185,6 @@
       color: var(--text-light);
     }
 
-    /* Tables */
-    table{border-collapse:collapse}
-    .table th, .table td{
-      padding:10px 10px;
-      border-bottom:1px solid var(--border);
-      font-size:.92rem;
-      vertical-align:top;
-    }
-    .table th{color:var(--text-light); font-weight:800}
-
-    /* Toasts */
     .toast-container{
       position:fixed;
       right:20px;
@@ -214,7 +207,7 @@
     .toast.error i{color:#ef4444}
     .toast.info i{color:#60a5fa}
 
-    /* Right panel chat (fixed cut-off) */
+    /* Chat - fixes partial cut off */
     .chat-wrap{padding:12px}
     .chat-box{
       border:1px solid var(--border);
@@ -223,12 +216,7 @@
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      height: 520px; /* bigger: no partial view */
-    }
-    .chat-head{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      display:flex; align-items:center; justify-content:space-between;
+      height: 520px;
     }
     .chat-tabs{display:flex; gap:8px; flex-wrap:wrap}
     .chat-tab{
@@ -287,10 +275,7 @@
       display:flex; align-items:center; justify-content:center;
       font-weight:900;
     }
-    .pay-name{font-weight:900; font-size:.92rem}
-    .pay-sub{color:var(--text-light); font-size:.82rem}
 
-    /* Upload panel */
     .upload-box{
       border:1px dashed rgba(255,255,255,.25);
       background: rgba(255,255,255,.06);
@@ -299,9 +284,8 @@
       display:flex; align-items:center; justify-content:space-between; gap:10px;
     }
 
-    /* Map */
     #map{height: 280px; border-radius: 14px; border:1px solid var(--border); overflow:hidden;}
-    .map-wrap{margin-top:12px;}
+    #map2{height: 320px; border-radius: 14px; border:1px solid var(--border); overflow:hidden;}
 
     /* Modal */
     #agriModal{
@@ -436,7 +420,7 @@
             <div class="stat">
               <div class="stat-title" data-i18n="walletBalanceLabel">Wallet Balance</div>
               <div class="stat-value" id="wallet">$0</div>
-              <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> +$0</div>
+              <div class="stat-change" id="walletDelta"><i class="fa-solid fa-arrow-up"></i> +$0</div>
             </div>
             <div class="stat">
               <div class="stat-title" data-i18n="activeContracts">Active Contracts</div>
@@ -457,15 +441,13 @@
             <button class="action-btn" data-nav="logistics"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">Logistics</span></button>
           </div>
 
-          <div class="map-wrap">
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="liveLogistics">Live Logistics</span></div>
-                <div class="badge">Map</div>
-              </div>
-              <div class="content-pad">
-                <div id="map"></div>
-              </div>
+          <div style="margin-top:12px;" class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="liveLogistics">Live Logistics</span></div>
+              <div class="badge">Map</div>
+            </div>
+            <div class="content-pad">
+              <div id="map"></div>
             </div>
           </div>
 
@@ -498,75 +480,7 @@
           </div>
         </div>
 
-        <div class="card" style="margin-top:12px;">
-          <div class="card-header">
-            <div class="card-title"><i class="fa-solid fa-wallet"></i> <span data-i18n="digitalWallet">Digital Wallet</span></div>
-            <div class="badge"><span data-i18n="mobileMoney">Mobile Money</span></div>
-          </div>
-          <div class="content-pad">
-            <div class="tile-grid">
-              <div class="pay-tile" data-pay="mpesa">
-                <div class="pay-logo" title="M-Pesa">
-                  <!-- simple SVG “M” -->
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 18V6h3l5 7 5-7h3v12h-3V11l-5 7-5-7v7H4z" fill="rgba(34,197,94,.95)"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="pay-name">M-Pesa</div>
-                  <div class="pay-sub">Kenya</div>
-                </div>
-              </div>
-
-              <div class="pay-tile" data-pay="mtn">
-                <div class="pay-logo" title="MTN">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 18V6h4l4 6 4-6h4v12h-3V11l-5 7-5-7v7H4z" fill="rgba(250,204,21,.95)"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="pay-name">MTN</div>
-                  <div class="pay-sub">MoMo</div>
-                </div>
-              </div>
-
-              <div class="pay-tile" data-pay="airtel">
-                <div class="pay-logo" title="Airtel">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8zm0 3.2a4.8 4.8 0 0 0 0 9.6 4.8 4.8 0 0 0 0-9.6z" fill="rgba(239,68,68,.95)"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="pay-name">Airtel</div>
-                  <div class="pay-sub">Money</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-top:12px;" class="upload-box">
-              <div>
-                <div style="font-weight:900;" data-i18n="quickPay">Quick Pay</div>
-                <div style="color:var(--text-light); font-size:.9rem;">Send money via selected provider</div>
-              </div>
-              <span class="badge" id="payProviderBadge">M-Pesa</span>
-            </div>
-
-            <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-              <div>
-                <div style="color:var(--text-light); font-size:.85rem;" data-i18n="phoneNumber">Phone Number</div>
-                <input id="payPhone" value="+254700000000" />
-              </div>
-              <div>
-                <div style="color:var(--text-light); font-size:.85rem;" data-i18n="amount">Amount</div>
-                <input id="payAmount" type="number" min="1" step="0.01" value="100" />
-              </div>
-              <div style="grid-column:1/-1; display:flex; justify-content:flex-end; gap:10px;">
-                <button class="action-btn" id="btnSendMoney"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">Send Money</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <!-- GAMIFICATION PANEL injected by script at bottom of this sidebar -->
       </div>
     </aside>
   </div>
@@ -586,8 +500,16 @@
 
   <script>
   (function () {
-    // ---------- STATE ----------
-    const LS = { lang:"agri_lang", currency:"agri_currency", section:"agri_section", data:"agri_demo_data_v5", chatTab:"agri_chat_tab" };
+    // ---------- CONSTANTS / STATE ----------
+    const LS = {
+      lang:"agri_lang",
+      currency:"agri_currency",
+      section:"agri_section",
+      data:"agri_demo_data_v6",
+      chatTab:"agri_chat_tab",
+      gam:"agri_gamification_v1"
+    };
+
     const state = {
       lang: localStorage.getItem(LS.lang) || "en",
       currency: localStorage.getItem(LS.currency) || "USD",
@@ -605,7 +527,7 @@
       en: {
         appName:"AgriTrade Africa",
         navDashboard:"Dashboard", navMarket:"Market", navWallet:"Wallet", navAITools:"AI Tools",
-        sidebarDashboard:"Dashboard", myListings:"My Listings", orders:"Orders", logistics:"Logistics",
+        sidebarDashboard:"Dashboard", logistics:"Logistics",
         diseaseScanner:"Disease Scanner", priceAI:"Price AI", soilAnalysis:"Soil Analysis",
         traceability:"Traceability", smartContracts:"Smart Contracts",
         totalRevenue:"Total Revenue", walletBalanceLabel:"Wallet Balance", activeContracts:"Active Contracts", trustScore:"Trust Score",
@@ -620,12 +542,13 @@
         typeMessage:"Type message...",
         aiReply:"Thanks for your message! I’ll help you find the best buyers for your crops.",
         currencyChanged:"Currency changed to {currency}",
-        languageChanged:"Language changed to {lang}"
+        languageChanged:"Language changed to {lang}",
+        achievements:"Achievements", level:"Level", xpProgress:"XP Progress"
       },
       es: {
         appName:"AgriTrade África",
         navDashboard:"Panel", navMarket:"Mercado", navWallet:"Billetera", navAITools:"Herramientas IA",
-        sidebarDashboard:"Panel", myListings:"Mis anuncios", orders:"Pedidos", logistics:"Logística",
+        sidebarDashboard:"Panel", logistics:"Logística",
         diseaseScanner:"Escáner de enfermedades", priceAI:"IA de precios", soilAnalysis:"Análisis de suelo",
         traceability:"Trazabilidad", smartContracts:"Contratos inteligentes",
         totalRevenue:"Ingresos totales", walletBalanceLabel:"Saldo de billetera", activeContracts:"Contratos activos", trustScore:"Puntuación de confianza",
@@ -640,12 +563,13 @@
         typeMessage:"Escribe un mensaje...",
         aiReply:"¡Gracias por tu mensaje! Te ayudaré a encontrar los mejores compradores.",
         currencyChanged:"Moneda cambiada a {currency}",
-        languageChanged:"Idioma cambiado a {lang}"
+        languageChanged:"Idioma cambiado a {lang}",
+        achievements:"Logros", level:"Nivel", xpProgress:"Progreso XP"
       },
       fr: {
         appName:"AgriTrade Afrique",
         navDashboard:"Tableau de bord", navMarket:"Marché", navWallet:"Portefeuille", navAITools:"Outils IA",
-        sidebarDashboard:"Tableau de bord", myListings:"Mes annonces", orders:"Commandes", logistics:"Logistique",
+        sidebarDashboard:"Tableau de bord", logistics:"Logistique",
         diseaseScanner:"Scanner de maladies", priceAI:"IA des prix", soilAnalysis:"Analyse du sol",
         traceability:"Traçabilité", smartContracts:"Contrats intelligents",
         totalRevenue:"Revenu total", walletBalanceLabel:"Solde du portefeuille", activeContracts:"Contrats actifs", trustScore:"Indice de confiance",
@@ -660,12 +584,13 @@
         typeMessage:"Tapez un message...",
         aiReply:"Merci pour votre message ! Je vais vous aider à trouver les meilleurs acheteurs.",
         currencyChanged:"Devise changée en {currency}",
-        languageChanged:"Langue : {lang}"
+        languageChanged:"Langue : {lang}",
+        achievements:"Succès", level:"Niveau", xpProgress:"Progression XP"
       },
       ar: {
         appName:"أجريتريد أفريقيا",
         navDashboard:"لوحة التحكم", navMarket:"السوق", navWallet:"المحفظة", navAITools:"أدوات الذكاء",
-        sidebarDashboard:"لوحة التحكم", myListings:"عروضي", orders:"الطلبات", logistics:"اللوجستيات",
+        sidebarDashboard:"لوحة التحكم", logistics:"اللوجستيات",
         diseaseScanner:"ماسح الأمراض", priceAI:"ذكاء الأسعار", soilAnalysis:"تحليل التربة",
         traceability:"التتبع", smartContracts:"العقود الذكية",
         totalRevenue:"إجمالي الإيرادات", walletBalanceLabel:"رصيد المحفظة", activeContracts:"العقود النشطة", trustScore:"درجة الثقة",
@@ -680,7 +605,8 @@
         typeMessage:"اكتب رسالة...",
         aiReply:"شكرًا لرسالتك! سأساعدك في العثور على أفضل المشترين.",
         currencyChanged:"تم تغيير العملة إلى {currency}",
-        languageChanged:"تم تغيير اللغة إلى {lang}"
+        languageChanged:"تم تغيير اللغة إلى {lang}",
+        achievements:"الإنجازات", level:"المستوى", xpProgress:"تقدم XP"
       }
     };
 
@@ -736,11 +662,12 @@
       modal.style.display="flex";
     }
 
-    // ---------- DATA (lightweight investor demo data) ----------
+    // ---------- DATA ----------
     function seedData(){
       const data = {
         baseRevenueUSD: 24500,
         walletUSD: 8320.50,
+        walletDeltaUSD: 1200,
         chat: [
           { id:"c1", tab:"ai", from:"AI", text:"💡 Tip: Offer bulk discount for 1000kg+ to increase deal size", ts: nowISO() },
           { id:"c2", tab:"buyers", from:"Buyer", text:"We need 5,000kg maize Grade A. Can you deliver to Nairobi in 7 days?", ts: nowISO() },
@@ -762,8 +689,123 @@
         return parsed;
       }catch{ return seedData(); }
     }
-    let DB = loadData();
+    const DB = loadData();
     function saveData(){ localStorage.setItem(LS.data, JSON.stringify(DB)); }
+
+    // ---------- GAMIFICATION ----------
+    const GAM = (() => {
+      try { return JSON.parse(localStorage.getItem(LS.gam) || "null") || null; } catch { return null; }
+    })() || {
+      xp: 0,
+      level: 1,
+      actions: { chats:0, quickPays:0, diseaseScans:0, soilRuns:0, priceRuns:0, navMarket:0, navLogistics:0, aiChats:0 },
+      badges: { trader:false, quality:false, pioneer:false, export:false, green:false, digital:false, mentor:false, leader:false }
+    };
+
+    function saveGAM(){ localStorage.setItem(LS.gam, JSON.stringify(GAM)); }
+    function xpForNextLevel(lv){ return 200 + (lv-1)*120; }
+
+    function badgeHint(k){
+      const a = GAM.actions;
+      const unlockedCount = Object.values(GAM.badges).filter(Boolean).length;
+      const hints = {
+        trader: `Send 3 messages (${a.chats}/3)`,
+        quality: `Run 2 scans (Disease/Soil) (${(a.diseaseScans+a.soilRuns)}/2)`,
+        pioneer: `Run Price AI 2x (${a.priceRuns}/2)`,
+        export: `Visit Market + Logistics (${Math.min(1,a.navMarket) + Math.min(1,a.navLogistics)}/2)`,
+        green: `Run Soil Analysis 1x (${a.soilRuns}/1)`,
+        digital: `Use Quick Pay 1x (${a.quickPays}/1)`,
+        mentor: `Chat with AI 5x (${a.aiChats}/5)`,
+        leader: `Unlock 4 badges (${unlockedCount}/4)`
+      };
+      return hints[k] || "";
+    }
+
+    function unlockBadge(key, label){
+      if(GAM.badges[key]) return;
+      GAM.badges[key] = true;
+      saveGAM();
+      renderGamification();
+      showToast(`Badge unlocked: ${label}`, "success");
+    }
+
+    function evaluateBadges(){
+      if(GAM.actions.chats >= 3) unlockBadge("trader", "Trader");
+      if((GAM.actions.diseaseScans + GAM.actions.soilRuns) >= 2) unlockBadge("quality", "Quality");
+      if(GAM.actions.priceRuns >= 2) unlockBadge("pioneer", "Pioneer");
+      if(GAM.actions.navMarket >= 1 && GAM.actions.navLogistics >= 1) unlockBadge("export", "Export");
+      if(GAM.actions.soilRuns >= 1) unlockBadge("green", "Green");
+      if(GAM.actions.quickPays >= 1) unlockBadge("digital", "Digital");
+      if(GAM.actions.aiChats >= 5) unlockBadge("mentor", "Mentor");
+      const unlockedCount = Object.values(GAM.badges).filter(Boolean).length;
+      if(unlockedCount >= 4) unlockBadge("leader", "Leader");
+    }
+
+    function addXP(amount, reason){
+      GAM.xp += amount;
+      while(GAM.xp >= xpForNextLevel(GAM.level)){
+        GAM.xp -= xpForNextLevel(GAM.level);
+        GAM.level += 1;
+        showToast(`Level up! Level ${GAM.level}`, "success");
+      }
+      saveGAM();
+      renderGamification();
+      evaluateBadges();
+      if(reason) showToast(`+${amount} XP — ${reason}`, "info");
+    }
+
+    function renderGamification(){
+      let host = document.getElementById("gamificationPanel");
+      if(!host){
+        const right = document.querySelector(".sidebar-right .chat-wrap");
+        if(!right) return;
+        host = document.createElement("div");
+        host.id = "gamificationPanel";
+        host.className = "card";
+        host.style.marginTop = "12px";
+        right.appendChild(host);
+      }
+
+      const next = xpForNextLevel(GAM.level);
+      const pct = Math.max(0, Math.min(100, Math.round((GAM.xp/next)*100)));
+
+      const badgeList = [
+        ["trader","Trader"],["quality","Quality"],["pioneer","Pioneer"],["export","Export"],
+        ["green","Green"],["digital","Digital"],["mentor","Mentor"],["leader","Leader"]
+      ];
+
+      host.innerHTML = `
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-trophy"></i> <span>${escapeHtml(t("achievements"))}</span></div>
+          <div class="badge">${escapeHtml(t("level"))} ${GAM.level}</div>
+        </div>
+        <div class="content-pad">
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <div style="font-weight:900;">${escapeHtml(t("xpProgress"))}</div>
+            <div class="badge">${GAM.xp} / ${next}</div>
+          </div>
+          <div style="height:10px; background: rgba(255,255,255,.08); border:1px solid var(--border); border-radius:999px; overflow:hidden; margin-top:8px;">
+            <div style="height:100%; width:${pct}%; background: linear-gradient(90deg, var(--accent), var(--accent2));"></div>
+          </div>
+
+          <div style="margin-top:12px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;">
+            ${badgeList.map(([k,label])=>`
+              <div style="border:1px solid var(--border); background: rgba(255,255,255,.06); border-radius:14px; padding:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                  <div style="font-weight:900;">${label}</div>
+                  <span class="badge" style="${GAM.badges[k] ? "outline:2px solid rgba(34,197,94,.25)" : "opacity:.7"}">
+                    ${GAM.badges[k] ? "Unlocked" : "Locked"}
+                  </span>
+                </div>
+                <div style="margin-top:6px; color:var(--text-light); font-size:.85rem;">
+                  ${escapeHtml(badgeHint(k))}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
 
     // ---------- SECTIONS ----------
     function buildSections(){
@@ -771,7 +813,7 @@
       if(!main) return;
       if(main.querySelector("[data-section='dashboard']")) return;
 
-      // Wrap existing dashboard
+      // wrap existing dashboard
       const dash = document.createElement("div");
       dash.dataset.section = "dashboard";
       dash.id = "section-dashboard";
@@ -788,28 +830,28 @@
         main.appendChild(el);
       };
 
-      mk("market", sectionShell("fa-store", t("navMarket"), `
+      mk("market", shell("fa-store", t("navMarket"), `
         <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-          Market module is connected in your other build — keeping this demo stable while we finalize AI/Wallet/Logistics blocks.
+          Market module can be re-attached (your bigger build). For this combined version we stabilized: AI + Chat + Logistics + Gamification.
           <div style="margin-top:10px;">
-            <button class="action-btn" onclick="openModal('Market', 'Market listings can be re-attached next. Your current priority fixes are AI + Wallet + Chat + Logistics.')">
+            <button class="action-btn" onclick="openModal('Market', 'Market listings will be merged in next pass. This demo is stable + investor-ready.')">
               <i class="fa-solid fa-list"></i> Market Status
             </button>
           </div>
         </div>
       `));
 
-      mk("wallet", sectionShell("fa-wallet", t("navWallet"), walletSectionHTML()));
-      mk("ai", sectionShell("fa-robot", t("navAITools"), aiToolsHTML()));
-      mk("disease", sectionShell("fa-camera", t("aiDiseaseDetection"), diseaseHTML()));
-      mk("priceai", sectionShell("fa-brain", t("priceAI"), priceAIHTML()));
-      mk("soil", sectionShell("fa-flask", t("soilAnalysis"), soilHTML()));
-      mk("logistics", sectionShell("fa-truck", t("logistics"), logisticsHTML()));
-      mk("traceability", sectionShell("fa-link", t("traceability"), traceHTML()));
-      mk("contracts", sectionShell("fa-file-contract", t("smartContracts"), contractsHTML()));
+      mk("wallet", shell("fa-wallet", t("navWallet"), walletHTML()));
+      mk("ai", shell("fa-robot", t("navAITools"), aiHubHTML()));
+      mk("disease", shell("fa-camera", t("aiDiseaseDetection"), diseaseHTML()));
+      mk("priceai", shell("fa-brain", t("priceAI"), priceAIHTML()));
+      mk("soil", shell("fa-flask", t("soilAnalysis"), soilHTML()));
+      mk("logistics", shell("fa-truck", t("logistics"), logisticsHTML()));
+      mk("traceability", shell("fa-link", t("traceability"), `<div class="content-pad" style="color:var(--text-light);">Traceability module placeholder (next merge).</div>`));
+      mk("contracts", shell("fa-file-contract", t("smartContracts"), `<div class="content-pad" style="color:var(--text-light);">Smart Contracts module placeholder (next merge).</div>`));
     }
 
-    function sectionShell(icon, title, body){
+    function shell(icon, title, body){
       return `
         <div class="card-header">
           <div class="card-title"><i class="fa-solid ${icon}"></i> ${escapeHtml(title)}</div>
@@ -819,22 +861,13 @@
       `;
     }
 
-    function walletSectionHTML(){
+    function walletHTML(){
       return `
         <div class="content-pad">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
-            <div class="stat">
-              <div class="stat-title" data-i18n="availableBalance">${escapeHtml(t("walletBalanceLabel"))}</div>
-              <div class="stat-value" id="walletBalanceBig">$0</div>
-              <div class="stat-change"><i class="fa-solid fa-shield"></i> <span data-i18n="verified">${escapeHtml(t("verified"))}</span></div>
-            </div>
-            <div class="stat">
-              <div class="stat-title">Quick Actions</div>
-              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-                <button class="action-btn" id="btnWalletDeposit"><i class="fa-solid fa-plus"></i> Deposit</button>
-                <button class="action-btn" id="btnWalletSend"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">${escapeHtml(t("sendMoney"))}</span></button>
-              </div>
-            </div>
+          <div class="stat">
+            <div class="stat-title" data-i18n="walletBalanceLabel">${escapeHtml(t("walletBalanceLabel"))}</div>
+            <div class="stat-value" id="walletBalanceBig">${escapeHtml(moneyFromUSD(DB.walletUSD))}</div>
+            <div class="stat-change"><i class="fa-solid fa-shield"></i> <span data-i18n="verified">${escapeHtml(t("verified"))}</span></div>
           </div>
 
           <div class="card" style="margin-top:12px;">
@@ -844,9 +877,9 @@
             </div>
             <div class="content-pad">
               <div class="tile-grid">
-                <div class="pay-tile" data-pay="mpesa"><div class="pay-logo">M</div><div><div class="pay-name">M-Pesa</div><div class="pay-sub">Kenya</div></div></div>
-                <div class="pay-tile" data-pay="mtn"><div class="pay-logo">MT</div><div><div class="pay-name">MTN</div><div class="pay-sub">MoMo</div></div></div>
-                <div class="pay-tile" data-pay="airtel"><div class="pay-logo">A</div><div><div class="pay-name">Airtel</div><div class="pay-sub">Money</div></div></div>
+                <div class="pay-tile" data-pay="mpesa"><div class="pay-logo">M</div><div><div style="font-weight:900;">M-Pesa</div><div style="color:var(--text-light);font-size:.82rem;">Kenya</div></div></div>
+                <div class="pay-tile" data-pay="mtn"><div class="pay-logo">MT</div><div><div style="font-weight:900;">MTN</div><div style="color:var(--text-light);font-size:.82rem;">MoMo</div></div></div>
+                <div class="pay-tile" data-pay="airtel"><div class="pay-logo">A</div><div><div style="font-weight:900;">Airtel</div><div style="color:var(--text-light);font-size:.82rem;">Money</div></div></div>
               </div>
 
               <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -864,7 +897,7 @@
               </div>
 
               <div style="margin-top:10px; color:var(--text-light); font-size:.9rem;">
-                Demo wallet transfers are stored in your browser and persist on refresh.
+                Demo transfers persist in your browser (localStorage).
               </div>
             </div>
           </div>
@@ -872,7 +905,7 @@
       `;
     }
 
-    function aiToolsHTML(){
+    function aiHubHTML(){
       return `
         <div class="content-pad">
           <div style="display:flex; flex-wrap:wrap; gap:10px;">
@@ -888,13 +921,7 @@
               <div class="badge">Demo</div>
             </div>
             <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-              Use the modules above to simulate real platform automation:
-              <ul style="margin:8px 0 0 18px;">
-                <li>Disease scanning via image upload</li>
-                <li>Price forecasting with smart recommendations</li>
-                <li>Soil analysis recommendations</li>
-                <li>Logistics map tracking</li>
-              </ul>
+              All AI modules above are active. Upload a crop photo to run disease detection and earn XP.
             </div>
           </div>
         </div>
@@ -904,41 +931,31 @@
     function diseaseHTML(){
       return `
         <div class="content-pad">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-camera"></i> <span data-i18n="aiDiseaseDetection">${escapeHtml(t("aiDiseaseDetection"))}</span></div>
-              <div class="badge">AI</div>
+          <div class="upload-box">
+            <div>
+              <div style="font-weight:900;" data-i18n="tapToUpload">${escapeHtml(t("tapToUpload"))}</div>
+              <div style="color:var(--text-light); font-size:.9rem;">JPEG/PNG supported</div>
             </div>
-            <div class="content-pad">
-              <div class="upload-box">
-                <div>
-                  <div style="font-weight:900;" data-i18n="tapToUpload">${escapeHtml(t("tapToUpload"))}</div>
-                  <div style="color:var(--text-light); font-size:.9rem;">JPEG/PNG supported</div>
-                </div>
-                <div>
-                  <input id="diseaseFile" type="file" accept="image/*" style="max-width:260px;" />
-                </div>
-              </div>
+            <input id="diseaseFile" type="file" accept="image/*" />
+          </div>
 
-              <div id="diseaseResult" style="margin-top:12px; display:none;">
-                <div class="card" style="padding:12px;">
-                  <div style="display:flex; justify-content:space-between; gap:10px;">
-                    <div style="font-weight:900;" data-i18n="healthyDetected">${escapeHtml(t("healthyDetected"))}</div>
-                    <div class="badge"><span data-i18n="confidence">${escapeHtml(t("confidence"))}</span>: <span id="diseaseConfidence">—</span></div>
-                  </div>
-                  <div style="margin-top:8px; color:var(--text-light); line-height:1.7;" id="diseaseAdvice">${escapeHtml(t("healthyAdvice"))}</div>
-                </div>
+          <div id="diseaseResult" style="margin-top:12px; display:none;">
+            <div class="card" style="padding:12px;">
+              <div style="display:flex; justify-content:space-between; gap:10px;">
+                <div style="font-weight:900;" id="diseaseTitle">${escapeHtml(t("healthyDetected"))}</div>
+                <div class="badge"><span data-i18n="confidence">${escapeHtml(t("confidence"))}</span>: <span id="diseaseConfidence">—</span></div>
               </div>
+              <div style="margin-top:8px; color:var(--text-light); line-height:1.7;" id="diseaseAdvice">${escapeHtml(t("healthyAdvice"))}</div>
+            </div>
+          </div>
 
-              <div class="card" style="margin-top:12px;">
-                <div class="card-header">
-                  <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="history">${escapeHtml(t("history"))}</span></div>
-                  <div class="badge" id="diseaseCount">0</div>
-                </div>
-                <div class="content-pad" id="diseaseHistory" style="color:var(--text-light); line-height:1.7;">
-                  No scans yet.
-                </div>
-              </div>
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="history">${escapeHtml(t("history"))}</span></div>
+              <div class="badge" id="diseaseCount">0</div>
+            </div>
+            <div class="content-pad" id="diseaseHistory" style="color:var(--text-light); line-height:1.7;">
+              No scans yet.
             </div>
           </div>
         </div>
@@ -948,41 +965,29 @@
     function priceAIHTML(){
       return `
         <div class="content-pad">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-brain"></i> <span data-i18n="priceAI">${escapeHtml(t("priceAI"))}</span></div>
-              <div class="badge">Forecast</div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+            <div>
+              <div style="color:var(--text-light); font-size:.85rem;">Crop</div>
+              <select id="priceCrop"><option>Maize</option><option>Beans</option><option>Coffee</option><option>Mango</option></select>
             </div>
-            <div class="content-pad">
-              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
-                <div>
-                  <div style="color:var(--text-light); font-size:.85rem;">Crop</div>
-                  <select id="priceCrop">
-                    <option>Maize</option><option>Beans</option><option>Coffee</option><option>Mango</option>
-                  </select>
-                </div>
-                <div>
-                  <div style="color:var(--text-light); font-size:.85rem;">Quantity (kg)</div>
-                  <input id="priceQty" type="number" min="50" step="50" value="1000"/>
-                </div>
-                <div>
-                  <div style="color:var(--text-light); font-size:.85rem;">Target Market</div>
-                  <select id="priceMarket">
-                    <option>Nairobi</option><option>Kigali</option><option>Addis Ababa</option><option>Djibouti</option>
-                  </select>
-                </div>
-              </div>
+            <div>
+              <div style="color:var(--text-light); font-size:.85rem;">Quantity (kg)</div>
+              <input id="priceQty" type="number" min="50" step="50" value="1000"/>
+            </div>
+            <div>
+              <div style="color:var(--text-light); font-size:.85rem;">Target Market</div>
+              <select id="priceMarket"><option>Nairobi</option><option>Kigali</option><option>Addis Ababa</option><option>Djibouti</option></select>
+            </div>
+          </div>
 
-              <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
-                <button class="action-btn" id="runPriceAI"><i class="fa-solid fa-wand-magic-sparkles"></i> Run Price AI</button>
-              </div>
+          <div style="margin-top:12px; display:flex; justify-content:flex-end;">
+            <button class="action-btn" id="runPriceAI"><i class="fa-solid fa-wand-magic-sparkles"></i> Run Price AI</button>
+          </div>
 
-              <div class="card" style="margin-top:12px; padding:12px;">
-                <div style="font-weight:900;">AI Output</div>
-                <div id="priceAIOut" style="margin-top:8px; color:var(--text-light); line-height:1.7;">
-                  Run the model to generate forecast + a negotiation recommendation.
-                </div>
-              </div>
+          <div class="card" style="margin-top:12px; padding:12px;">
+            <div style="font-weight:900;">AI Output</div>
+            <div id="priceAIOut" style="margin-top:8px; color:var(--text-light); line-height:1.7;">
+              Run the model to generate forecast + a negotiation recommendation.
             </div>
           </div>
         </div>
@@ -992,26 +997,18 @@
     function soilHTML(){
       return `
         <div class="content-pad">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-flask"></i> <span data-i18n="soilAnalysis">${escapeHtml(t("soilAnalysis"))}</span></div>
-              <div class="badge">AI</div>
+          <div class="upload-box">
+            <div>
+              <div style="font-weight:900;">Upload soil photo / report</div>
+              <div style="color:var(--text-light); font-size:.9rem;">Demo analysis</div>
             </div>
-            <div class="content-pad">
-              <div class="upload-box">
-                <div>
-                  <div style="font-weight:900;">Upload soil photo / report</div>
-                  <div style="color:var(--text-light); font-size:.9rem;">We simulate analysis in demo mode</div>
-                </div>
-                <input id="soilFile" type="file" accept="image/*,.pdf" />
-              </div>
+            <input id="soilFile" type="file" accept="image/*,.pdf" />
+          </div>
 
-              <div class="card" style="margin-top:12px; padding:12px;">
-                <div style="font-weight:900;">Soil AI Recommendation</div>
-                <div id="soilOut" style="margin-top:8px; color:var(--text-light); line-height:1.7;">
-                  Upload a file to generate a recommendation.
-                </div>
-              </div>
+          <div class="card" style="margin-top:12px; padding:12px;">
+            <div style="font-weight:900;">Soil AI Recommendation</div>
+            <div id="soilOut" style="margin-top:8px; color:var(--text-light); line-height:1.7;">
+              Upload a file to generate a recommendation.
             </div>
           </div>
         </div>
@@ -1021,48 +1018,15 @@
     function logisticsHTML(){
       return `
         <div class="content-pad">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-truck"></i> <span data-i18n="liveLogistics">${escapeHtml(t("liveLogistics"))}</span></div>
-              <div class="badge">Map</div>
-            </div>
-            <div class="content-pad">
-              <div id="map2"></div>
-              <div style="margin-top:10px; color:var(--text-light); line-height:1.7;">
-                Live map includes demo markers: warehouse, farm, and in-transit route.
-              </div>
-            </div>
+          <div id="map2"></div>
+          <div style="margin-top:10px; color:var(--text-light); line-height:1.7;">
+            Demo markers: warehouse, farm, in-transit route.
           </div>
         </div>
       `;
     }
 
-    function traceHTML(){
-      return `
-        <div class="content-pad">
-          <div class="card" style="padding:12px;">
-            <div style="font-weight:900;">Traceability</div>
-            <div style="color:var(--text-light); line-height:1.7; margin-top:6px;">
-              Demo-ready trust timeline is active in your full build. This module can be reattached next.
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function contractsHTML(){
-      return `
-        <div class="content-pad">
-          <div class="card" style="padding:12px;">
-            <div style="font-weight:900;">Smart Contracts</div>
-            <div style="color:var(--text-light); line-height:1.7; margin-top:6px;">
-              Contract actions are stable in your full build. We focused these fixes on: language/currency UI, wallet quick pay, chat, disease scanner, and map.
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
+    // ---------- NAV ----------
     function showSection(name){
       const main = document.getElementById("mainContent");
       if(!main) return;
@@ -1077,12 +1041,26 @@
       document.querySelectorAll(".menu-link, .nav-btn").forEach(x=> x.classList.remove("active"));
       document.querySelectorAll(`[data-nav="${name}"]`).forEach(x=> x.classList.add("active"));
 
-      // If logistics section opened, ensure map exists
-      if(name === "dashboard") setTimeout(()=> initMap("map"), 50);
-      if(name === "logistics") setTimeout(()=> initMap("map2"), 50);
+      // Gamification nav hooks
+      if(name === "market") { GAM.actions.navMarket += 1; addXP(10, "Visited Market"); }
+      if(name === "logistics") { GAM.actions.navLogistics += 1; addXP(10, "Visited Logistics"); }
+      saveGAM(); evaluateBadges();
+
+      if(name === "dashboard") setTimeout(()=> initMap("map"), 40);
+      if(name === "logistics") setTimeout(()=> initMap("map2"), 40);
     }
 
-    // ---------- LANGUAGE SELECTOR ----------
+    function bindNav(){
+      document.body.addEventListener("click", (e)=>{
+        const nav = e.target.closest("[data-nav]");
+        if(nav){
+          e.preventDefault();
+          showSection(nav.dataset.nav);
+        }
+      });
+    }
+
+    // ---------- LANGUAGE / CURRENCY ----------
     function injectLanguageSelector(){
       const navRight = document.querySelector(".nav-right");
       if(!navRight || document.getElementById("langSelect")) return;
@@ -1105,6 +1083,7 @@
       document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
       const chatInput = document.getElementById("chatInput");
       if(chatInput) chatInput.placeholder = t("typeMessage");
+      renderGamification(); // re-render panel titles in new language
     }
 
     function setLanguage(lang, toast){
@@ -1129,9 +1108,11 @@
       const revenueEl = document.getElementById("revenue");
       const walletEl = document.getElementById("wallet");
       const walletBig = document.getElementById("walletBalanceBig");
+      const delta = document.getElementById("walletDelta");
       if(revenueEl) revenueEl.textContent = moneyFromUSD(DB.baseRevenueUSD);
       if(walletEl) walletEl.textContent = moneyFromUSD(DB.walletUSD);
       if(walletBig) walletBig.textContent = moneyFromUSD(DB.walletUSD);
+      if(delta) delta.innerHTML = `<i class="fa-solid fa-arrow-up"></i> +${escapeHtml(moneyFromUSD(DB.walletDeltaUSD || 1200))}`;
     }
 
     // ---------- CHAT ----------
@@ -1182,75 +1163,86 @@
       saveData();
       renderChat();
 
-      // Auto AI response
+      GAM.actions.chats += 1;
+      addXP(8, "Sent a message");
+      saveGAM(); evaluateBadges();
+
       setTimeout(()=>{
         DB.chat.push({ id:"a"+Math.random().toString(16).slice(2), tab:"ai", from:"AI", text: t("aiReply"), ts: nowISO() });
         saveData();
+
+        GAM.actions.aiChats += 1;
+        addXP(6, "AI interaction");
+        saveGAM(); evaluateBadges();
+
         renderChat();
-      }, 500);
+      }, 550);
+    }
+
+    function bindChat(){
+      const tabs = document.getElementById("chatTabs");
+      if(tabs && !tabs.__b){
+        tabs.__b = true;
+        tabs.addEventListener("click", (e)=>{
+          const tEl = e.target.closest(".chat-tab");
+          if(!tEl) return;
+          setChatTab(tEl.dataset.chat);
+        });
+      }
+      const btn = document.getElementById("sendBtn");
+      const input = document.getElementById("chatInput");
+      if(btn && !btn.__b){
+        btn.__b = true;
+        btn.addEventListener("click", sendChat);
+      }
+      if(input && !input.__b){
+        input.__b = true;
+        input.addEventListener("keydown", (e)=>{ if(e.key==="Enter") sendChat(); });
+      }
     }
 
     // ---------- QUICK PAY ----------
     function setPayProvider(p){
       state.payProvider = p;
-      const badge = document.getElementById("payProviderBadge");
-      const badge2 = document.getElementById("walletProviderBadge");
+      const badge = document.getElementById("walletProviderBadge");
       const label = p==="mpesa" ? "M-Pesa" : p==="mtn" ? "MTN" : "Airtel";
       if(badge) badge.textContent = label;
-      if(badge2) badge2.textContent = label;
     }
 
     function sendMoneyQuickPay(){
-      const phone = (document.getElementById("payPhone")?.value || document.getElementById("walletPhone")?.value || "").trim();
-      const amt = Number(document.getElementById("payAmount")?.value || document.getElementById("walletAmount")?.value || 0);
+      const phone = (document.getElementById("walletPhone")?.value || "").trim();
+      const amt = Number(document.getElementById("walletAmount")?.value || 0);
       if(!phone || !isFinite(amt) || amt<=0){
         showToast("Enter phone + amount.", "error");
         return;
       }
-      // Demo transfer subtracts from wallet USD equivalent
       const amtUSD = amt / (rates[state.currency] || 1);
       DB.walletUSD = Math.max(0, DB.walletUSD - amtUSD);
       saveData();
       renderStats();
+
+      GAM.actions.quickPays += 1;
+      addXP(15, "Used Quick Pay");
+      saveGAM(); evaluateBadges();
+
       showToast(`Sent ${moneyFromUSD(amtUSD)} via ${state.payProvider.toUpperCase()} to ${phone}`, "success");
     }
 
-    // ---------- DISEASE SCANNER (upload -> simulated analysis) ----------
-    function bindDiseaseScanner(){
-      const file = document.getElementById("diseaseFile");
-      if(!file || file.__b) return;
-      file.__b = true;
-
-      file.addEventListener("change", ()=>{
-        const resultBox = document.getElementById("diseaseResult");
-        const conf = document.getElementById("diseaseConfidence");
-        const advice = document.getElementById("diseaseAdvice");
-
-        const outcomes = [
-          { title: t("healthyDetected"), confidence: "96%", advice: t("healthyAdvice") },
-          { title: "Early Leaf Spot Risk Detected", confidence: "88%", advice: "Recommend isolate affected area, improve airflow, and apply approved fungicide per local guidance." },
-          { title: "Possible Nutrient Stress Detected", confidence: "84%", advice: "Recommend soil test + balanced NPK; check irrigation consistency." }
-        ];
-        const pick = outcomes[Math.floor(Math.random()*outcomes.length)];
-
-        if(resultBox) resultBox.style.display = "";
-        if(conf) conf.textContent = pick.confidence;
-        if(advice) advice.textContent = pick.advice;
-
-        DB.diseaseHistory.unshift({
-          id:"d"+Math.random().toString(16).slice(2),
-          fileName: file.files?.[0]?.name || "crop-image",
-          outcome: pick.title,
-          confidence: pick.confidence,
-          ts: nowISO()
-        });
-        DB.diseaseHistory = DB.diseaseHistory.slice(0, 10);
-        saveData();
-        renderDiseaseHistory();
-        showToast("Scan complete", "success");
+    function bindWallet(){
+      document.querySelectorAll(".pay-tile").forEach(tile=>{
+        if(tile.__b) return;
+        tile.__b = true;
+        tile.addEventListener("click", ()=> setPayProvider(tile.dataset.pay));
       });
+
+      const btn = document.getElementById("walletSendBtn");
+      if(btn && !btn.__b){
+        btn.__b = true;
+        btn.addEventListener("click", sendMoneyQuickPay);
+      }
     }
 
+    // ---------- DISEASE / SOIL / PRICE AI ----------
     function renderDiseaseHistory(){
       const wrap = document.getElementById("diseaseHistory");
       const count = document.getElementById("diseaseCount");
@@ -1274,7 +1266,70 @@
       `).join("");
     }
 
-    // ---------- PRICE AI / SOIL ----------
+    function bindDisease(){
+      const file = document.getElementById("diseaseFile");
+      if(!file || file.__b) return;
+      file.__b = true;
+
+      file.addEventListener("change", ()=>{
+        const resultBox = document.getElementById("diseaseResult");
+        const title = document.getElementById("diseaseTitle");
+        const conf = document.getElementById("diseaseConfidence");
+        const advice = document.getElementById("diseaseAdvice");
+
+        const outcomes = [
+          { title: t("healthyDetected"), confidence: "96%", advice: t("healthyAdvice") },
+          { title: "Early Leaf Spot Risk Detected", confidence: "88%", advice: "Recommend isolate affected area, improve airflow, and apply approved fungicide per local guidance." },
+          { title: "Possible Nutrient Stress Detected", confidence: "84%", advice: "Recommend soil test + balanced NPK; check irrigation consistency." }
+        ];
+        const pick = outcomes[Math.floor(Math.random()*outcomes.length)];
+
+        if(resultBox) resultBox.style.display = "";
+        if(title) title.textContent = pick.title;
+        if(conf) conf.textContent = pick.confidence;
+        if(advice) advice.textContent = pick.advice;
+
+        DB.diseaseHistory.unshift({
+          id:"d"+Math.random().toString(16).slice(2),
+          fileName: file.files?.[0]?.name || "crop-image",
+          outcome: pick.title,
+          confidence: pick.confidence,
+          ts: nowISO()
+        });
+        DB.diseaseHistory = DB.diseaseHistory.slice(0, 10);
+        saveData();
+        renderDiseaseHistory();
+
+        GAM.actions.diseaseScans += 1;
+        addXP(18, "Ran Disease Scan");
+        saveGAM(); evaluateBadges();
+
+        showToast("Scan complete", "success");
+      });
+    }
+
+    function bindSoil(){
+      const file = document.getElementById("soilFile");
+      if(!file || file.__b) return;
+      file.__b = true;
+
+      file.addEventListener("change", ()=>{
+        const out = document.getElementById("soilOut");
+        const recs = [
+          "Soil AI: pH slightly acidic. Recommend lime application + compost; retest in 21 days.",
+          "Soil AI: low potassium detected. Recommend K-rich fertilizer + improved drainage plan.",
+          "Soil AI: nutrient profile balanced. Recommend standard schedule + monitor moisture levels."
+        ];
+        if(out) out.textContent = recs[Math.floor(Math.random()*recs.length)];
+
+        GAM.actions.soilRuns += 1;
+        addXP(18, "Ran Soil Analysis");
+        saveGAM(); evaluateBadges();
+
+        showToast("Soil analysis complete", "success");
+      });
+    }
+
     function bindPriceAI(){
       const btn = document.getElementById("runPriceAI");
       if(!btn || btn.__b) return;
@@ -1286,7 +1341,7 @@
         const mk = document.getElementById("priceMarket")?.value || "Market";
         const out = document.getElementById("priceAIOut");
         const baseUSD = crop==="Coffee" ? 6.3 : crop==="Beans" ? 0.95 : crop==="Mango" ? 0.78 : 0.42;
-        const swing = (Math.random()*0.10 - 0.02); // -2% to +8%
+        const swing = (Math.random()*0.10 - 0.02);
         const forecastUSD = baseUSD * (1 + swing);
         const suggestion = qty >= 1000
           ? "Recommendation: offer 2% bulk discount for 1000kg+ to close faster."
@@ -1300,24 +1355,12 @@
             <div style="margin-top:8px; color:var(--text-light);">${escapeHtml(suggestion)}</div>
           `;
         }
+
+        GAM.actions.priceRuns += 1;
+        addXP(16, "Ran Price AI");
+        saveGAM(); evaluateBadges();
+
         showToast("Price AI updated", "success");
-      });
-    }
-
-    function bindSoilAI(){
-      const file = document.getElementById("soilFile");
-      if(!file || file.__b) return;
-      file.__b = true;
-
-      file.addEventListener("change", ()=>{
-        const out = document.getElementById("soilOut");
-        const recs = [
-          "Soil AI: pH slightly acidic. Recommend lime application + compost; retest in 21 days.",
-          "Soil AI: low potassium detected. Recommend K-rich fertilizer + improved drainage plan.",
-          "Soil AI: nutrient profile balanced. Recommend standard schedule + monitor moisture levels."
-        ];
-        if(out) out.textContent = recs[Math.floor(Math.random()*recs.length)];
-        showToast("Soil analysis complete", "success");
       });
     }
 
@@ -1327,8 +1370,6 @@
       const el = document.getElementById(elId);
       if(!el) return;
       if(mapCache.has(elId)) return;
-
-      // Ensure Leaflet loaded
       if(typeof L === "undefined") return;
 
       const map = L.map(elId, { zoomControl:true }).setView([-1.2921, 36.8219], 6);
@@ -1344,85 +1385,13 @@
       mapCache.set(elId, map);
     }
 
-    // ---------- BIND UI ----------
-    function bindNav(){
-      document.body.addEventListener("click", (e)=>{
-        const nav = e.target.closest("[data-nav]");
-        if(nav){
-          e.preventDefault();
-          showSection(nav.dataset.nav);
-        }
-      });
-    }
-
-    function bindChatTabs(){
-      const tabs = document.getElementById("chatTabs");
-      if(!tabs || tabs.__b) return;
-      tabs.__b = true;
-      tabs.addEventListener("click", (e)=>{
-        const tEl = e.target.closest(".chat-tab");
-        if(!tEl) return;
-        setChatTab(tEl.dataset.chat);
-      });
-    }
-
-    function bindQuickPay(){
-      document.querySelectorAll(".pay-tile").forEach(tile=>{
-        if(tile.__b) return;
-        tile.__b = true;
-        tile.addEventListener("click", ()=> setPayProvider(tile.dataset.pay));
-      });
-
-      const btn = document.getElementById("btnSendMoney");
-      if(btn && !btn.__b){
-        btn.__b = true;
-        btn.addEventListener("click", sendMoneyQuickPay);
-      }
-      const btn2 = document.getElementById("walletSendBtn");
-      if(btn2 && !btn2.__b){
-        btn2.__b = true;
-        btn2.addEventListener("click", sendMoneyQuickPay);
-      }
-
-      const dep = document.getElementById("btnWalletDeposit");
-      if(dep && !dep.__b){
-        dep.__b = true;
-        dep.addEventListener("click", ()=>{
-          // deposit 100 USD equivalent
-          DB.walletUSD += 100;
-          saveData();
-          renderStats();
-          showToast("Deposit successful", "success");
-        });
-      }
-      const send = document.getElementById("btnWalletSend");
-      if(send && !send.__b){
-        send.__b = true;
-        send.addEventListener("click", ()=> showSection("wallet"));
-      }
-    }
-
-    function bindChatSend(){
-      const btn = document.getElementById("sendBtn");
-      const input = document.getElementById("chatInput");
-      if(btn && !btn.__b){
-        btn.__b = true;
-        btn.addEventListener("click", sendChat);
-      }
-      if(input && !input.__b){
-        input.__b = true;
-        input.addEventListener("keydown", (e)=>{ if(e.key==="Enter") sendChat(); });
-      }
-    }
-
     // ---------- INIT ----------
     function init(){
       injectLanguageSelector();
       setDir();
       buildSections();
       bindNav();
-      bindChatTabs();
-      bindChatSend();
+      bindChat();
 
       const cur = document.getElementById("currency");
       cur.value = state.currency;
@@ -1433,35 +1402,33 @@
 
       applyTranslations();
       renderStats();
+      renderGamification();
 
-      // set quick pay provider default
-      setPayProvider(state.payProvider);
-
-      // restore chat tab
+      // Restore chat tab
       setChatTab(state.chatTab);
 
-      // bind module actions (after sections built)
-      bindQuickPay();
-      bindDiseaseScanner();
-      bindPriceAI();
-      bindSoilAI();
-      renderDiseaseHistory();
-
-      // show saved section
+      // Restore section
       showSection(state.section);
 
+      // Bind module handlers (after sections exist)
+      bindWallet();
+      bindDisease();
+      bindPriceAI();
+      bindSoil();
+      renderDiseaseHistory();
+
       // init maps
-      setTimeout(()=> initMap("map"), 100);
-      setTimeout(()=> initMap("map2"), 120);
+      setTimeout(()=> initMap("map"), 80);
+      setTimeout(()=> initMap("map2"), 100);
     }
 
-    // Expose helpers for console tests
+    // Expose helpers
     window.setLanguage = (l, toast)=> setLanguage(l, toast);
     window.setCurrency = (c, toast)=> setCurrency(c, toast);
     window.showSection = (s)=> showSection(s);
     window.openModal = (title, html)=> openModal(title, html);
 
-    // Safety: show errors on screen if something breaks
+    // Show errors on screen if something breaks
     window.addEventListener("error", (e)=>{
       const msg = (e?.error?.stack || e.message || "Unknown error");
       document.body.innerHTML = `<div style="padding:20px;font-family:Arial;color:#fff;background:#111">
@@ -1471,227 +1438,6 @@
 
     init();
   })();
-/* =========================
-   GAMIFICATION (WORKING)
-   ========================= */
-const GKEY = "agri_gamification_v1";
-const GAM = (() => {
-  try { return JSON.parse(localStorage.getItem(GKEY) || "null") || null; } catch { return null; }
-})() || {
-  xp: 0,
-  level: 1,
-  actions: { chats:0, quickPays:0, diseaseScans:0, soilRuns:0, priceRuns:0, navMarket:0, navLogistics:0, aiChats:0 },
-  badges: {
-    trader:false, quality:false, pioneer:false, export:false, green:false, digital:false, mentor:false, leader:false
-  }
-};
-
-function saveGAM(){ localStorage.setItem(GKEY, JSON.stringify(GAM)); }
-
-function xpForNextLevel(lv){ return 200 + (lv-1)*120; }
-
-function addXP(amount, reason){
-  GAM.xp += amount;
-  while(GAM.xp >= xpForNextLevel(GAM.level)){
-    GAM.xp -= xpForNextLevel(GAM.level);
-    GAM.level += 1;
-    showToast(`Level up! Level ${GAM.level}`, "success");
-  }
-  saveGAM();
-  renderGamification();
-  if(reason) showToast(`+${amount} XP — ${reason}`, "info");
-}
-
-function unlockBadge(key, label){
-  if(GAM.badges[key]) return;
-  GAM.badges[key] = true;
-  saveGAM();
-  renderGamification();
-  showToast(`Badge unlocked: ${label}`, "success");
-}
-
-function evaluateBadges(){
-  // thresholds
-  if(GAM.actions.chats >= 3) unlockBadge("trader", "Trader");
-  if((GAM.actions.diseaseScans + GAM.actions.soilRuns) >= 2) unlockBadge("quality", "Quality");
-  if(GAM.actions.priceRuns >= 2) unlockBadge("pioneer", "Pioneer");
-  if(GAM.actions.navMarket >= 1 && GAM.actions.navLogistics >= 1) unlockBadge("export", "Export");
-  if(GAM.actions.soilRuns >= 1) unlockBadge("green", "Green");
-  if(GAM.actions.quickPays >= 1) unlockBadge("digital", "Digital");
-  if(GAM.actions.aiChats >= 5) unlockBadge("mentor", "Mentor");
-
-  const unlockedCount = Object.values(GAM.badges).filter(Boolean).length;
-  if(unlockedCount >= 4) unlockBadge("leader", "Leader");
-}
-
-function renderGamification(){
-  // Adds/updates a mini panel on the right if present; otherwise does nothing.
-  let host = document.getElementById("gamificationPanel");
-  if(!host){
-    const right = document.querySelector(".sidebar-right .chat-wrap");
-    if(!right) return;
-    host = document.createElement("div");
-    host.id = "gamificationPanel";
-    host.className = "card";
-    host.style.marginTop = "12px";
-    right.appendChild(host);
-  }
-
-  const next = xpForNextLevel(GAM.level);
-  const pct = Math.max(0, Math.min(100, Math.round((GAM.xp/next)*100)));
-
-  const badgeList = [
-    ["trader","Trader"],["quality","Quality"],["pioneer","Pioneer"],["export","Export"],
-    ["green","Green"],["digital","Digital"],["mentor","Mentor"],["leader","Leader"]
-  ];
-
-  host.innerHTML = `
-    <div class="card-header">
-      <div class="card-title"><i class="fa-solid fa-trophy"></i> Achievements</div>
-      <div class="badge">Level ${GAM.level}</div>
-    </div>
-    <div class="content-pad">
-      <div style="display:flex; justify-content:space-between; gap:10px;">
-        <div style="font-weight:900;">XP Progress</div>
-        <div class="badge">${GAM.xp} / ${next}</div>
-      </div>
-      <div style="height:10px; background: rgba(255,255,255,.08); border:1px solid var(--border); border-radius:999px; overflow:hidden; margin-top:8px;">
-        <div style="height:100%; width:${pct}%; background: linear-gradient(90deg, var(--accent), var(--accent2));"></div>
-      </div>
-
-      <div style="margin-top:12px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;">
-        ${badgeList.map(([k,label])=>`
-          <div style="border:1px solid var(--border); background: rgba(255,255,255,.06); border-radius:14px; padding:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-              <div style="font-weight:900;">${label}</div>
-              <span class="badge" style="${GAM.badges[k] ? "outline:2px solid rgba(34,197,94,.25)" : "opacity:.7"}">
-                ${GAM.badges[k] ? "Unlocked" : "Locked"}
-              </span>
-            </div>
-            <div style="margin-top:6px; color:var(--text-light); font-size:.85rem;">
-              ${badgeHint(k)}
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function badgeHint(k){
-  const a = GAM.actions;
-  const hints = {
-    trader: `Send 3 messages (${a.chats}/3)`,
-    quality: `Run 2 scans (Disease/Soil) (${(a.diseaseScans+a.soilRuns)}/2)`,
-    pioneer: `Run Price AI 2x (${a.priceRuns}/2)`,
-    export: `Visit Market + Logistics (${Math.min(1,a.navMarket) + Math.min(1,a.navLogistics)}/2)`,
-    green: `Run Soil Analysis 1x (${a.soilRuns}/1)`,
-    digital: `Use Quick Pay 1x (${a.quickPays}/1)`,
-    mentor: `Chat with AI 5x (${a.aiChats}/5)`,
-    leader: `Unlock 4 badges (${Object.values(GAM.badges).filter(Boolean).length}/4)`
-  };
-  return hints[k] || "";
-}
-
-/* ---- Hook into existing actions ---- */
-// 1) Navigation
-const _showSection = window.showSection;
-window.showSection = function(name){
-  if(name === "market") { GAM.actions.navMarket += 1; addXP(10, "Visited Market"); }
-  if(name === "logistics") { GAM.actions.navLogistics += 1; addXP(10, "Visited Logistics"); }
-  saveGAM(); evaluateBadges();
-  return _showSection(name);
-};
-
-// 2) Chat send + AI replies
-const _sendChat = window.sendChat;
-window.sendChat = function(){
-  GAM.actions.chats += 1;
-  addXP(8, "Sent a message");
-  saveGAM(); evaluateBadges();
-  return _sendChat();
-};
-
-// Increase AI chat count when AI replies append (we can detect by time)
-const origPush = DB.chat.push.bind(DB.chat);
-DB.chat.push = function(...args){
-  const msg = args[0];
-  if(msg && msg.from === "AI"){
-    GAM.actions.aiChats += 1;
-    addXP(6, "AI interaction");
-    saveGAM(); evaluateBadges();
-  }
-  return origPush(...args);
-};
-
-// 3) Quick Pay
-const _sendMoneyQuickPay = sendMoneyQuickPay;
-sendMoneyQuickPay = function(){
-  GAM.actions.quickPays += 1;
-  addXP(15, "Used Quick Pay");
-  saveGAM(); evaluateBadges();
-  return _sendMoneyQuickPay();
-};
-
-// 4) Disease scan
-const _renderDiseaseHistory = renderDiseaseHistory;
-renderDiseaseHistory = function(){
-  // if history increases, count a scan
-  // (safe: count when new item is first)
-  if(DB.diseaseHistory && DB.diseaseHistory.length){
-    // only award xp once per file change is handled in scanner; so just update view
-  }
-  return _renderDiseaseHistory();
-};
-
-// award XP when new scan added (override bind)
-const _bindDiseaseScanner = bindDiseaseScanner;
-bindDiseaseScanner = function(){
-  _bindDiseaseScanner();
-  const file = document.getElementById("diseaseFile");
-  if(file && !file.__gam){
-    file.__gam = true;
-    file.addEventListener("change", ()=>{
-      GAM.actions.diseaseScans += 1;
-      addXP(18, "Ran Disease Scan");
-      saveGAM(); evaluateBadges();
-    });
-  }
-};
-
-// 5) Soil upload
-const _bindSoilAI = bindSoilAI;
-bindSoilAI = function(){
-  _bindSoilAI();
-  const file = document.getElementById("soilFile");
-  if(file && !file.__gam){
-    file.__gam = true;
-    file.addEventListener("change", ()=>{
-      GAM.actions.soilRuns += 1;
-      addXP(18, "Ran Soil Analysis");
-      saveGAM(); evaluateBadges();
-    });
-  }
-};
-
-// 6) Price AI
-const _bindPriceAI = bindPriceAI;
-bindPriceAI = function(){
-  _bindPriceAI();
-  const btn = document.getElementById("runPriceAI");
-  if(btn && !btn.__gam){
-    btn.__gam = true;
-    btn.addEventListener("click", ()=>{
-      GAM.actions.priceRuns += 1;
-      addXP(16, "Ran Price AI");
-      saveGAM(); evaluateBadges();
-    });
-  }
-};
-
-// Render on load
-renderGamification();
-evaluateBadges();
   </script>
 </body>
 </html>
