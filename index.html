@@ -20,6 +20,8 @@
       --accent:#16a34a;
       --accent2:#22c55e;
       --danger:#dc2626;
+      --warn:#f59e0b;
+      --info:#2563eb;
       --border: rgba(11,18,32,.12);
       --shadow: 0 18px 40px rgba(11,18,32,.10);
       --radius:14px;
@@ -36,6 +38,7 @@
       min-height:100vh;
     }
     a{color:inherit; text-decoration:none}
+    hr{border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0}
     .navbar{
       position:sticky; top:0; z-index:50;
       display:flex; align-items:center; justify-content:space-between;
@@ -79,6 +82,11 @@
       border-color: rgba(220,38,38,.25);
       background: rgba(220,38,38,.08);
     }
+    .btn.warn{
+      border-color: rgba(245,158,11,.30);
+      background: rgba(245,158,11,.10);
+    }
+    .btn.small{padding:7px 10px; border-radius:10px; font-size:.9rem}
 
     .nav-right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
     select, input, textarea{
@@ -95,13 +103,13 @@
 
     .layout{
       display:grid;
-      grid-template-columns: 270px 1fr 360px;
+      grid-template-columns: 270px 1fr 380px;
       gap:14px;
       padding:14px;
-      max-width: 1550px;
+      max-width: 1580px;
       margin: 0 auto;
     }
-    @media(max-width:1180px){
+    @media(max-width:1240px){
       .layout{grid-template-columns: 250px 1fr;}
       .right{display:none}
     }
@@ -149,6 +157,7 @@
       padding:12px 14px;
       border-bottom:1px solid var(--border);
       background: rgba(255,255,255,.96);
+      flex-wrap:wrap;
     }
     .card-title{font-weight:900; display:flex; align-items:center; gap:10px}
     .content-pad{padding:12px 14px}
@@ -169,7 +178,9 @@
     .stat-value{font-size:1.6rem; font-weight:900; margin-top:6px}
     .stat-change{font-size:.85rem; margin-top:6px; color:#166534}
 
-    #map{height:520px; border-radius:14px; border:1px solid var(--border); overflow:hidden; background:#fff;}
+    #map{height:560px; border-radius:14px; border:1px solid var(--border); overflow:hidden; background:#fff;}
+    #mapMirror{height:560px; border-radius:14px; border:1px solid var(--border); overflow:hidden; background:#fff;}
+
     .badge{
       display:inline-flex; align-items:center; justify-content:center;
       padding:4px 10px;
@@ -179,6 +190,7 @@
       font-size:.78rem;
       color: var(--muted);
       white-space:nowrap;
+      gap:8px;
     }
 
     .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
@@ -218,7 +230,7 @@
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      height: 520px;
+      height: 560px;
       box-shadow: 0 10px 26px rgba(11,18,32,.07);
     }
     .tabs{display:flex; gap:8px; padding:10px; border-bottom:1px solid rgba(11,18,32,.08); background: rgba(255,255,255,.96); flex-wrap:wrap;}
@@ -271,10 +283,11 @@
       border:1px solid var(--border);
       background: rgba(255,255,255,.96);
       box-shadow: var(--shadow);
-      max-width: 520px;
+      max-width: 560px;
     }
     .toast.success i{color:#16a34a}
     .toast.error i{color:#dc2626}
+    .toast.warn i{color:#f59e0b}
     .toast.info i{color:#2563eb}
 
     /* Provider tiles */
@@ -290,6 +303,7 @@
       user-select:none;
     }
     .tile:hover{background: rgba(22,163,74,.08)}
+    .tile.active{outline:2px solid rgba(22,163,74,.18); border-color: rgba(22,163,74,.30)}
     .tile-logo{
       width:36px; height:36px; border-radius:12px;
       border:1px solid var(--border);
@@ -308,6 +322,75 @@
       height:100%;
       width:0%;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
+      transition: width .25s ease;
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background: rgba(11,18,32,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:99999;
+    }
+    .modal{
+      width:min(720px, 100%);
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 22px 70px rgba(11,18,32,.25);
+      overflow:hidden;
+    }
+    .modal .modal-head{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 14px;
+      border-bottom:1px solid rgba(11,18,32,.10);
+      background: rgba(255,255,255,.96);
+    }
+    .modal .modal-body{padding:12px 14px}
+    .modal .modal-foot{
+      padding:12px 14px;
+      display:flex; justify-content:flex-end; gap:10px;
+      border-top:1px solid rgba(11,18,32,.10);
+      background: rgba(255,255,255,.96);
+      flex-wrap:wrap;
+    }
+    .field-grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+    @media(max-width:700px){ .field-grid{grid-template-columns: 1fr;} }
+
+    .hint{
+      font-size:.85rem; color:var(--muted);
+      line-height:1.6;
+    }
+    .error{color: var(--danger); font-size:.9rem;}
+    .ok{color:#166534; font-size:.9rem;}
+
+    /* Loading shimmer */
+    .loading{
+      display:inline-flex; gap:8px; align-items:center;
+      font-size:.92rem; color: var(--muted);
+    }
+    .spinner{
+      width:16px; height:16px; border-radius:999px;
+      border:2px solid rgba(11,18,32,.12);
+      border-top-color: rgba(22,163,74,.75);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* QR canvas */
+    .qr-wrap{
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    .qr{
+      width:140px; height:140px;
+      border-radius:14px;
+      border:1px solid rgba(11,18,32,.12);
+      background:#fff;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
     }
 
     [dir="rtl"] body { direction: rtl; }
@@ -349,13 +432,21 @@
       <button class="btn" data-nav="wallet" onclick="__agri_nav('wallet')"><i class="fa-solid fa-wallet"></i> <span data-i18n="navWallet">Wallet</span></button>
       <button class="btn" data-nav="ai" onclick="__agri_nav('ai')"><i class="fa-solid fa-robot"></i> <span data-i18n="navAITools">AI Tools</span></button>
       <button class="btn" data-nav="orders" onclick="__agri_nav('orders')"><i class="fa-solid fa-box"></i> <span data-i18n="orders">Orders</span></button>
+      <button class="btn" data-nav="logistics" onclick="__agri_nav('logistics')"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">Logistics</span></button>
+      <button class="btn" data-nav="progress" onclick="__agri_nav('progress')"><i class="fa-solid fa-trophy"></i> <span data-i18n="progress">Progress</span></button>
     </div>
 
     <div class="nav-right">
-      <div class="pill">
+      <div class="pill" title="JS status">
         <span class="dot on"></span>
         <span>JS: ON</span>
         <span class="badge" id="clickCount">0</span>
+      </div>
+
+      <div class="pill" title="Your gamification status">
+        <i class="fa-solid fa-star" style="color: var(--warn)"></i>
+        <span><span data-i18n="level">Level</span>: <strong id="navLevel">—</strong></span>
+        <span class="badge">XP <strong id="navXP">—</strong></span>
       </div>
 
       <select id="langSelect" title="Language">
@@ -399,6 +490,11 @@
         <div data-i18n="orders">Orders</div>
       </div>
 
+      <div class="menu-link" data-nav="logistics" onclick="__agri_nav('logistics')">
+        <div class="menu-icon"><i class="fa-solid fa-truck"></i></div>
+        <div data-i18n="logistics">Logistics</div>
+      </div>
+
       <div class="menu-title" data-i18n="aiAutomation">AI & Automation</div>
 
       <div class="menu-link" data-nav="ai" onclick="__agri_nav('ai')">
@@ -406,20 +502,16 @@
         <div data-i18n="navAITools">AI Tools</div>
       </div>
 
-      <div class="menu-link" data-nav="disease" onclick="__agri_nav('disease')">
-        <div class="menu-icon"><i class="fa-solid fa-camera"></i></div>
-        <div data-i18n="diseaseScanner">Disease Scanner</div>
-      </div>
-
-      <div class="menu-link" data-nav="logistics" onclick="__agri_nav('logistics')">
-        <div class="menu-icon"><i class="fa-solid fa-truck"></i></div>
-        <div data-i18n="logistics">Logistics</div>
-      </div>
-
       <div class="menu-title" data-i18n="gamification">Gamification</div>
       <div class="menu-link" data-nav="progress" onclick="__agri_nav('progress')">
         <div class="menu-icon"><i class="fa-solid fa-trophy"></i></div>
         <div data-i18n="progress">Progress</div>
+      </div>
+
+      <div class="menu-title">Export</div>
+      <div class="menu-link" onclick="Exports.exportAll()">
+        <div class="menu-icon"><i class="fa-solid fa-file-export"></i></div>
+        <div>Export All CSV</div>
       </div>
     </aside>
 
@@ -429,7 +521,7 @@
       <section class="card" data-section="dashboard" id="section-dashboard">
         <div class="card-header">
           <div class="card-title"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="navDashboard">Dashboard</span></div>
-          <div class="badge"><span data-i18n="live">Live</span></div>
+          <div class="badge"><i class="fa-solid fa-signal"></i> <span data-i18n="live">Live</span></div>
         </div>
 
         <div class="content-pad">
@@ -477,7 +569,8 @@
           <div class="card-title"><i class="fa-solid fa-store"></i> <span data-i18n="navMarket">Market</span></div>
           <div class="row">
             <input id="marketSearch" class="grow" placeholder="Search listings..." />
-            <button class="btn primary" onclick="Market.openCreate()"><i class="fa-solid fa-plus"></i> <span data-i18n="createListing">Create Listing</span></button>
+            <button class="btn primary" onclick="Market.openCreateModal()"><i class="fa-solid fa-plus"></i> <span data-i18n="createListing">Create Listing</span></button>
+            <button class="btn" onclick="Exports.exportListings()"><i class="fa-solid fa-file-csv"></i> CSV</button>
           </div>
         </div>
 
@@ -496,6 +589,7 @@
           <div class="row">
             <span class="badge"><span data-i18n="availableBalance">Available Balance</span>: <strong id="walletBalance">—</strong></span>
             <button class="btn" onclick="Wallet.depositDemo()"><i class="fa-solid fa-circle-plus"></i> <span data-i18n="deposit">Deposit</span></button>
+            <button class="btn" onclick="Exports.exportLedger()"><i class="fa-solid fa-file-csv"></i> CSV</button>
           </div>
         </div>
 
@@ -507,14 +601,15 @@
             </div>
             <div class="content-pad">
               <div class="tile-grid" style="margin-bottom:10px;">
-                <div class="tile" onclick="Wallet.selectProvider('M-Pesa')"><div class="tile-logo">MP</div><div><strong>M-Pesa</strong><div class="muted" style="font-size:.85rem;">Safaricom</div></div></div>
-                <div class="tile" onclick="Wallet.selectProvider('MTN')"><div class="tile-logo">MT</div><div><strong>MTN</strong><div class="muted" style="font-size:.85rem;">Mobile Money</div></div></div>
-                <div class="tile" onclick="Wallet.selectProvider('Airtel')"><div class="tile-logo">AR</div><div><strong>Airtel</strong><div class="muted" style="font-size:.85rem;">Money</div></div></div>
+                <div class="tile" id="tileMP" onclick="Wallet.selectProvider('M-Pesa')"><div class="tile-logo">MP</div><div><strong>M-Pesa</strong><div class="muted" style="font-size:.85rem;">Safaricom</div></div></div>
+                <div class="tile" id="tileMT" onclick="Wallet.selectProvider('MTN')"><div class="tile-logo">MT</div><div><strong>MTN</strong><div class="muted" style="font-size:.85rem;">Mobile Money</div></div></div>
+                <div class="tile" id="tileAR" onclick="Wallet.selectProvider('Airtel')"><div class="tile-logo">AR</div><div><strong>Airtel</strong><div class="muted" style="font-size:.85rem;">Money</div></div></div>
               </div>
 
               <div class="row" style="margin-bottom:10px;">
                 <span class="badge"><span data-i18n="provider">Provider</span>: <strong id="payProvider">M-Pesa</strong></span>
                 <span class="badge"><span data-i18n="fee">Fee</span>: <strong id="payFee">—</strong></span>
+                <span class="badge">Receipt: <strong id="receiptHint">Ready</strong></span>
               </div>
 
               <div class="row" style="margin-bottom:10px;">
@@ -523,7 +618,20 @@
                 <button class="btn primary" onclick="Wallet.sendMoney()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">Send Money</span></button>
               </div>
 
-              <div class="muted" id="payValidation" style="display:none; color:var(--danger);"></div>
+              <div class="error" id="payValidation" style="display:none;"></div>
+
+              <div class="card" style="margin-top:10px;">
+                <div class="card-header">
+                  <div class="card-title"><i class="fa-solid fa-receipt"></i> Receipt</div>
+                  <div class="row">
+                    <button class="btn small" onclick="Wallet.printReceipt()"><i class="fa-solid fa-print"></i> Print</button>
+                  </div>
+                </div>
+                <div class="content-pad" id="receiptBox" style="line-height:1.7;">
+                  <div class="muted">Send a payment to generate a receipt.</div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -545,6 +653,7 @@
           <div class="card-title"><i class="fa-solid fa-box"></i> <span data-i18n="orders">Orders</span></div>
           <div class="row">
             <button class="btn" onclick="Orders.seedOne()"><i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="simulateOrder">Simulate Order</span></button>
+            <button class="btn" onclick="Exports.exportOrders()"><i class="fa-solid fa-file-csv"></i> CSV</button>
             <button class="btn danger" onclick="Orders.reset()"><i class="fa-solid fa-trash"></i> <span data-i18n="clear">Clear</span></button>
           </div>
         </div>
@@ -601,6 +710,14 @@
               </div>
               <div id="aiAnswer" class="card" style="margin-top:10px;">
                 <div class="content-pad muted" id="aiAnswerText">—</div>
+              </div>
+
+              <div class="card" style="margin-top:12px;">
+                <div class="card-header">
+                  <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> AI History</div>
+                  <button class="btn small danger" onclick="AI.clearHistory()"><i class="fa-solid fa-trash"></i> Clear</button>
+                </div>
+                <div class="content-pad" id="aiHistory"></div>
               </div>
             </div>
           </div>
@@ -683,15 +800,26 @@
       <section class="card" data-section="logistics" style="display:none;">
         <div class="card-header">
           <div class="card-title"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">Logistics</span></div>
-          <button class="btn" onclick="__agri_nav('dashboard')"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="backToDashboard">Back</span></button>
+          <div class="row">
+            <span class="badge"><i class="fa-solid fa-location-dot"></i> Nairobi → Hub → Buyer</span>
+            <button class="btn" onclick="Maps.fitAll()"><i class="fa-solid fa-expand"></i> Fit Map</button>
+          </div>
         </div>
         <div class="content-pad">
           <div class="muted" data-i18n="logisticsHint">Track shipments. Map stays interactive and resizes correctly.</div>
           <div class="card" style="margin-top:10px;">
             <div class="content-pad">
-              <div id="mapMirror" style="height:520px;"></div>
+              <div id="mapMirror"></div>
               <div id="mapMirrorFallback" class="muted" style="display:none; margin-top:8px;">Map library did not load.</div>
             </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-route"></i> Timeline</div>
+              <button class="btn small" onclick="Logistics.addCheckpoint()"><i class="fa-solid fa-plus"></i> Add Checkpoint</button>
+            </div>
+            <div class="content-pad" id="logTimeline"></div>
           </div>
         </div>
       </section>
@@ -700,7 +828,11 @@
       <section class="card" data-section="progress" style="display:none;">
         <div class="card-header">
           <div class="card-title"><i class="fa-solid fa-trophy"></i> <span data-i18n="progress">Progress</span></div>
-          <button class="btn primary" onclick="Game.unlockProgress()"><i class="fa-solid fa-unlock"></i> <span data-i18n="unlockProgress">Unlock Progress</span></button>
+          <div class="row">
+            <button class="btn primary" onclick="Game.unlockProgress()"><i class="fa-solid fa-unlock"></i> <span data-i18n="unlockProgress">Unlock Progress</span></button>
+            <button class="btn" onclick="Game.claimReward()"><i class="fa-solid fa-gift"></i> Claim Reward</button>
+            <button class="btn danger" onclick="Game.reset()"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset">Reset</span></button>
+          </div>
         </div>
         <div class="content-pad">
           <div class="row" style="justify-content:space-between; margin-bottom:10px;">
@@ -712,8 +844,15 @@
 
           <div class="card" style="margin-top:12px;">
             <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-list-check"></i> Action Checklist</div>
+              <span class="badge">Do actions to earn XP</span>
+            </div>
+            <div class="content-pad" id="checklist"></div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
               <div class="card-title"><i class="fa-solid fa-award"></i> <span data-i18n="achievements">Achievements</span></div>
-              <button class="btn danger" onclick="Game.reset()"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset">Reset</span></button>
             </div>
             <div class="content-pad" id="badges" style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;"></div>
           </div>
@@ -750,9 +889,21 @@
 
   <div id="toastContainer" class="toast-container"></div>
 
+  <!-- MODAL -->
+  <div id="modalBackdrop" class="modal-backdrop" onclick="UI.closeModalOnBackdrop(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <div class="card-title" id="modalTitle"><i class="fa-solid fa-layer-group"></i> Modal</div>
+        <button class="btn small" onclick="UI.closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
   <script>
   (function(){
-    // ---------- STATE / STORAGE ----------
+    // ---------- STORAGE KEYS ----------
     const LS = {
       lang:"agri_lang",
       currency:"agri_currency",
@@ -761,9 +912,12 @@
       orders:"agri_orders",
       wallet:"agri_wallet",
       game:"agri_game",
-      chat:"agri_chat"
+      chat:"agri_chat",
+      aiHistory:"agri_ai_history",
+      logistics:"agri_logistics_timeline"
     };
 
+    // ---------- FX + LOCALE ----------
     const rates = { USD:1, KES:130.5, ETB:54.2, RWF:1220 };
     const LOCALES = { en:"en-US", es:"es-ES", fr:"fr-FR", ar:"ar" };
     const RTL = new Set(["ar"]);
@@ -812,7 +966,6 @@
         clear:"Clear",
         open:"Open",
         back:"Back",
-        backToDashboard:"Back",
         priceAI:"Price AI",
         priceAiHint:"Estimate price by crop & grade",
         soilAnalysis:"Soil Analysis",
@@ -873,7 +1026,6 @@
         clear:"Borrar",
         open:"Abrir",
         back:"Volver",
-        backToDashboard:"Volver",
         priceAI:"IA de precios",
         priceAiHint:"Estimar por cultivo y calidad",
         soilAnalysis:"Análisis de suelo",
@@ -934,7 +1086,6 @@
         clear:"Effacer",
         open:"Ouvrir",
         back:"Retour",
-        backToDashboard:"Retour",
         priceAI:"IA des prix",
         priceAiHint:"Estimer par culture et qualité",
         soilAnalysis:"Analyse du sol",
@@ -995,7 +1146,6 @@
         clear:"مسح",
         open:"فتح",
         back:"رجوع",
-        backToDashboard:"رجوع",
         priceAI:"ذكاء الأسعار",
         priceAiHint:"تقدير حسب المحصول والجودة",
         soilAnalysis:"تحليل التربة",
@@ -1044,11 +1194,111 @@
       if(!c) return;
       const el = document.createElement("div");
       el.className = "toast " + type;
-      const icon = type==="success" ? "check-circle" : type==="error" ? "exclamation-circle" : "info-circle";
+      const icon = type==="success" ? "check-circle" : type==="error" ? "exclamation-circle" : type==="warn" ? "triangle-exclamation" : "info-circle";
       el.innerHTML = `<i class="fas fa-${icon}"></i><span>${String(msg)}</span>`;
       c.appendChild(el);
-      setTimeout(()=> el.remove(), 2600);
+      setTimeout(()=> el.remove(), 2800);
     }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // ---------- STORE ----------
+    function loadJSON(key, fallback){
+      try{
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      }catch{ return fallback; }
+    }
+    function saveJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    const Store = {
+      listings: ()=> loadJSON(LS.listings, null),
+      setListings: (v)=> saveJSON(LS.listings, v),
+      wallet: ()=> loadJSON(LS.wallet, null),
+      setWallet: (v)=> saveJSON(LS.wallet, v),
+      orders: ()=> loadJSON(LS.orders, null),
+      setOrders: (v)=> saveJSON(LS.orders, v),
+      game: ()=> loadJSON(LS.game, null),
+      setGame: (v)=> saveJSON(LS.game, v),
+      chat: ()=> loadJSON(LS.chat, null),
+      setChat: (v)=> saveJSON(LS.chat, v),
+      aiHistory: ()=> loadJSON(LS.aiHistory, []),
+      setAiHistory: (v)=> saveJSON(LS.aiHistory, v),
+      logisticsTimeline: ()=> loadJSON(LS.logistics, null),
+      setLogisticsTimeline: (v)=> saveJSON(LS.logistics, v),
+    };
+
+    // ---------- DEFAULT DATA ----------
+    const uuid = ()=> (crypto?.randomUUID ? crypto.randomUUID() : ("id-"+Math.random().toString(16).slice(2)));
+
+    const defaultListings = [
+      { id: uuid(), crop:"Maize", grade:"A", qtyKg: 1200, pricePerKgUSD: 0.42, location:"Nakuru, KE", seller:"Kiptoo Farm Co-op", updatedAt: Date.now() },
+      { id: uuid(), crop:"Beans", grade:"B", qtyKg: 650, pricePerKgUSD: 0.88, location:"Musanze, RW", seller:"Imbuto Traders", updatedAt: Date.now() },
+      { id: uuid(), crop:"Coffee", grade:"A", qtyKg: 300, pricePerKgUSD: 3.10, location:"Jimma, ET", seller:"Oromia Growers", updatedAt: Date.now() }
+    ];
+
+    const defaultWallet = {
+      balanceUSD: 8320.50,
+      ledger: [
+        { id: uuid(), type:"credit", provider:"Settlement", amountUSD: 1200, note:"Contract payout", ts: Date.now()-86400000 },
+        { id: uuid(), type:"debit", provider:"M-Pesa", amountUSD: 85, note:"Logistics fee", ts: Date.now()-42000000 }
+      ],
+      lastReceipt: null
+    };
+
+    const defaultOrders = [
+      { id: "ORD-10021", crop:"Maize", qtyKg: 500, priceUSD: 0.42, buyer:"Nairobi Foods Ltd", status:"Pending", ts: Date.now()-7200000 },
+      { id: "ORD-10022", crop:"Beans", qtyKg: 200, priceUSD: 0.88, buyer:"Kigali Market Hub", status:"In Transit", ts: Date.now()-17200000 }
+    ];
+
+    const defaultGame = { xp: 120, level: 1, unlocked: {}, lastClaimAt: 0 };
+
+    const defaultChat = {
+      tab:"buyers",
+      messages: [
+        { role:"ai", tab:"ai", text:"Welcome to AgriChat. Try: “Find maize buyers for 1000kg”", ts: Date.now()-60000 }
+      ]
+    };
+
+    const defaultTimeline = [
+      { id: uuid(), label:"Farm pickup confirmed", ts: Date.now()-7200000 },
+      { id: uuid(), label:"Warehouse received & graded", ts: Date.now()-5400000 },
+      { id: uuid(), label:"Truck departed Nairobi hub", ts: Date.now()-3600000 }
+    ];
+
+    // Seed localStorage once
+    function ensureSeed(){
+      if(!localStorage.getItem(LS.listings)) Store.setListings(defaultListings);
+      if(!localStorage.getItem(LS.wallet)) Store.setWallet(defaultWallet);
+      if(!localStorage.getItem(LS.orders)) Store.setOrders(defaultOrders);
+      if(!localStorage.getItem(LS.game)) Store.setGame(defaultGame);
+      if(!localStorage.getItem(LS.chat)) Store.setChat(defaultChat);
+      if(!localStorage.getItem(LS.logistics)) Store.setLogisticsTimeline(defaultTimeline);
+    }
+
+    // ---------- UI MODAL ----------
+    const UI = {
+      openModal({title, icon="fa-layer-group", bodyHTML, footHTML}){
+        document.getElementById("modalTitle").innerHTML = `<i class="fa-solid ${icon}"></i> ${title}`;
+        document.getElementById("modalBody").innerHTML = bodyHTML;
+        document.getElementById("modalFoot").innerHTML = footHTML || `
+          <button class="btn" onclick="UI.closeModal()"><i class="fa-solid fa-xmark"></i> Close</button>
+        `;
+        document.getElementById("modalBackdrop").style.display = "flex";
+      },
+      closeModal(){ document.getElementById("modalBackdrop").style.display = "none"; },
+      closeModalOnBackdrop(e){ if(e.target && e.target.id==="modalBackdrop") UI.closeModal(); }
+    };
+    window.UI = UI;
 
     // ---------- NAV ----------
     window.__agri_nav = function(name){
@@ -1066,9 +1316,8 @@
       state.section = name;
       localStorage.setItem(LS.section, name);
 
-      // Map resize on show
       if(name==="dashboard") setTimeout(()=> Maps.initMain(), 120);
-      if(name==="logistics") setTimeout(()=> Maps.initMirror(), 120);
+      if(name==="logistics") setTimeout(()=> Maps.initMirror(), 140);
     };
 
     function applyTranslations(){
@@ -1078,67 +1327,10 @@
       if(chatInput) chatInput.placeholder = t("typeMessage");
     }
 
-    // ---------- DEMO DATA ----------
-    function loadJSON(key, fallback){
-      try{
-        const v = localStorage.getItem(key);
-        return v ? JSON.parse(v) : fallback;
-      }catch{ return fallback; }
-    }
-    function saveJSON(key, value){
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-
-    // Market listings
-    const defaultListings = [
-      { id: crypto.randomUUID(), crop:"Maize", grade:"A", qtyKg: 1200, pricePerKgUSD: 0.42, location:"Nakuru, KE", seller:"Kiptoo Farm Co-op", updatedAt: Date.now() },
-      { id: crypto.randomUUID(), crop:"Beans", grade:"B", qtyKg: 650, pricePerKgUSD: 0.88, location:"Musanze, RW", seller:"Imbuto Traders", updatedAt: Date.now() },
-      { id: crypto.randomUUID(), crop:"Coffee", grade:"A", qtyKg: 300, pricePerKgUSD: 3.10, location:"Jimma, ET", seller:"Oromia Growers", updatedAt: Date.now() }
-    ];
-
-    // Wallet + ledger
-    const defaultWallet = {
-      balanceUSD: 8320.50,
-      ledger: [
-        { id: crypto.randomUUID(), type:"credit", provider:"Settlement", amountUSD: 1200, note:"Contract payout", ts: Date.now()-86400000 },
-        { id: crypto.randomUUID(), type:"debit", provider:"M-Pesa", amountUSD: 85, note:"Logistics fee", ts: Date.now()-42000000 }
-      ]
-    };
-
-    const defaultOrders = [
-      { id: "ORD-10021", crop:"Maize", qtyKg: 500, priceUSD: 0.42, buyer:"Nairobi Foods Ltd", status:"Pending", ts: Date.now()-7200000 },
-      { id: "ORD-10022", crop:"Beans", qtyKg: 200, priceUSD: 0.88, buyer:"Kigali Market Hub", status:"In Transit", ts: Date.now()-17200000 }
-    ];
-
-    // Game
-    const defaultGame = { xp: 120, level: 1, unlocked: {} };
-
-    // Chat
-    const defaultChat = {
-      tab:"buyers",
-      messages: [
-        { role:"ai", tab:"ai", text:"Welcome to AgriChat. Try: “Find maize buyers for 1000kg”", ts: Date.now()-60000 }
-      ]
-    };
-
-    // ---------- MODULES ----------
-    const Store = {
-      listings: ()=> loadJSON(LS.listings, defaultListings),
-      setListings: (v)=> saveJSON(LS.listings, v),
-      wallet: ()=> loadJSON(LS.wallet, defaultWallet),
-      setWallet: (v)=> saveJSON(LS.wallet, v),
-      orders: ()=> loadJSON(LS.orders, defaultOrders),
-      setOrders: (v)=> saveJSON(LS.orders, v),
-      game: ()=> loadJSON(LS.game, defaultGame),
-      setGame: (v)=> saveJSON(LS.game, v),
-      chat: ()=> loadJSON(LS.chat, defaultChat),
-      setChat: (v)=> saveJSON(LS.chat, v)
-    };
-
+    // ---------- DASHBOARD ----------
     const Dashboard = {
       render(){
-        // revenue derived from orders + listings as a demo KPI
-        const orders = Store.orders();
+        const orders = Store.orders() || [];
         const wallet = Store.wallet();
         const revenueUSD = orders.reduce((sum,o)=> sum + (o.qtyKg * o.priceUSD), 0) + 24500;
 
@@ -1149,51 +1341,245 @@
       }
     };
 
+    // ---------- MARKET (MODALS) ----------
     const Market = {
-      openCreate(){
-        const crop = prompt("Crop (e.g., Maize, Beans, Coffee):");
-        if(!crop) return;
-        const grade = prompt("Grade (A/B/C):", "A") || "A";
-        const qty = Number(prompt("Quantity (kg):", "500"));
-        const price = Number(prompt("Price per kg (USD):", "0.50"));
-        const loc = prompt("Location (City, Country):", "Nairobi, KE") || "Nairobi, KE";
-        const seller = prompt("Seller name:", "Demo Seller") || "Demo Seller";
+      openCreateModal(){
+        UI.openModal({
+          title: "Create Market Listing",
+          icon: "fa-store",
+          bodyHTML: `
+            <div class="field-grid">
+              <div>
+                <div class="hint">Crop</div>
+                <input id="mCrop" placeholder="e.g., Maize" value="Maize"/>
+              </div>
+              <div>
+                <div class="hint">Grade</div>
+                <select id="mGrade">
+                  <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                </select>
+              </div>
+              <div>
+                <div class="hint">Quantity (kg)</div>
+                <input id="mQty" type="number" min="1" value="500"/>
+              </div>
+              <div>
+                <div class="hint">Price per kg (USD)</div>
+                <input id="mPrice" type="number" min="0.01" step="0.01" value="0.50"/>
+              </div>
+              <div>
+                <div class="hint">Location</div>
+                <input id="mLoc" placeholder="City, Country" value="Nairobi, KE"/>
+              </div>
+              <div>
+                <div class="hint">Seller</div>
+                <input id="mSeller" placeholder="Seller name" value="Demo Seller"/>
+              </div>
+            </div>
+            <div class="error" id="mErr" style="display:none; margin-top:10px;"></div>
+          `,
+          footHTML: `
+            <button class="btn" onclick="UI.closeModal()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            <button class="btn primary" onclick="Market.createFromModal()"><i class="fa-solid fa-check"></i> Create</button>
+          `
+        });
+      },
+      createFromModal(){
+        const crop = (document.getElementById("mCrop").value||"").trim();
+        const grade = (document.getElementById("mGrade").value||"A").trim().toUpperCase();
+        const qty = Number(document.getElementById("mQty").value);
+        const price = Number(document.getElementById("mPrice").value);
+        const loc = (document.getElementById("mLoc").value||"").trim();
+        const seller = (document.getElementById("mSeller").value||"").trim();
+        const err = document.getElementById("mErr");
 
-        if(!Number.isFinite(qty) || qty <= 0) return showToast("Invalid quantity", "error");
-        if(!Number.isFinite(price) || price <= 0) return showToast("Invalid price", "error");
+        const fail=(m)=>{ err.style.display="block"; err.textContent=m; };
+
+        if(!crop) return fail("Crop is required.");
+        if(!["A","B","C"].includes(grade)) return fail("Grade must be A, B, or C.");
+        if(!Number.isFinite(qty) || qty<=0) return fail("Quantity must be greater than 0.");
+        if(!Number.isFinite(price) || price<=0) return fail("Price must be greater than 0.");
+        if(!loc) return fail("Location is required.");
+        if(!seller) return fail("Seller is required.");
 
         const listings = Store.listings();
         listings.unshift({
-          id: crypto.randomUUID(),
-          crop: crop.trim(),
-          grade: grade.trim().toUpperCase(),
+          id: uuid(),
+          crop, grade,
           qtyKg: Math.round(qty),
           pricePerKgUSD: price,
-          location: loc.trim(),
-          seller: seller.trim(),
+          location: loc,
+          seller,
           updatedAt: Date.now()
         });
         Store.setListings(listings);
+        UI.closeModal();
         Game.addXP(25, "Created listing");
         Market.render();
         showToast("Listing created", "success");
       },
-      placeOrder(listingId){
+      openEditModal(id){
+        const listings = Store.listings();
+        const item = listings.find(x=> x.id===id);
+        if(!item) return;
+
+        UI.openModal({
+          title: "Edit Listing",
+          icon: "fa-pen-to-square",
+          bodyHTML: `
+            <div class="field-grid">
+              <div>
+                <div class="hint">Crop</div>
+                <input id="eCrop" value="${escapeHtml(item.crop)}"/>
+              </div>
+              <div>
+                <div class="hint">Grade</div>
+                <select id="eGrade">
+                  <option value="A" ${item.grade==="A"?"selected":""}>A</option>
+                  <option value="B" ${item.grade==="B"?"selected":""}>B</option>
+                  <option value="C" ${item.grade==="C"?"selected":""}>C</option>
+                </select>
+              </div>
+              <div>
+                <div class="hint">Quantity (kg)</div>
+                <input id="eQty" type="number" min="1" value="${item.qtyKg}"/>
+              </div>
+              <div>
+                <div class="hint">Price per kg (USD)</div>
+                <input id="ePrice" type="number" min="0.01" step="0.01" value="${item.pricePerKgUSD}"/>
+              </div>
+              <div>
+                <div class="hint">Location</div>
+                <input id="eLoc" value="${escapeHtml(item.location)}"/>
+              </div>
+              <div>
+                <div class="hint">Seller</div>
+                <input id="eSeller" value="${escapeHtml(item.seller)}"/>
+              </div>
+            </div>
+            <div class="error" id="eErr" style="display:none; margin-top:10px;"></div>
+          `,
+          footHTML: `
+            <button class="btn danger" onclick="Market.remove('${id}')"><i class="fa-solid fa-trash"></i> Remove</button>
+            <span class="grow"></span>
+            <button class="btn" onclick="UI.closeModal()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            <button class="btn primary" onclick="Market.saveEdit('${id}')"><i class="fa-solid fa-check"></i> Save</button>
+          `
+        });
+      },
+      saveEdit(id){
+        const listings = Store.listings();
+        const item = listings.find(x=> x.id===id);
+        if(!item) return;
+
+        const crop = (document.getElementById("eCrop").value||"").trim();
+        const grade = (document.getElementById("eGrade").value||"A").trim().toUpperCase();
+        const qty = Number(document.getElementById("eQty").value);
+        const price = Number(document.getElementById("ePrice").value);
+        const loc = (document.getElementById("eLoc").value||"").trim();
+        const seller = (document.getElementById("eSeller").value||"").trim();
+        const err = document.getElementById("eErr");
+        const fail=(m)=>{ err.style.display="block"; err.textContent=m; };
+
+        if(!crop) return fail("Crop is required.");
+        if(!["A","B","C"].includes(grade)) return fail("Grade must be A, B, or C.");
+        if(!Number.isFinite(qty) || qty<=0) return fail("Quantity must be greater than 0.");
+        if(!Number.isFinite(price) || price<=0) return fail("Price must be greater than 0.");
+        if(!loc) return fail("Location is required.");
+        if(!seller) return fail("Seller is required.");
+
+        item.crop=crop; item.grade=grade; item.qtyKg=Math.round(qty);
+        item.pricePerKgUSD=price; item.location=loc; item.seller=seller;
+        item.updatedAt=Date.now();
+        Store.setListings(listings);
+
+        UI.closeModal();
+        Game.addXP(10, "Edited listing");
+        Market.render();
+        showToast("Listing updated", "success");
+      },
+      openOrderModal(listingId){
         const listings = Store.listings();
         const item = listings.find(x=> x.id===listingId);
         if(!item) return;
 
-        const qty = Number(prompt(`Order qty (kg) for ${item.crop} (available ${item.qtyKg}kg):`, String(Math.min(200, item.qtyKg))));
-        if(!Number.isFinite(qty) || qty <= 0) return showToast("Invalid order qty", "error");
-        if(qty > item.qtyKg) return showToast("Not enough quantity available", "error");
+        UI.openModal({
+          title: "Place Order",
+          icon: "fa-cart-shopping",
+          bodyHTML: `
+            <div class="hint"><strong>${escapeHtml(item.crop)}</strong> • Grade ${escapeHtml(item.grade)} • Available ${item.qtyKg.toLocaleString(locale())} kg</div>
+            <hr>
+            <div class="field-grid">
+              <div>
+                <div class="hint">Buyer Name</div>
+                <input id="oBuyer" value="Demo Buyer Ltd"/>
+              </div>
+              <div>
+                <div class="hint">Order Quantity (kg)</div>
+                <input id="oQty" type="number" min="1" value="${Math.min(200, item.qtyKg)}"/>
+              </div>
+              <div>
+                <div class="hint">Payment Terms</div>
+                <select id="oTerms">
+                  <option>Escrow (recommended)</option>
+                  <option>50% upfront, 50% on delivery</option>
+                  <option>Net 7</option>
+                  <option>Net 14</option>
+                </select>
+              </div>
+              <div>
+                <div class="hint">Delivery Window</div>
+                <select id="oDelivery">
+                  <option>24–48 hours</option>
+                  <option>2–4 days</option>
+                  <option>5–7 days</option>
+                </select>
+              </div>
+            </div>
+            <div class="error" id="oErr" style="display:none; margin-top:10px;"></div>
+            <div class="card" style="margin-top:10px;">
+              <div class="content-pad">
+                <div class="muted">Estimated Total</div>
+                <div style="font-size:1.4rem;font-weight:900;" id="oTotal">—</div>
+                <div class="muted" style="margin-top:6px;">Price/kg: <strong>${moneyFromUSD(item.pricePerKgUSD)}</strong></div>
+              </div>
+            </div>
+          `,
+          footHTML: `
+            <button class="btn" onclick="UI.closeModal()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            <button class="btn primary" onclick="Market.placeOrderFromModal('${listingId}')"><i class="fa-solid fa-check"></i> Place Order</button>
+          `
+        });
 
-        const buyer = prompt("Buyer name:", "Demo Buyer Ltd") || "Demo Buyer Ltd";
+        const qtyEl = document.getElementById("oQty");
+        const calc = ()=>{
+          const q = Number(qtyEl.value);
+          const totalUSD = (Number.isFinite(q) ? q : 0) * item.pricePerKgUSD;
+          document.getElementById("oTotal").textContent = moneyFromUSD(totalUSD);
+        };
+        qtyEl.addEventListener("input", calc);
+        calc();
+      },
+      placeOrderFromModal(listingId){
+        const listings = Store.listings();
+        const item = listings.find(x=> x.id===listingId);
+        if(!item) return;
+
+        const buyer = (document.getElementById("oBuyer").value||"").trim();
+        const qty = Number(document.getElementById("oQty").value);
+        const terms = (document.getElementById("oTerms").value||"").trim();
+        const delivery = (document.getElementById("oDelivery").value||"").trim();
+        const err = document.getElementById("oErr");
+        const fail=(m)=>{ err.style.display="block"; err.textContent=m; };
+
+        if(!buyer) return fail("Buyer name is required.");
+        if(!Number.isFinite(qty) || qty<=0) return fail("Order quantity must be greater than 0.");
+        if(qty > item.qtyKg) return fail("Order quantity exceeds available inventory.");
 
         // reduce listing qty
         item.qtyKg -= Math.round(qty);
         item.updatedAt = Date.now();
 
-        // create order
         const orders = Store.orders();
         const id = "ORD-" + String(Math.floor(10000 + Math.random()*89999));
         orders.unshift({
@@ -1203,49 +1589,26 @@
           priceUSD: item.pricePerKgUSD,
           buyer,
           status: "Pending",
+          terms,
+          delivery,
           ts: Date.now()
         });
 
-        // write back
-        Store.setListings(listings.filter(x=> x.qtyKg > 0)); // remove if zero
+        Store.setListings(listings.filter(x=> x.qtyKg > 0));
         Store.setOrders(orders);
 
+        UI.closeModal();
         Game.addXP(35, "Placed order");
         Orders.render();
         Market.render();
         Dashboard.render();
         showToast(`Order created: ${id}`, "success");
       },
-      editPrice(id){
-        const listings = Store.listings();
-        const item = listings.find(x=> x.id===id);
-        if(!item) return;
-        const p = Number(prompt("New price per kg (USD):", String(item.pricePerKgUSD)));
-        if(!Number.isFinite(p) || p<=0) return showToast("Invalid price", "error");
-        item.pricePerKgUSD = p;
-        item.updatedAt = Date.now();
-        Store.setListings(listings);
-        Game.addXP(10, "Updated price");
-        Market.render();
-        showToast("Price updated", "success");
-      },
-      editQty(id){
-        const listings = Store.listings();
-        const item = listings.find(x=> x.id===id);
-        if(!item) return;
-        const q = Number(prompt("New quantity (kg):", String(item.qtyKg)));
-        if(!Number.isFinite(q) || q<=0) return showToast("Invalid quantity", "error");
-        item.qtyKg = Math.round(q);
-        item.updatedAt = Date.now();
-        Store.setListings(listings);
-        Game.addXP(10, "Updated quantity");
-        Market.render();
-        showToast("Quantity updated", "success");
-      },
       remove(id){
         if(!confirm("Remove this listing?")) return;
         const listings = Store.listings().filter(x=> x.id!==id);
         Store.setListings(listings);
+        UI.closeModal();
         Game.addXP(5, "Removed listing");
         Market.render();
         showToast("Listing removed", "success");
@@ -1272,18 +1635,17 @@
 
         const rows = listings.map(x=>{
           const totalUSD = x.qtyKg * x.pricePerKgUSD;
+          const updated = new Intl.DateTimeFormat(locale(), { dateStyle:"medium" }).format(new Date(x.updatedAt));
           return `
             <tr>
-              <td><strong>${x.crop}</strong><div class="muted" style="font-size:.85rem;">${x.location}</div></td>
-              <td>${x.grade}</td>
+              <td><strong>${escapeHtml(x.crop)}</strong><div class="muted" style="font-size:.85rem;">${escapeHtml(x.location)} • Updated ${updated}</div></td>
+              <td>${escapeHtml(x.grade)}</td>
               <td>${x.qtyKg.toLocaleString(locale())}</td>
               <td>${moneyFromUSD(x.pricePerKgUSD)}</td>
-              <td><strong>${moneyFromUSD(totalUSD)}</strong></td>
+              <td><strong>${moneyFromUSD(totalUSD)}</strong><div class="muted" style="font-size:.85rem;">${escapeHtml(x.seller)}</div></td>
               <td class="row" style="gap:6px;">
-                <button class="btn primary" onclick="Market.placeOrder('${x.id}')"><i class="fa-solid fa-cart-shopping"></i> Order</button>
-                <button class="btn" onclick="Market.editPrice('${x.id}')"><i class="fa-solid fa-tag"></i></button>
-                <button class="btn" onclick="Market.editQty('${x.id}')"><i class="fa-solid fa-scale-balanced"></i></button>
-                <button class="btn danger" onclick="Market.remove('${x.id}')"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn primary small" onclick="Market.openOrderModal('${x.id}')"><i class="fa-solid fa-cart-shopping"></i> Order</button>
+                <button class="btn small" onclick="Market.openEditModal('${x.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
               </td>
             </tr>
           `;
@@ -1307,10 +1669,10 @@
       }
     };
 
+    // ---------- WALLET ----------
     const Wallet = {
       provider: "M-Pesa",
       feeFor(provider){
-        // simple fee model (demo)
         if(provider==="M-Pesa") return 0.012;
         if(provider==="MTN") return 0.010;
         if(provider==="Airtel") return 0.011;
@@ -1319,6 +1681,9 @@
       selectProvider(p){
         Wallet.provider = p;
         document.getElementById("payProvider").textContent = p;
+        document.getElementById("tileMP").classList.toggle("active", p==="M-Pesa");
+        document.getElementById("tileMT").classList.toggle("active", p==="MTN");
+        document.getElementById("tileAR").classList.toggle("active", p==="Airtel");
         Wallet.renderFee();
       },
       renderFee(){
@@ -1328,7 +1693,7 @@
       depositDemo(){
         const wallet = Store.wallet();
         wallet.balanceUSD += 250;
-        wallet.ledger.unshift({ id: crypto.randomUUID(), type:"credit", provider:"Deposit", amountUSD: 250, note:"Demo deposit", ts: Date.now() });
+        wallet.ledger.unshift({ id: uuid(), type:"credit", provider:"Deposit", amountUSD: 250, note:"Demo deposit", ts: Date.now() });
         Store.setWallet(wallet);
         Game.addXP(15, "Deposit");
         Wallet.render();
@@ -1339,36 +1704,108 @@
         const phone = (document.getElementById("payPhone").value || "").trim();
         const amt = Number(document.getElementById("payAmount").value);
         const v = document.getElementById("payValidation");
+        const receiptHint = document.getElementById("receiptHint");
 
         const showErr = (m)=>{ v.style.display="block"; v.textContent=m; };
         v.style.display="none"; v.textContent="";
+        receiptHint.textContent = "Processing...";
 
-        if(!phone || phone.length < 8) return showErr("Enter a valid phone number.");
-        if(!Number.isFinite(amt) || amt <= 0) return showErr("Enter a valid amount.");
+        if(!phone || phone.length < 8){ receiptHint.textContent="Ready"; return showErr("Enter a valid phone number."); }
+        if(!Number.isFinite(amt) || amt <= 0){ receiptHint.textContent="Ready"; return showErr("Enter a valid amount."); }
 
         const wallet = Store.wallet();
         const feePct = Wallet.feeFor(Wallet.provider);
         const feeUSD = amt * feePct;
         const totalUSD = amt + feeUSD;
 
-        if(totalUSD > wallet.balanceUSD) return showErr("Insufficient balance.");
+        if(totalUSD > wallet.balanceUSD){ receiptHint.textContent="Ready"; return showErr("Insufficient balance."); }
 
-        wallet.balanceUSD -= totalUSD;
-        wallet.ledger.unshift({
-          id: crypto.randomUUID(),
-          type:"debit",
-          provider: Wallet.provider,
-          amountUSD: amt,
-          note: `Send to ${phone} (fee ${feeUSD.toFixed(2)} USD)`,
-          ts: Date.now()
-        });
+        // Loading state
+        v.style.display="none";
+        showToast("Sending payment…", "info");
 
-        Store.setWallet(wallet);
-        Game.addXP(20, "Send payment");
-        Wallet.render();
-        Dashboard.render();
-        document.getElementById("payAmount").value = "";
-        showToast("Payment sent", "success");
+        setTimeout(()=>{
+          wallet.balanceUSD -= totalUSD;
+          const receiptId = "RCPT-" + String(Math.floor(100000 + Math.random()*899999));
+          const note = `Send to ${phone} (fee ${feeUSD.toFixed(2)} USD)`;
+          wallet.ledger.unshift({
+            id: uuid(),
+            type:"debit",
+            provider: Wallet.provider,
+            amountUSD: amt,
+            note,
+            ts: Date.now()
+          });
+          wallet.lastReceipt = {
+            receiptId,
+            provider: Wallet.provider,
+            phone,
+            amountUSD: amt,
+            feeUSD,
+            totalUSD,
+            ts: Date.now()
+          };
+
+          Store.setWallet(wallet);
+          Game.addXP(20, "Send payment");
+          Wallet.render();
+          Dashboard.render();
+          document.getElementById("payAmount").value = "";
+          receiptHint.textContent = "Generated";
+          showToast("Payment sent", "success");
+        }, 650);
+      },
+      renderReceipt(){
+        const wallet = Store.wallet();
+        const box = document.getElementById("receiptBox");
+        const r = wallet.lastReceipt;
+        if(!r){
+          box.innerHTML = `<div class="muted">Send a payment to generate a receipt.</div>`;
+          return;
+        }
+        const when = new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(r.ts));
+        box.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <div><strong>Receipt</strong> <span class="badge">${r.receiptId}</span></div>
+            <div class="muted">${when}</div>
+          </div>
+          <hr>
+          <div>Provider: <strong>${escapeHtml(r.provider)}</strong></div>
+          <div>To: <strong>${escapeHtml(r.phone)}</strong></div>
+          <div>Amount: <strong>${moneyFromUSD(r.amountUSD)}</strong></div>
+          <div>Fee: <strong>${moneyFromUSD(r.feeUSD)}</strong></div>
+          <div>Total: <strong>${moneyFromUSD(r.totalUSD)}</strong></div>
+          <hr>
+          <div class="muted">Status: Completed</div>
+        `;
+      },
+      printReceipt(){
+        const wallet = Store.wallet();
+        if(!wallet.lastReceipt){ showToast("No receipt to print yet.", "warn"); return; }
+
+        const r = wallet.lastReceipt;
+        const when = new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(r.ts));
+        const html = `
+          <html><head><title>${r.receiptId}</title></head>
+          <body style="font-family:system-ui; padding:18px;">
+            <h2 style="margin:0 0 6px 0;">AgriTrade Africa — Receipt</h2>
+            <div style="opacity:.7; margin-bottom:12px;">${when}</div>
+            <div><strong>Receipt ID:</strong> ${r.receiptId}</div>
+            <div><strong>Provider:</strong> ${escapeHtml(r.provider)}</div>
+            <div><strong>To:</strong> ${escapeHtml(r.phone)}</div>
+            <div><strong>Amount:</strong> ${moneyFromUSD(r.amountUSD)}</div>
+            <div><strong>Fee:</strong> ${moneyFromUSD(r.feeUSD)}</div>
+            <div><strong>Total:</strong> ${moneyFromUSD(r.totalUSD)}</div>
+            <hr/>
+            <div>Status: Completed</div>
+          </body></html>
+        `;
+        const w = window.open("", "_blank");
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+        w.focus();
+        setTimeout(()=> w.print(), 300);
       },
       reset(){
         if(!confirm("Reset wallet + ledger?")) return;
@@ -1388,7 +1825,7 @@
           return `
             <tr>
               <td>${when}</td>
-              <td><strong>${x.provider}</strong><div class="muted" style="font-size:.85rem;">${x.note}</div></td>
+              <td><strong>${escapeHtml(x.provider)}</strong><div class="muted" style="font-size:.85rem;">${escapeHtml(x.note)}</div></td>
               <td style="color:${color}; font-weight:900;">${sign}${moneyFromUSD(x.amountUSD)}</td>
             </tr>
           `;
@@ -1402,9 +1839,11 @@
         `;
 
         Wallet.renderFee();
+        Wallet.renderReceipt();
       }
     };
 
+    // ---------- ORDERS ----------
     const Orders = {
       seedOne(){
         const listings = Store.listings();
@@ -1450,13 +1889,13 @@
           const totalUSD = o.qtyKg * o.priceUSD;
           return `
             <tr>
-              <td><strong>${o.id}</strong><div class="muted" style="font-size:.85rem;">${when}</div></td>
-              <td>${o.crop}</td>
+              <td><strong>${escapeHtml(o.id)}</strong><div class="muted" style="font-size:.85rem;">${when}</div></td>
+              <td>${escapeHtml(o.crop)}</td>
               <td>${o.qtyKg.toLocaleString(locale())}</td>
               <td>${moneyFromUSD(o.priceUSD)}</td>
-              <td><strong>${moneyFromUSD(totalUSD)}</strong><div class="muted" style="font-size:.85rem;">${o.buyer}</div></td>
+              <td><strong>${moneyFromUSD(totalUSD)}</strong><div class="muted" style="font-size:.85rem;">${escapeHtml(o.buyer)}</div></td>
               <td>
-                <select onchange="Orders.setStatus('${o.id}', this.value)">
+                <select onchange="Orders.setStatus('${escapeHtml(o.id)}', this.value)">
                   <option ${o.status==="Pending"?"selected":""}>Pending</option>
                   <option ${o.status==="In Transit"?"selected":""}>In Transit</option>
                   <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
@@ -1476,30 +1915,68 @@
       }
     };
 
+    // ---------- AI ----------
     const AI = {
+      addHistory(type, payload){
+        const h = Store.aiHistory();
+        h.unshift({ id: uuid(), type, payload, ts: Date.now() });
+        Store.setAiHistory(h.slice(0, 30));
+        AI.renderHistory();
+      },
+      clearHistory(){
+        Store.setAiHistory([]);
+        AI.renderHistory();
+        showToast("AI history cleared", "success");
+      },
+      renderHistory(){
+        const el = document.getElementById("aiHistory");
+        if(!el) return;
+        const h = Store.aiHistory();
+        if(!h.length){ el.innerHTML = `<div class="muted">No history yet.</div>`; return; }
+        el.innerHTML = h.map(x=>{
+          const when = new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(x.ts));
+          return `<div class="card" style="margin-bottom:10px;">
+            <div class="content-pad">
+              <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+                <strong>${escapeHtml(x.type)}</strong><span class="badge">${when}</span>
+              </div>
+              <div class="muted" style="margin-top:6px;line-height:1.6;">${escapeHtml(JSON.stringify(x.payload))}</div>
+            </div>
+          </div>`;
+        }).join("");
+      },
+      setLoading(targetId, text){
+        const el = document.getElementById(targetId);
+        el.innerHTML = `<span class="loading"><span class="spinner"></span> ${escapeHtml(text)}</span>`;
+      },
       ask(){
         const input = document.getElementById("aiPrompt");
         const out = document.getElementById("aiAnswerText");
         const q = (input.value || "").trim();
         if(!q) return showToast("Enter a question.", "error");
 
-        // Demo response logic (not “placeholder”, it responds based on intent)
-        const qq = q.toLowerCase();
-        let answer = "";
-        if(qq.includes("wallet") || qq.includes("balance")){
-          const w = Store.wallet();
-          answer = `Your available balance is ${moneyFromUSD(w.balanceUSD)}.`;
-        } else if(qq.includes("maize") || qq.includes("corn")){
-          answer = "For maize deals, target buyers near Nairobi and offer 2–4% discount for 1000kg+. Use escrow for first-time buyers.";
-        } else if(qq.includes("logistics") || qq.includes("delivery")){
-          answer = "Recommend split routing: farm → warehouse → hub. Add insurance on long-haul segments and confirm GPS check-ins every 2 hours.";
-        } else {
-          answer = "I can help with pricing, buyer targeting, contracts, and logistics. Try: “Estimate maize Grade A price for 800kg”.";
-        }
+        AI.setLoading("aiAnswerText", "Thinking…");
 
-        out.textContent = answer;
-        input.value = "";
-        Game.addXP(10, "Used AI");
+        setTimeout(()=>{
+          const qq = q.toLowerCase();
+          let answer = "";
+          if(qq.includes("wallet") || qq.includes("balance")){
+            const w = Store.wallet();
+            answer = `Your available balance is ${moneyFromUSD(w.balanceUSD)}.`;
+          } else if(qq.includes("maize") || qq.includes("corn")){
+            answer = "For maize deals, target buyers near Nairobi and offer 2–4% discount for 1000kg+. Use escrow for first-time buyers.";
+          } else if(qq.includes("logistics") || qq.includes("delivery")){
+            answer = "Recommend split routing: farm → warehouse → hub. Add insurance on long-haul segments and confirm GPS check-ins every 2 hours.";
+          } else if(qq.includes("order")){
+            answer = "To create an order: Market → click Order on a listing → choose quantity and buyer → submit.";
+          } else {
+            answer = "I can help with pricing, buyer targeting, contracts, and logistics. Try: “Estimate maize Grade A price for 800kg”.";
+          }
+          out.textContent = answer;
+          AI.addHistory("AI Ask", { question:q, answer });
+          input.value = "";
+          Game.addXP(10, "Used AI");
+        }, 520);
       },
       calcPrice(){
         const crop = document.getElementById("priceCrop").value;
@@ -1507,71 +1984,87 @@
         const qty = Number(document.getElementById("priceQty").value);
         if(!Number.isFinite(qty) || qty<=0) return showToast("Enter qty (kg).", "error");
 
-        // base per-kg USD model
-        const base = { maize:0.45, beans:0.95, coffee:3.20, cassava:0.25 }[crop] || 0.5;
-        const gradeMul = { A:1.12, B:1.00, C:0.90 }[grade] || 1.0;
+        AI.setLoading("priceOut", "Calculating…");
+        document.getElementById("priceNote").textContent = "—";
 
-        // bulk discount
-        const discount = qty >= 1000 ? 0.04 : qty >= 500 ? 0.02 : 0.0;
+        setTimeout(()=>{
+          const base = { maize:0.45, beans:0.95, coffee:3.20, cassava:0.25 }[crop] || 0.5;
+          const gradeMul = { A:1.12, B:1.00, C:0.90 }[grade] || 1.0;
+          const discount = qty >= 1000 ? 0.04 : qty >= 500 ? 0.02 : 0.0;
 
-        const priceUSD = base * gradeMul * (1 - discount);
-        const totalUSD = priceUSD * qty;
+          const priceUSD = base * gradeMul * (1 - discount);
+          const totalUSD = priceUSD * qty;
 
-        document.getElementById("priceOut").textContent = moneyFromUSD(totalUSD);
-        document.getElementById("priceNote").textContent =
-          `Per-kg: ${moneyFromUSD(priceUSD)} • Bulk discount: ${(discount*100).toFixed(0)}% • Grade: ${grade.toUpperCase()}`;
+          document.getElementById("priceOut").textContent = moneyFromUSD(totalUSD);
+          document.getElementById("priceNote").textContent =
+            `Per-kg: ${moneyFromUSD(priceUSD)} • Bulk discount: ${(discount*100).toFixed(0)}% • Grade: ${grade.toUpperCase()}`;
 
-        Game.addXP(12, "Price estimate");
+          AI.addHistory("Price Estimate", { crop, grade, qtyKg: qty, perKgUSD: +priceUSD.toFixed(3), totalUSD: +totalUSD.toFixed(2) });
+          Game.addXP(12, "Price estimate");
+        }, 520);
       },
       soilAnalyze(){
         const f = document.getElementById("soilFile").files[0];
         if(!f) return showToast("Upload a report (image/PDF).", "error");
 
-        // simulated results based on file size (deterministic-ish)
-        const n = f.size % 1000;
-        const ph = (6.0 + (n/1000)*1.2).toFixed(1);
-        const nppm = 45 + (n % 40);
-        const pppm = 12 + (n % 18);
-        const kppm = 80 + (n % 60);
+        document.getElementById("soilResult").innerHTML = `<span class="loading"><span class="spinner"></span> Analyzing soil report…</span>`;
 
-        document.getElementById("soilResult").innerHTML = `
-          <div><strong>Soil Summary</strong></div>
-          <div class="muted">File: ${f.name}</div>
-          <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
-          <div>pH: <strong>${ph}</strong></div>
-          <div>N (ppm): <strong>${nppm}</strong></div>
-          <div>P (ppm): <strong>${pppm}</strong></div>
-          <div>K (ppm): <strong>${kppm}</strong></div>
-          <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
-          <div><strong>Recommendation</strong></div>
-          <div class="muted" style="line-height:1.7;">
-            Apply balanced fertilizer, add compost for organic matter, and irrigate lightly after application.
-          </div>
-        `;
-        Game.addXP(18, "Soil analysis");
+        setTimeout(()=>{
+          const n = f.size % 1000;
+          const ph = (6.0 + (n/1000)*1.2).toFixed(1);
+          const nppm = 45 + (n % 40);
+          const pppm = 12 + (n % 18);
+          const kppm = 80 + (n % 60);
+
+          const result = { file: f.name, ph:+ph, N:nppm, P:pppm, K:kppm };
+
+          document.getElementById("soilResult").innerHTML = `
+            <div><strong>Soil Summary</strong></div>
+            <div class="muted">File: ${escapeHtml(f.name)}</div>
+            <hr>
+            <div>pH: <strong>${ph}</strong></div>
+            <div>N (ppm): <strong>${nppm}</strong></div>
+            <div>P (ppm): <strong>${pppm}</strong></div>
+            <div>K (ppm): <strong>${kppm}</strong></div>
+            <hr>
+            <div><strong>Recommendation</strong></div>
+            <div class="muted" style="line-height:1.7;">
+              Apply balanced fertilizer, add compost for organic matter, and irrigate lightly after application.
+            </div>
+          `;
+          AI.addHistory("Soil Analysis", result);
+          Game.addXP(18, "Soil analysis");
+        }, 650);
       },
       diseaseScan(){
         const f = document.getElementById("diseaseFile").files[0];
         if(!f) return showToast("Upload a crop photo.", "error");
 
-        // deterministic “confidence” (demo)
-        const c = 86 + (f.size % 12);
-        const healthy = (f.size % 3) !== 0;
+        document.getElementById("diseaseResult").innerHTML = `<span class="loading"><span class="spinner"></span> Scanning crop image…</span>`;
 
-        document.getElementById("diseaseResult").innerHTML = healthy
-          ? `<div><strong>Healthy Crop Detected</strong></div>
-             <div class="muted">Confidence: <strong>${c}%</strong></div>
-             <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
-             <div class="muted" style="line-height:1.7;">No disease patterns detected. Continue current care schedule and monitor weekly.</div>`
-          : `<div><strong>Potential Risk Detected</strong></div>
-             <div class="muted">Confidence: <strong>${c}%</strong></div>
-             <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
-             <div class="muted" style="line-height:1.7;">Consider isolating affected plants and applying recommended treatment. Retest with a clearer photo under daylight.</div>`;
+        setTimeout(()=>{
+          const c = 86 + (f.size % 12);
+          const healthy = (f.size % 3) !== 0;
 
-        Game.addXP(20, "Disease scan");
+          const result = { file: f.name, confidence: c, healthy };
+
+          document.getElementById("diseaseResult").innerHTML = healthy
+            ? `<div><strong>Healthy Crop Detected</strong></div>
+               <div class="muted">Confidence: <strong>${c}%</strong></div>
+               <hr>
+               <div class="muted" style="line-height:1.7;">No disease patterns detected. Continue current care schedule and monitor weekly.</div>`
+            : `<div><strong>Potential Risk Detected</strong></div>
+               <div class="muted">Confidence: <strong>${c}%</strong></div>
+               <hr>
+               <div class="muted" style="line-height:1.7;">Consider isolating affected plants and applying recommended treatment. Retest with a clearer photo under daylight.</div>`;
+
+          AI.addHistory("Disease Scan", result);
+          Game.addXP(20, "Disease scan");
+        }, 650);
       }
     };
 
+    // ---------- CHAT ----------
     const Chat = {
       tab: "buyers",
       switch(tab){
@@ -1589,21 +2082,22 @@
         const c = Store.chat();
         c.messages.push({ role:"me", tab: c.tab, text, ts: Date.now() });
 
-        // AI response rules
         const lower = text.toLowerCase();
         let reply = "";
         if(c.tab === "ai"){
           if(lower.includes("wallet") || lower.includes("balance")){
             reply = `Balance: ${moneyFromUSD(Store.wallet().balanceUSD)}.`;
           } else if(lower.includes("order")){
-            reply = "To create an order: open Market → click Order on a listing → choose qty and buyer.";
+            reply = "Open Market → click Order on a listing → set buyer and quantity → submit.";
           } else if(lower.includes("disease")){
-            reply = "Open Disease Scanner → upload a crop photo → Scan Crop.";
+            reply = "Open AI Tools → Disease Scanner → upload a crop photo → Scan Crop.";
+          } else if(lower.includes("price")){
+            reply = "Open AI Tools → Price AI → choose crop/grade and quantity → Estimate.";
           } else {
             reply = "Try: “Estimate maize Grade A price for 800kg” or “Find buyers near Nairobi”.";
           }
         } else if(c.tab === "buyers"){
-          reply = "Buyer lead: Nairobi Foods Ltd — prefers weekly supply, Grade A, 500–1500kg. Ask for delivery timeline and payment terms.";
+          reply = "Buyer lead: Nairobi Foods Ltd — prefers weekly supply, Grade A, 500–1500kg. Ask for delivery timeline and payment terms (escrow recommended).";
         } else {
           reply = "Seller lead: Co-op in Nakuru — consistent maize supply. Ask for moisture %, grade certificate, and pickup window.";
         }
@@ -1619,7 +2113,7 @@
         const c = Store.chat();
         Chat.tab = c.tab || "buyers";
         const box = document.getElementById("chatMessages");
-        const msgs = c.messages.filter(m => m.tab === c.tab || m.role === "me" && m.tab === c.tab);
+        const msgs = c.messages.filter(m => m.tab === c.tab);
 
         const html = msgs.map(m=>{
           const own = m.role === "me";
@@ -1639,16 +2133,32 @@
       }
     };
 
+    // ---------- GAME ----------
     const Game = {
       thresholds: [0, 200, 450, 800, 1200, 1700, 2300],
       badges: [
-        { key:"trader", name:"Trader", need: 100 },
-        { key:"quality", name:"Quality", need: 250 },
-        { key:"pioneer", name:"Pioneer", need: 450 },
-        { key:"export", name:"Export", need: 800 },
-        { key:"green", name:"Green", need: 1200 },
-        { key:"mentor", name:"Mentor", need: 1700 }
+        { key:"trader", name:"Trader", need: 100, benefit:"Higher trust + better buyer matching" },
+        { key:"quality", name:"Quality", need: 250, benefit:"Priority listings placement" },
+        { key:"pioneer", name:"Pioneer", need: 450, benefit:"Lower escrow friction" },
+        { key:"export", name:"Export", need: 800, benefit:"Export-ready compliance checklist" },
+        { key:"green", name:"Green", need: 1200, benefit:"Sustainability badge on profile" },
+        { key:"mentor", name:"Mentor", need: 1700, benefit:"Mentor matchmaking access" }
       ],
+      checklistItems(){
+        const listings = (Store.listings()||[]).length;
+        const orders = (Store.orders()||[]).length;
+        const ledger = (Store.wallet()?.ledger||[]).length;
+        const history = (Store.aiHistory()||[]).length;
+
+        return [
+          { label:"Create a listing (+25 XP)", done: listings >= 4 },
+          { label:"Place an order (+35 XP)", done: orders >= 3 },
+          { label:"Send a payment (+20 XP)", done: ledger >= 3 },
+          { label:"Run a disease scan (+20 XP)", done: history.some(h=>h.type==="Disease Scan") },
+          { label:"Run a soil analysis (+18 XP)", done: history.some(h=>h.type==="Soil Analysis") },
+          { label:"Get 2 AI results (+10 XP each)", done: history.length >= 2 }
+        ];
+      },
       addXP(amount, reason){
         const g = Store.game();
         g.xp += amount;
@@ -1662,24 +2172,22 @@
           if(g.xp >= Game.thresholds[i]) lvl = i+1;
         }
         g.level = lvl;
-
-        // unlock badges
         for(const b of Game.badges){
           if(g.xp >= b.need) g.unlocked[b.key] = true;
         }
       },
       unlockProgress(){
-        // This is the “button to unlock progress” you asked for.
-        // It awards XP based on actual platform activity (listings/orders/chat/wallet).
-        const listings = Store.listings().length;
-        const orders = Store.orders().length;
-        const ledger = Store.wallet().ledger.length;
+        const listings = (Store.listings()||[]).length;
+        const orders = (Store.orders()||[]).length;
+        const ledger = (Store.wallet()?.ledger||[]).length;
+        const history = (Store.aiHistory()||[]).length;
 
         let gain = 0;
         gain += Math.min(60, listings * 10);
-        gain += Math.min(80, orders * 15);
-        gain += Math.min(40, ledger * 5);
-        gain += 25; // base reward for checking in
+        gain += Math.min(90, orders * 18);
+        gain += Math.min(45, ledger * 6);
+        gain += Math.min(45, history * 6);
+        gain += 25;
 
         const g = Store.game();
         g.xp += gain;
@@ -1687,6 +2195,27 @@
         Store.setGame(g);
         Game.render();
         showToast(`Progress unlocked: +${gain} XP`, "success");
+      },
+      claimReward(){
+        const g = Store.game();
+        const now = Date.now();
+        if(now - g.lastClaimAt < 60_000){
+          showToast("Reward is on cooldown (60 seconds).", "warn");
+          return;
+        }
+        // Claim gives wallet bonus
+        const bonus = 50 + (g.level * 10);
+        const w = Store.wallet();
+        w.balanceUSD += bonus;
+        w.ledger.unshift({ id: uuid(), type:"credit", provider:"Reward", amountUSD: bonus, note:`Level ${g.level} reward`, ts: Date.now() });
+        Store.setWallet(w);
+
+        g.lastClaimAt = now;
+        Store.setGame(g);
+
+        Wallet.render();
+        Dashboard.render();
+        showToast(`Reward claimed: +${moneyFromUSD(bonus)} added to wallet`, "success");
       },
       reset(){
         if(!confirm("Reset XP + badges?")) return;
@@ -1700,6 +2229,8 @@
 
         document.getElementById("xp").textContent = String(g.xp);
         document.getElementById("lvl").textContent = String(g.level);
+        document.getElementById("navXP").textContent = String(g.xp);
+        document.getElementById("navLevel").textContent = String(g.level);
 
         const next = Game.thresholds.find(x => x > g.xp) || (g.xp + 200);
         document.getElementById("nextReward").textContent = String(next) + " XP";
@@ -1716,16 +2247,27 @@
             <div class="card" style="border-color:${on ? "rgba(22,163,74,.28)" : "rgba(11,18,32,.12)"};">
               <div class="content-pad">
                 <div class="row" style="justify-content:space-between;">
-                  <strong>${b.name}</strong>
+                  <strong>${escapeHtml(b.name)}</strong>
                   <span class="badge">${on ? "Unlocked" : `${b.need} XP`}</span>
                 </div>
                 <div class="muted" style="margin-top:6px; line-height:1.6;">
-                  ${on ? "Benefit: higher trust + better buyer matching." : "Complete actions in Market/Wallet/AI to unlock."}
+                  ${on ? `Benefit: ${escapeHtml(b.benefit)}` : "Complete actions in Market/Wallet/AI to unlock."}
                 </div>
               </div>
             </div>
           `;
         }).join("");
+
+        const checklist = document.getElementById("checklist");
+        const items = Game.checklistItems();
+        checklist.innerHTML = items.map(i=>`
+          <div class="card" style="margin-bottom:10px;">
+            <div class="content-pad" style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
+              <div>${escapeHtml(i.label)}</div>
+              <span class="badge">${i.done ? "Done" : "Pending"}</span>
+            </div>
+          </div>
+        `).join("");
       }
     };
 
@@ -1733,6 +2275,8 @@
     const Maps = {
       map:null,
       mirror:null,
+      markersMain: [],
+      markersMirror: [],
       initMain(){
         const el = document.getElementById("map");
         if(!el) return;
@@ -1747,14 +2291,13 @@
           }
           Maps.map = L.map("map").setView([-1.2921, 36.8219], 6);
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(Maps.map);
-
           const markers = [
             { pos: [-1.2921, 36.8219], title: "Nairobi - Warehouse" },
             { pos: [-0.0236, 37.9062], title: "Mt. Kenya - Farm" },
             { pos: [-1.2864, 36.8172], title: "In Transit" }
           ];
-          markers.forEach(m => L.marker(m.pos).addTo(Maps.map).bindPopup(m.title));
-          setTimeout(()=> Maps.map.invalidateSize(), 300);
+          Maps.markersMain = markers.map(m => L.marker(m.pos).addTo(Maps.map).bindPopup(m.title));
+          setTimeout(()=> Maps.map.invalidateSize(), 350);
           setTimeout(()=> Maps.map.invalidateSize(), 900);
         }catch{
           document.getElementById("mapFallback").style.display = "block";
@@ -1775,39 +2318,149 @@
           }
           Maps.mirror = L.map("mapMirror").setView([-1.2921, 36.8219], 6);
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(Maps.mirror);
-          [
+          const markers = [
             { pos: [-1.2921, 36.8219], title: "Nairobi - Hub" },
             { pos: [-0.0236, 37.9062], title: "Farm Pickup" },
             { pos: [-1.2864, 36.8172], title: "Truck Checkpoint" }
-          ].forEach(m => L.marker(m.pos).addTo(Maps.mirror).bindPopup(m.title));
-          setTimeout(()=> Maps.mirror.invalidateSize(), 300);
+          ];
+          Maps.markersMirror = markers.map(m => L.marker(m.pos).addTo(Maps.mirror).bindPopup(m.title));
+          setTimeout(()=> Maps.mirror.invalidateSize(), 350);
           setTimeout(()=> Maps.mirror.invalidateSize(), 900);
         }catch{
           fb.style.display = "block";
         }
+      },
+      fitAll(){
+        try{
+          const m = Maps.mirror || Maps.map;
+          if(!m) return;
+          const markers = (Maps.mirror ? Maps.markersMirror : Maps.markersMain);
+          if(!markers?.length) return;
+          const group = new L.featureGroup(markers);
+          m.fitBounds(group.getBounds().pad(0.2));
+        }catch{}
       }
     };
 
-    function escapeHtml(str){
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    // ---------- LOGISTICS TIMELINE ----------
+    const Logistics = {
+      addCheckpoint(){
+        UI.openModal({
+          title: "Add Logistics Checkpoint",
+          icon: "fa-route",
+          bodyHTML: `
+            <div class="hint">Add a real checkpoint event (saved locally).</div>
+            <div style="margin-top:10px;">
+              <div class="hint">Checkpoint label</div>
+              <input id="cpLabel" placeholder="e.g., Arrived at warehouse for grading"/>
+            </div>
+            <div class="error" id="cpErr" style="display:none; margin-top:10px;"></div>
+          `,
+          footHTML: `
+            <button class="btn" onclick="UI.closeModal()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            <button class="btn primary" onclick="Logistics.saveCheckpoint()"><i class="fa-solid fa-check"></i> Save</button>
+          `
+        });
+      },
+      saveCheckpoint(){
+        const label = (document.getElementById("cpLabel").value||"").trim();
+        const err = document.getElementById("cpErr");
+        if(!label){
+          err.style.display="block";
+          err.textContent="Checkpoint label is required.";
+          return;
+        }
+        const timeline = Store.logisticsTimeline() || [];
+        timeline.unshift({ id: uuid(), label, ts: Date.now() });
+        Store.setLogisticsTimeline(timeline.slice(0, 20));
+        UI.closeModal();
+        Logistics.render();
+        Game.addXP(8, "Logistics checkpoint");
+        showToast("Checkpoint added", "success");
+      },
+      render(){
+        const el = document.getElementById("logTimeline");
+        if(!el) return;
+        const timeline = Store.logisticsTimeline() || [];
+        if(!timeline.length){ el.innerHTML = `<div class="muted">No checkpoints yet.</div>`; return; }
+        el.innerHTML = timeline.map(x=>{
+          const when = new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(x.ts));
+          return `<div class="card" style="margin-bottom:10px;">
+            <div class="content-pad" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <div><strong>${escapeHtml(x.label)}</strong></div>
+              <span class="badge">${when}</span>
+            </div>
+          </div>`;
+        }).join("");
+      }
+    };
+
+    // ---------- EXPORTS ----------
+    function downloadText(filename, text){
+      const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    }
+    function toCSV(rows){
+      const esc = (v)=> `"${String(v ?? "").replaceAll('"','""')}"`;
+      return rows.map(r=> r.map(esc).join(",")).join("\n");
     }
 
-    // ---------- Expose modules globally for onclick ----------
+    const Exports = {
+      exportListings(){
+        const listings = Store.listings() || [];
+        const rows = [
+          ["id","crop","grade","qtyKg","pricePerKgUSD","location","seller","updatedAt"],
+          ...listings.map(x=>[x.id,x.crop,x.grade,x.qtyKg,x.pricePerKgUSD,x.location,x.seller,new Date(x.updatedAt).toISOString()])
+        ];
+        downloadText("agritrade_listings.csv", toCSV(rows));
+        showToast("Listings CSV exported", "success");
+      },
+      exportOrders(){
+        const orders = Store.orders() || [];
+        const rows = [
+          ["id","crop","qtyKg","priceUSD","buyer","status","terms","delivery","ts"],
+          ...orders.map(o=>[o.id,o.crop,o.qtyKg,o.priceUSD,o.buyer,o.status,o.terms||"",o.delivery||"",new Date(o.ts).toISOString()])
+        ];
+        downloadText("agritrade_orders.csv", toCSV(rows));
+        showToast("Orders CSV exported", "success");
+      },
+      exportLedger(){
+        const w = Store.wallet();
+        const rows = [
+          ["id","type","provider","amountUSD","note","ts"],
+          ...(w.ledger||[]).map(x=>[x.id,x.type,x.provider,x.amountUSD,x.note,new Date(x.ts).toISOString()])
+        ];
+        downloadText("agritrade_wallet_ledger.csv", toCSV(rows));
+        showToast("Ledger CSV exported", "success");
+      },
+      exportAll(){
+        Exports.exportListings();
+        setTimeout(()=> Exports.exportOrders(), 250);
+        setTimeout(()=> Exports.exportLedger(), 500);
+      }
+    };
+
+    // ---------- GLOBALS FOR ONCLICK ----------
     window.Market = Market;
     window.Wallet = Wallet;
     window.Orders = Orders;
-    window.AI = AI;
     window.Chat = Chat;
+    window.AI = AI;
     window.Game = Game;
     window.Maps = Maps;
+    window.Logistics = Logistics;
+    window.Exports = Exports;
 
     // ---------- INIT ----------
     document.addEventListener("DOMContentLoaded", ()=>{
+      ensureSeed();
       setDir();
 
       // wire dropdowns
@@ -1822,7 +2475,7 @@
         localStorage.setItem(LS.lang, state.lang);
         setDir();
         applyTranslations();
-        Market.render(); Orders.render(); Wallet.render(); Dashboard.render(); Chat.render(); Game.render();
+        Market.render(); Orders.render(); Wallet.render(); Dashboard.render(); Chat.render(); Game.render(); AI.renderHistory(); Logistics.render();
         showToast("Language updated", "success");
       });
 
@@ -1833,15 +2486,7 @@
         showToast("Currency updated", "success");
       });
 
-      // market search
       document.getElementById("marketSearch").addEventListener("input", ()=> Market.render());
-
-      // defaults persist
-      if(!localStorage.getItem(LS.listings)) Store.setListings(defaultListings);
-      if(!localStorage.getItem(LS.wallet)) Store.setWallet(defaultWallet);
-      if(!localStorage.getItem(LS.orders)) Store.setOrders(defaultOrders);
-      if(!localStorage.getItem(LS.game)) Store.setGame(defaultGame);
-      if(!localStorage.getItem(LS.chat)) Store.setChat(defaultChat);
 
       applyTranslations();
       Wallet.selectProvider("M-Pesa");
@@ -1851,12 +2496,12 @@
       Dashboard.render();
       Chat.render();
       Game.render();
+      AI.renderHistory();
+      Logistics.render();
 
-      // restore section
       __agri_nav(state.section);
 
-      // init map after first paint
-      setTimeout(()=> Maps.initMain(), 400);
+      setTimeout(()=> Maps.initMain(), 420);
     });
   })();
   </script>
