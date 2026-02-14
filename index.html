@@ -402,5 +402,105 @@
       </section>
     </main>
   </div>
+  <script>
+(function(){
+  // ---- Helpers ----
+  function ensureToast(){
+    if (document.getElementById("toastContainer")) return;
+    const c = document.createElement("div");
+    c.id = "toastContainer";
+    c.style.cssText = "position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:99999;";
+    document.body.appendChild(c);
+  }
+  function toast(msg){
+    ensureToast();
+    const c = document.getElementById("toastContainer");
+    const t = document.createElement("div");
+    t.style.cssText = "padding:10px 12px;border-radius:14px;border:1px solid rgba(0,0,0,.15);background:rgba(255,255,255,.96);box-shadow:0 18px 40px rgba(0,0,0,.10);max-width:420px;font-family:system-ui;";
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(()=>t.remove(), 2200);
+  }
+
+  // ---- Ensure mainContent exists ----
+  function getMain(){
+    return document.getElementById("mainContent") || document.querySelector("main") || document.body;
+  }
+
+  // ---- Create a section if missing ----
+  function ensureSection(name){
+    const main = getMain();
+    let sec = main.querySelector(`[data-section="${name}"]`);
+    if (sec) return sec;
+
+    sec = document.createElement("section");
+    sec.className = "card";
+    sec.dataset.section = name;
+    sec.style.display = "none";
+    sec.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa-solid fa-layer-group"></i>
+          <span style="text-transform:capitalize">${name}</span>
+        </div>
+        <div class="badge">Demo</div>
+      </div>
+      <div class="content-pad" style="color:rgba(11,18,32,.68);line-height:1.7;">
+        ${name.toUpperCase()} panel is now live. (Auto-created so navigation always works.)
+      </div>
+    `;
+    main.appendChild(sec);
+    return sec;
+  }
+
+  // ---- Bulletproof navigation ----
+  window.__agri_nav = window.__agri_nav || function(section){
+    // Create missing target sections so nav never fails
+    ensureSection(section);
+
+    // Hide all sections then show target
+    const main = getMain();
+    main.querySelectorAll("[data-section]").forEach(s => s.style.display = "none");
+    const target = main.querySelector(`[data-section="${section}"]`);
+    if (target) target.style.display = "";
+
+    // Highlight active buttons
+    document.querySelectorAll(".menu-link, .nav-btn, .btn").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(`[data-nav="${section}"]`).forEach(x => x.classList.add("active"));
+
+    localStorage.setItem("agri_section", section);
+    toast("Opened: " + section);
+  };
+
+  // ---- Force-bind clicks to everything with data-nav ----
+  function bindAllNav(){
+    document.querySelectorAll("[data-nav]").forEach(el=>{
+      el.style.cursor = "pointer";
+      el.addEventListener("click", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        const section = el.getAttribute("data-nav");
+        if (!section) return;
+        window.__agri_nav(section);
+      }, { capture:true });
+    });
+  }
+
+  // ---- Ensure your common sections exist ----
+  function ensureCommonSections(){
+    ["dashboard","market","wallet","ai","listings","orders","logistics","disease"].forEach(ensureSection);
+  }
+
+  // ---- Run after page loads ----
+  document.addEventListener("DOMContentLoaded", ()=>{
+    ensureCommonSections();
+    bindAllNav();
+
+    // Restore last section (if not dashboard)
+    const last = localStorage.getItem("agri_section") || "dashboard";
+    window.__agri_nav(last);
+  });
+})();
+</script>
 </body>
 </html>
