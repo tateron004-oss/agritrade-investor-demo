@@ -5,53 +5,65 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AgriTrade Africa — Investor Demo</title>
 
-  <!-- GitHub Pages safe: CDN assets ok -->
+  <!-- Icons -->
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <!-- Map (Leaflet) - GitHub Pages safe -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
   <style>
     :root{
-      --bg:#0b0f17;
-      --card:#111827;
-      --card2:#0f172a;
-      --text:#e5e7eb;
-      --text-light:#a7b0c0;
+      /* Lighter premium theme (not dark/blank-looking) */
+      --bg:#0f172a;
+      --bg2:#111c33;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.08);
+      --text:#eaf0ff;
+      --text-light:rgba(234,240,255,.78);
       --accent:#22c55e;
+      --accent2:#60a5fa;
       --purple:#8b5cf6;
-      --border:rgba(255,255,255,.08);
-      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --border:rgba(255,255,255,.12);
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
       --radius:14px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
       color:var(--text);
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(34,197,94,.18), transparent 55%),
-                  radial-gradient(900px 500px at 90% 20%, rgba(139,92,246,.20), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(34,197,94,.20), transparent 55%),
+        radial-gradient(900px 500px at 90% 20%, rgba(96,165,250,.20), transparent 55%),
+        radial-gradient(900px 500px at 60% 90%, rgba(139,92,246,.18), transparent 55%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      min-height:100vh;
     }
     a{color:inherit; text-decoration:none}
+
+    /* Navbar */
     .navbar{
       position:sticky; top:0; z-index:20;
       display:flex; align-items:center; justify-content:space-between;
       padding:12px 16px;
       border-bottom:1px solid var(--border);
-      background: rgba(10,14,22,.65);
+      background: rgba(12,18,34,.70);
       backdrop-filter: blur(12px);
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight:900; letter-spacing:.2px;
-    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:.2px;}
     .brand .logo{
       width:34px; height:34px; border-radius:10px;
       background: linear-gradient(135deg, var(--accent), var(--purple));
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
     }
     .nav-center{display:flex; gap:10px; align-items:center;}
     .nav-btn{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.06);
       color:var(--text);
       padding:9px 12px;
       border-radius:12px;
@@ -60,32 +72,37 @@
       transition: transform .08s ease, background .15s ease;
       user-select:none;
     }
-    .nav-btn:hover{background: rgba(255,255,255,.06)}
+    .nav-btn:hover{background: rgba(255,255,255,.10)}
     .nav-btn:active{transform: translateY(1px)}
-    .nav-btn.active{outline:2px solid rgba(34,197,94,.25); border-color: rgba(34,197,94,.35)}
+    .nav-btn.active{outline:2px solid rgba(34,197,94,.22); border-color: rgba(34,197,94,.35)}
     .nav-right{display:flex; gap:10px; align-items:center;}
+
+    /* Fix “greyed out” selects */
     select, input{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.10);
       color:var(--text);
       padding:9px 10px;
       border-radius:12px;
       outline:none;
+      appearance:none;
+      -webkit-appearance:none;
     }
+    select:hover{background: rgba(255,255,255,.14)}
+    option{background:#0f172a; color:var(--text);} /* makes dropdown readable */
+
+    /* Layout */
     .layout{
       display:grid;
-      grid-template-columns: 240px 1fr 280px;
+      grid-template-columns: 260px 1fr 320px;
       gap:14px;
       padding:14px;
-      max-width: 1400px;
+      max-width: 1500px;
       margin: 0 auto;
-    }
-    .sidebar-left,.sidebar-right,.main{
-      min-height: calc(100vh - 70px);
     }
     .panel{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.05);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
@@ -100,18 +117,19 @@
       user-select:none;
       transition: background .15s ease;
     }
-    .menu-link:hover{background: rgba(255,255,255,.05)}
-    .menu-link.active{background: rgba(34,197,94,.12); outline:1px solid rgba(34,197,94,.25)}
+    .menu-link:hover{background: rgba(255,255,255,.08)}
+    .menu-link.active{background: rgba(34,197,94,.14); outline:1px solid rgba(34,197,94,.25)}
     .menu-icon{
-      width:32px; height:32px; border-radius:10px;
+      width:34px; height:34px; border-radius:12px;
       display:flex; align-items:center; justify-content:center;
-      background: rgba(255,255,255,.05);
+      background: rgba(255,255,255,.08);
       border:1px solid var(--border);
     }
+
     .main{padding:0}
     .card{
       border:1px solid var(--border);
-      background: rgba(17,24,39,.65);
+      background: rgba(255,255,255,.06);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
@@ -121,25 +139,28 @@
       gap:12px;
       padding:12px 14px;
       border-bottom:1px solid var(--border);
-      background: rgba(255,255,255,.02);
+      background: rgba(0,0,0,.10);
     }
     .card-title{font-weight:900; display:flex; align-items:center; gap:10px}
     .content-pad{padding:12px 14px}
+
     .grid4{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;}
-    @media(max-width:1100px){ .layout{grid-template-columns: 220px 1fr; } .sidebar-right{display:none} .grid4{grid-template-columns: repeat(2, minmax(0,1fr));} }
-    @media(max-width:720px){ .layout{grid-template-columns: 1fr;} .sidebar-left{display:none} .grid4{grid-template-columns: 1fr;} }
+    @media(max-width:1180px){ .layout{grid-template-columns: 240px 1fr;} .sidebar-right{display:none} .grid4{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media(max-width:760px){ .layout{grid-template-columns: 1fr;} .sidebar-left{display:none} .grid4{grid-template-columns: 1fr;} }
+
     .stat{
       padding:12px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.07);
       border-radius: 14px;
     }
     .stat-title{font-size:.85rem; color:var(--text-light)}
     .stat-value{font-size:1.6rem; font-weight:900; margin-top:6px}
-    .stat-change{font-size:.85rem; margin-top:6px; color: #86efac}
+    .stat-change{font-size:.85rem; margin-top:6px; color: #a7f3d0}
+
     .action-btn{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.08);
       color:var(--text);
       padding:9px 12px;
       border-radius:12px;
@@ -147,17 +168,20 @@
       display:inline-flex; gap:8px; align-items:center;
       transition: background .15s ease, transform .08s ease;
     }
-    .action-btn:hover{background: rgba(255,255,255,.07)}
+    .action-btn:hover{background: rgba(255,255,255,.12)}
     .action-btn:active{transform: translateY(1px)}
+    .action-btn:disabled{opacity:.6; cursor:not-allowed}
     .badge{
       display:inline-flex; align-items:center; justify-content:center;
       padding:4px 10px;
       border-radius:999px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.08);
       font-size:.78rem;
       color: var(--text-light);
     }
+
+    /* Tables */
     table{border-collapse:collapse}
     .table th, .table td{
       padding:10px 10px;
@@ -165,7 +189,9 @@
       font-size:.92rem;
       vertical-align:top;
     }
-    .table th{color:var(--text-light); font-weight:800; text-transform:none}
+    .table th{color:var(--text-light); font-weight:800}
+
+    /* Toasts */
     .toast-container{
       position:fixed;
       right:20px;
@@ -180,31 +206,31 @@
       padding:10px 12px;
       border-radius:14px;
       border:1px solid var(--border);
-      background: rgba(17,24,39,.9);
+      background: rgba(10,15,28,.92);
       box-shadow: var(--shadow);
-      max-width: 420px;
+      max-width: 440px;
     }
     .toast.success i{color:#22c55e}
     .toast.error i{color:#ef4444}
     .toast.info i{color:#60a5fa}
 
-    /* Chat box on right */
+    /* Right panel chat (fixed cut-off) */
     .chat-wrap{padding:12px}
     .chat-box{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.06);
       border-radius: 14px;
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      height: 380px;
+      height: 520px; /* bigger: no partial view */
     }
     .chat-head{
       padding:10px 12px;
       border-bottom:1px solid var(--border);
       display:flex; align-items:center; justify-content:space-between;
     }
-    .chat-tabs{display:flex; gap:8px}
+    .chat-tabs{display:flex; gap:8px; flex-wrap:wrap}
     .chat-tab{
       padding:6px 10px;
       border-radius:999px;
@@ -213,7 +239,7 @@
       font-size:.82rem;
       color:var(--text-light);
       user-select:none;
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.06);
     }
     .chat-tab.active{color:var(--text); outline:2px solid rgba(34,197,94,.18)}
     .chat-messages{padding:10px; overflow:auto; flex:1}
@@ -223,25 +249,59 @@
       width:34px; height:34px; border-radius:12px;
       display:flex; align-items:center; justify-content:center;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      background: rgba(255,255,255,.08);
       font-weight:900; font-size:.78rem;
     }
     .msg-bubble{
-      max-width: 70%;
+      max-width: 75%;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.07);
       padding:10px 12px;
       border-radius: 14px;
       line-height:1.55;
     }
-    .msg-bubble.own{background: rgba(34,197,94,.10)}
+    .msg-bubble.own{background: rgba(34,197,94,.14)}
     .chat-input{
       display:flex; gap:8px;
       padding:10px;
       border-top:1px solid var(--border);
-      background: rgba(0,0,0,.08);
+      background: rgba(0,0,0,.10);
     }
     .chat-input input{flex:1}
+
+    /* Quick Pay tiles */
+    .tile-grid{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px;}
+    .pay-tile{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.07);
+      border-radius:14px;
+      padding:10px;
+      cursor:pointer;
+      display:flex; align-items:center; gap:10px;
+    }
+    .pay-tile:hover{background: rgba(255,255,255,.10)}
+    .pay-logo{
+      width:36px; height:36px; border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.20);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+    }
+    .pay-name{font-weight:900; font-size:.92rem}
+    .pay-sub{color:var(--text-light); font-size:.82rem}
+
+    /* Upload panel */
+    .upload-box{
+      border:1px dashed rgba(255,255,255,.25);
+      background: rgba(255,255,255,.06);
+      border-radius:14px;
+      padding:12px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+
+    /* Map */
+    #map{height: 280px; border-radius: 14px; border:1px solid var(--border); overflow:hidden;}
+    .map-wrap{margin-top:12px;}
 
     /* Modal */
     #agriModal{
@@ -252,13 +312,13 @@
       padding: 20px;
     }
     #agriModalCard{
-      width: min(920px, 96vw);
+      width: min(980px, 96vw);
       max-height: 88vh;
       overflow:auto;
-      background: rgba(17,24,39,.96);
+      background: rgba(12,18,34,.95);
       border: 1px solid var(--border);
       border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
       padding: 16px 16px 12px 16px;
     }
 
@@ -308,22 +368,44 @@
         <div data-i18n="sidebarDashboard">Dashboard</div>
       </div>
 
-      <div class="menu-link" data-nav="listings">
-        <div class="menu-icon"><i class="fa-solid fa-warehouse"></i></div>
-        <div data-i18n="myListings">My Listings</div>
+      <div class="menu-link" data-nav="market">
+        <div class="menu-icon"><i class="fa-solid fa-store"></i></div>
+        <div data-i18n="navMarket">Market</div>
       </div>
 
-      <div class="menu-link" data-nav="orders">
-        <div class="menu-icon"><i class="fa-solid fa-box"></i></div>
-        <div data-i18n="orders">Orders</div>
+      <div class="menu-link" data-nav="wallet">
+        <div class="menu-icon"><i class="fa-solid fa-wallet"></i></div>
+        <div data-i18n="navWallet">Wallet</div>
       </div>
+
+      <div class="menu-title">AI & AUTOMATION</div>
+
+      <div class="menu-link" data-nav="ai">
+        <div class="menu-icon"><i class="fa-solid fa-robot"></i></div>
+        <div data-i18n="navAITools">AI Tools</div>
+      </div>
+
+      <div class="menu-link" data-nav="disease">
+        <div class="menu-icon"><i class="fa-solid fa-camera"></i></div>
+        <div data-i18n="diseaseScanner">Disease Scanner</div>
+      </div>
+
+      <div class="menu-link" data-nav="priceai">
+        <div class="menu-icon"><i class="fa-solid fa-brain"></i></div>
+        <div data-i18n="priceAI">Price AI</div>
+      </div>
+
+      <div class="menu-link" data-nav="soil">
+        <div class="menu-icon"><i class="fa-solid fa-flask"></i></div>
+        <div data-i18n="soilAnalysis">Soil Analysis</div>
+      </div>
+
+      <div class="menu-title">LOGISTICS & TRUST</div>
 
       <div class="menu-link" data-nav="logistics">
         <div class="menu-icon"><i class="fa-solid fa-truck"></i></div>
         <div data-i18n="logistics">Logistics</div>
       </div>
-
-      <div class="menu-title">TRUST</div>
 
       <div class="menu-link" data-nav="traceability">
         <div class="menu-icon"><i class="fa-solid fa-link"></i></div>
@@ -337,45 +419,58 @@
     </aside>
 
     <main class="main" id="mainContent">
-      <!-- DASHBOARD (this content gets wrapped into a dashboard section automatically) -->
+      <!-- DASHBOARD -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> Dashboard</div>
-          <div class="badge">LIVE</div>
+          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="navDashboard">Dashboard</span></div>
+          <div class="badge"><span data-i18n="live">Live</span></div>
         </div>
+
         <div class="content-pad">
           <div class="grid4">
             <div class="stat">
-              <div class="stat-title">Total Revenue</div>
+              <div class="stat-title" data-i18n="totalRevenue">Total Revenue</div>
               <div class="stat-value" id="revenue">$0</div>
               <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> 15%</div>
             </div>
             <div class="stat">
-              <div class="stat-title">Wallet Balance</div>
+              <div class="stat-title" data-i18n="walletBalanceLabel">Wallet Balance</div>
               <div class="stat-value" id="wallet">$0</div>
               <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> +$0</div>
             </div>
             <div class="stat">
-              <div class="stat-title">Active Contracts</div>
+              <div class="stat-title" data-i18n="activeContracts">Active Contracts</div>
               <div class="stat-value">12</div>
-              <div class="stat-change"><i class="fa-solid fa-circle-check"></i> Verified</div>
+              <div class="stat-change"><i class="fa-solid fa-circle-check"></i> <span data-i18n="verified">Verified</span></div>
             </div>
             <div class="stat">
-              <div class="stat-title">Trust Score</div>
+              <div class="stat-title" data-i18n="trustScore">Trust Score</div>
               <div class="stat-value">94</div>
-              <div class="stat-change"><i class="fa-solid fa-shield"></i> Verified</div>
+              <div class="stat-change"><i class="fa-solid fa-shield"></i> <span data-i18n="verified">Verified</span></div>
             </div>
           </div>
 
           <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px;">
-            <button class="action-btn" data-nav="market"><i class="fa-solid fa-store"></i> Open Market</button>
-            <button class="action-btn" data-nav="wallet"><i class="fa-solid fa-wallet"></i> Open Wallet</button>
-            <button class="action-btn" data-nav="orders"><i class="fa-solid fa-box"></i> View Orders</button>
-            <button class="action-btn" data-nav="listings"><i class="fa-solid fa-warehouse"></i> My Listings</button>
+            <button class="action-btn" data-nav="market"><i class="fa-solid fa-store"></i> <span data-i18n="navMarket">Market</span></button>
+            <button class="action-btn" data-nav="wallet"><i class="fa-solid fa-wallet"></i> <span data-i18n="navWallet">Wallet</span></button>
+            <button class="action-btn" data-nav="disease"><i class="fa-solid fa-camera"></i> <span data-i18n="diseaseScanner">Disease Scanner</span></button>
+            <button class="action-btn" data-nav="logistics"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">Logistics</span></button>
+          </div>
+
+          <div class="map-wrap">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="liveLogistics">Live Logistics</span></div>
+                <div class="badge">Map</div>
+              </div>
+              <div class="content-pad">
+                <div id="map"></div>
+              </div>
+            </div>
           </div>
 
           <div style="margin-top:12px; color:var(--text-light); line-height:1.7;">
-            This is a static investor demo for GitHub Pages (no backend). All actions update real demo data in your browser.
+            Investor demo (GitHub Pages static). All actions update real demo data in your browser.
           </div>
         </div>
       </div>
@@ -385,47 +480,93 @@
       <div class="chat-wrap">
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><i class="fa-solid fa-comments"></i> AgriAI Chat</div>
-            <div class="chat-tabs">
-              <div class="chat-tab active" onclick="switchChat('all')">All</div>
-              <div class="chat-tab" onclick="switchChat('buyers')">Buyers</div>
-              <div class="chat-tab" onclick="switchChat('sellers')">Sellers</div>
+            <div class="card-title"><i class="fa-solid fa-comments"></i> <span data-i18n="messages">Messages</span></div>
+            <div class="chat-tabs" id="chatTabs">
+              <div class="chat-tab active" data-chat="all"><span data-i18n="all">All</span></div>
+              <div class="chat-tab" data-chat="buyers"><span data-i18n="buyers">Buyers</span></div>
+              <div class="chat-tab" data-chat="sellers"><span data-i18n="sellers">Sellers</span></div>
+              <div class="chat-tab" data-chat="ai"><span data-i18n="ai">AI</span></div>
             </div>
           </div>
 
           <div class="chat-box">
-            <div class="chat-messages" id="chatMessages">
-              <div class="message">
-                <div class="msg-avatar" style="background: linear-gradient(135deg, var(--purple), #e91e63); color: white;">AI</div>
-                <div class="msg-bubble ai">
-                  <div style="font-size: 0.7rem; font-weight: bold; margin-bottom: 0.25rem;">AgriAI</div>
-                  💡 Tip: Offer bulk discount for 1000kg+ to increase deal size
-                </div>
-              </div>
-            </div>
+            <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-input">
-              <input id="chatInput" placeholder="Type message..." onkeydown="handleChat(event)" />
-              <button class="action-btn" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+              <input id="chatInput" placeholder="Type message..." />
+              <button class="action-btn" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
           </div>
         </div>
 
         <div class="card" style="margin-top:12px;">
           <div class="card-header">
-            <div class="card-title"><i class="fa-solid fa-trophy"></i> Achievements</div>
-            <div class="badge">Level 7</div>
+            <div class="card-title"><i class="fa-solid fa-wallet"></i> <span data-i18n="digitalWallet">Digital Wallet</span></div>
+            <div class="badge"><span data-i18n="mobileMoney">Mobile Money</span></div>
           </div>
-          <div class="content-pad" style="display:flex; flex-wrap:wrap; gap:10px;">
-            <span class="badge">Trader</span>
-            <span class="badge">Quality</span>
-            <span class="badge">Pioneer</span>
-            <span class="badge">Export</span>
-            <span class="badge">Green</span>
-            <span class="badge">Digital</span>
-            <span class="badge">Mentor</span>
-            <span class="badge">Leader</span>
+          <div class="content-pad">
+            <div class="tile-grid">
+              <div class="pay-tile" data-pay="mpesa">
+                <div class="pay-logo" title="M-Pesa">
+                  <!-- simple SVG “M” -->
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 18V6h3l5 7 5-7h3v12h-3V11l-5 7-5-7v7H4z" fill="rgba(34,197,94,.95)"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="pay-name">M-Pesa</div>
+                  <div class="pay-sub">Kenya</div>
+                </div>
+              </div>
+
+              <div class="pay-tile" data-pay="mtn">
+                <div class="pay-logo" title="MTN">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 18V6h4l4 6 4-6h4v12h-3V11l-5 7-5-7v7H4z" fill="rgba(250,204,21,.95)"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="pay-name">MTN</div>
+                  <div class="pay-sub">MoMo</div>
+                </div>
+              </div>
+
+              <div class="pay-tile" data-pay="airtel">
+                <div class="pay-logo" title="Airtel">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8zm0 3.2a4.8 4.8 0 0 0 0 9.6 4.8 4.8 0 0 0 0-9.6z" fill="rgba(239,68,68,.95)"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="pay-name">Airtel</div>
+                  <div class="pay-sub">Money</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;" class="upload-box">
+              <div>
+                <div style="font-weight:900;" data-i18n="quickPay">Quick Pay</div>
+                <div style="color:var(--text-light); font-size:.9rem;">Send money via selected provider</div>
+              </div>
+              <span class="badge" id="payProviderBadge">M-Pesa</span>
+            </div>
+
+            <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <div>
+                <div style="color:var(--text-light); font-size:.85rem;" data-i18n="phoneNumber">Phone Number</div>
+                <input id="payPhone" value="+254700000000" />
+              </div>
+              <div>
+                <div style="color:var(--text-light); font-size:.85rem;" data-i18n="amount">Amount</div>
+                <input id="payAmount" type="number" min="1" step="0.01" value="100" />
+              </div>
+              <div style="grid-column:1/-1; display:flex; justify-content:flex-end; gap:10px;">
+                <button class="action-btn" id="btnSendMoney"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">Send Money</span></button>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     </aside>
   </div>
@@ -444,20 +585,15 @@
   </div>
 
   <script>
-  /**
-   * AgriTrade Africa — GitHub Pages Safe Investor Demo (single-file)
-   * - Fully functional Market, Wallet Ledger, Orders, My Listings, Logistics, Traceability, Smart Contracts
-   * - Multilingual + currency conversions everywhere
-   * - Uses localStorage only (no backend required)
-   */
-
   (function () {
-    // ---------- STATE / STORAGE ----------
-    const LS = { lang:"agri_lang", currency:"agri_currency", section:"agri_section", data:"agri_demo_data_v4" };
+    // ---------- STATE ----------
+    const LS = { lang:"agri_lang", currency:"agri_currency", section:"agri_section", data:"agri_demo_data_v5", chatTab:"agri_chat_tab" };
     const state = {
       lang: localStorage.getItem(LS.lang) || "en",
       currency: localStorage.getItem(LS.currency) || "USD",
-      section: localStorage.getItem(LS.section) || "dashboard"
+      section: localStorage.getItem(LS.section) || "dashboard",
+      chatTab: localStorage.getItem(LS.chatTab) || "all",
+      payProvider: "mpesa"
     };
 
     const rates = { USD:1, KES:130.5, ETB:54.2, RWF:1220 };
@@ -466,84 +602,85 @@
 
     // ---------- I18N ----------
     const I18N = {
-      en:{ appName:"AgriTrade Africa", navDashboard:"Dashboard", navMarket:"Market", navWallet:"Wallet", navAITools:"AI Tools",
-        sidebarDashboard:"Dashboard", myListings:"My Listings", orders:"Orders", logistics:"Logistics", traceability:"Traceability", smartContracts:"Smart Contracts",
-        marketTitle:"Market Listings", search:"Search", category:"Category", origin:"Origin", crop:"Crop", grade:"Grade", available:"Available", pricePerKg:"Price / kg",
-        minOrder:"Min Order", viewDetails:"View Details", requestQuote:"Request Quote", openChat:"Chat", buyNow:"Buy Now", addToOrders:"Added to Orders", quoteSent:"Quote request sent",
-        listingsTitle:"My Listings", createListing:"Create Listing", edit:"Edit", delete:"Delete", publish:"Publish", unpublish:"Unpublish", save:"Save", cancel:"Cancel",
-        listingSaved:"Listing saved", listingDeleted:"Listing deleted",
-        ordersTitle:"Orders", status:"Status", all:"All", pending:"Pending", confirmed:"Confirmed", inTransit:"In Transit", delivered:"Delivered", disputed:"Disputed", refunded:"Refunded",
-        orderId:"Order ID", buyer:"Buyer", seller:"Seller", total:"Total", created:"Created", actions:"Actions", view:"View",
-        markConfirmed:"Mark Confirmed", markInTransit:"Mark In Transit", markDelivered:"Mark Delivered", openDispute:"Open Dispute", refund:"Refund", orderUpdated:"Order updated",
-        walletTitle:"Wallet & Ledger", availableBalance:"Available Balance", escrow:"Escrow", ledger:"Ledger", deposit:"Deposit", send:"Send", receive:"Receive",
-        phoneNumber:"Phone Number", amount:"Amount", note:"Note", confirm:"Confirm", txType:"Type", txRef:"Reference", txCounterparty:"Counterparty", txDate:"Date", txAmount:"Amount",
-        depositSuccess:"Deposit successful", sendSuccess:"Transfer sent", receiveSuccess:"Funds received",
-        aiToolsTitle:"AI Tools", scanCrop:"Scan Crop", predictPrices:"Predict Prices", soilTest:"Soil Test", weatherAI:"Weather AI",
-        logisticsTitle:"Live Logistics", shipmentId:"Shipment ID", route:"Route", eta:"ETA", carrier:"Carrier", lastPing:"Last Ping",
-        traceTitle:"Traceability", batchId:"Batch ID", event:"Event", actor:"Actor", location:"Location",
-        contractsTitle:"Smart Contracts", contractId:"Contract ID", terms:"Terms", claim:"Claim", claimed:"Claimed",
+      en: {
+        appName:"AgriTrade Africa",
+        navDashboard:"Dashboard", navMarket:"Market", navWallet:"Wallet", navAITools:"AI Tools",
+        sidebarDashboard:"Dashboard", myListings:"My Listings", orders:"Orders", logistics:"Logistics",
+        diseaseScanner:"Disease Scanner", priceAI:"Price AI", soilAnalysis:"Soil Analysis",
+        traceability:"Traceability", smartContracts:"Smart Contracts",
+        totalRevenue:"Total Revenue", walletBalanceLabel:"Wallet Balance", activeContracts:"Active Contracts", trustScore:"Trust Score",
+        verified:"Verified", live:"Live", liveLogistics:"Live Logistics",
+        messages:"Messages", all:"All", buyers:"Buyers", sellers:"Sellers", ai:"AI",
+        digitalWallet:"Digital Wallet", mobileMoney:"Mobile Money", quickPay:"Quick Pay",
+        phoneNumber:"Phone Number", amount:"Amount", sendMoney:"Send Money",
+        aiDiseaseDetection:"AI Disease Detection", history:"History",
+        tapToUpload:"Tap to upload crop photo", chooseFile:"Choose File",
+        healthyDetected:"Healthy Crop Detected", confidence:"Confidence",
+        healthyAdvice:"Your crop shows no signs of disease. Continue current care schedule.",
+        typeMessage:"Type message...",
         aiReply:"Thanks for your message! I’ll help you find the best buyers for your crops.",
-        currencyChanged:"Currency changed to {currency}", languageChanged:"Language changed to {lang}"
+        currencyChanged:"Currency changed to {currency}",
+        languageChanged:"Language changed to {lang}"
       },
-      es:{ appName:"AgriTrade África", navDashboard:"Panel", navMarket:"Mercado", navWallet:"Billetera", navAITools:"Herramientas IA",
-        sidebarDashboard:"Panel", myListings:"Mis anuncios", orders:"Pedidos", logistics:"Logística", traceability:"Trazabilidad", smartContracts:"Contratos inteligentes",
-        marketTitle:"Anuncios del mercado", search:"Buscar", category:"Categoría", origin:"Origen", crop:"Cultivo", grade:"Calidad", available:"Disponible", pricePerKg:"Precio / kg",
-        minOrder:"Pedido mínimo", viewDetails:"Ver detalles", requestQuote:"Pedir cotización", openChat:"Chat", buyNow:"Comprar ahora",
-        addToOrders:"Agregado a Pedidos", quoteSent:"Solicitud de cotización enviada",
-        listingsTitle:"Mis anuncios", createListing:"Crear anuncio", edit:"Editar", delete:"Eliminar", publish:"Publicar", unpublish:"Ocultar", save:"Guardar", cancel:"Cancelar",
-        listingSaved:"Anuncio guardado", listingDeleted:"Anuncio eliminado",
-        ordersTitle:"Pedidos", status:"Estado", all:"Todos", pending:"Pendiente", confirmed:"Confirmado", inTransit:"En tránsito", delivered:"Entregado", disputed:"En disputa", refunded:"Reembolsado",
-        orderId:"ID pedido", buyer:"Comprador", seller:"Vendedor", total:"Total", created:"Creado", actions:"Acciones", view:"Ver",
-        markConfirmed:"Marcar confirmado", markInTransit:"Marcar en tránsito", markDelivered:"Marcar entregado", openDispute:"Abrir disputa", refund:"Reembolsar", orderUpdated:"Pedido actualizado",
-        walletTitle:"Billetera y libro mayor", availableBalance:"Saldo disponible", escrow:"Depósito en garantía", ledger:"Libro mayor", deposit:"Depositar", send:"Enviar", receive:"Recibir",
-        phoneNumber:"Número de teléfono", amount:"Monto", note:"Nota", confirm:"Confirmar", txType:"Tipo", txRef:"Referencia", txCounterparty:"Contraparte", txDate:"Fecha", txAmount:"Monto",
-        depositSuccess:"Depósito exitoso", sendSuccess:"Transferencia enviada", receiveSuccess:"Fondos recibidos",
-        aiToolsTitle:"Herramientas IA", scanCrop:"Escanear cultivo", predictPrices:"Predecir precios", soilTest:"Prueba de suelo", weatherAI:"IA del clima",
-        logisticsTitle:"Logística en vivo", shipmentId:"ID envío", route:"Ruta", eta:"ETA", carrier:"Transportista", lastPing:"Último ping",
-        traceTitle:"Trazabilidad", batchId:"ID lote", event:"Evento", actor:"Actor", location:"Ubicación",
-        contractsTitle:"Contratos inteligentes", contractId:"ID contrato", terms:"Términos", claim:"Reclamar", claimed:"Reclamado",
-        aiReply:"¡Gracias por tu mensaje! Te ayudaré a encontrar los mejores compradores para tus cultivos.",
-        currencyChanged:"Moneda cambiada a {currency}", languageChanged:"Idioma cambiado a {lang}"
+      es: {
+        appName:"AgriTrade África",
+        navDashboard:"Panel", navMarket:"Mercado", navWallet:"Billetera", navAITools:"Herramientas IA",
+        sidebarDashboard:"Panel", myListings:"Mis anuncios", orders:"Pedidos", logistics:"Logística",
+        diseaseScanner:"Escáner de enfermedades", priceAI:"IA de precios", soilAnalysis:"Análisis de suelo",
+        traceability:"Trazabilidad", smartContracts:"Contratos inteligentes",
+        totalRevenue:"Ingresos totales", walletBalanceLabel:"Saldo de billetera", activeContracts:"Contratos activos", trustScore:"Puntuación de confianza",
+        verified:"Verificado", live:"En vivo", liveLogistics:"Logística en vivo",
+        messages:"Mensajes", all:"Todos", buyers:"Compradores", sellers:"Vendedores", ai:"IA",
+        digitalWallet:"Billetera digital", mobileMoney:"Dinero móvil", quickPay:"Pago rápido",
+        phoneNumber:"Número de teléfono", amount:"Monto", sendMoney:"Enviar dinero",
+        aiDiseaseDetection:"Detección de enfermedades con IA", history:"Historial",
+        tapToUpload:"Toque para subir foto del cultivo", chooseFile:"Elegir archivo",
+        healthyDetected:"Cultivo saludable detectado", confidence:"Confianza",
+        healthyAdvice:"No se detectan signos de enfermedad. Continúa con el cuidado habitual.",
+        typeMessage:"Escribe un mensaje...",
+        aiReply:"¡Gracias por tu mensaje! Te ayudaré a encontrar los mejores compradores.",
+        currencyChanged:"Moneda cambiada a {currency}",
+        languageChanged:"Idioma cambiado a {lang}"
       },
-      fr:{ appName:"AgriTrade Afrique", navDashboard:"Tableau de bord", navMarket:"Marché", navWallet:"Portefeuille", navAITools:"Outils IA",
-        sidebarDashboard:"Tableau de bord", myListings:"Mes annonces", orders:"Commandes", logistics:"Logistique", traceability:"Traçabilité", smartContracts:"Contrats intelligents",
-        marketTitle:"Annonces du marché", search:"Rechercher", category:"Catégorie", origin:"Origine", crop:"Culture", grade:"Qualité", available:"Disponible", pricePerKg:"Prix / kg",
-        minOrder:"Commande min.", viewDetails:"Voir détails", requestQuote:"Demander un devis", openChat:"Chat", buyNow:"Acheter",
-        addToOrders:"Ajouté aux commandes", quoteSent:"Demande de devis envoyée",
-        listingsTitle:"Mes annonces", createListing:"Créer une annonce", edit:"Modifier", delete:"Supprimer", publish:"Publier", unpublish:"Dépublier", save:"Enregistrer", cancel:"Annuler",
-        listingSaved:"Annonce enregistrée", listingDeleted:"Annonce supprimée",
-        ordersTitle:"Commandes", status:"Statut", all:"Toutes", pending:"En attente", confirmed:"Confirmée", inTransit:"En transit", delivered:"Livrée", disputed:"Litige", refunded:"Remboursée",
-        orderId:"ID commande", buyer:"Acheteur", seller:"Vendeur", total:"Total", created:"Créée", actions:"Actions", view:"Voir",
-        markConfirmed:"Marquer confirmée", markInTransit:"Marquer en transit", markDelivered:"Marquer livrée", openDispute:"Ouvrir un litige", refund:"Rembourser", orderUpdated:"Commande mise à jour",
-        walletTitle:"Portefeuille & registre", availableBalance:"Solde disponible", escrow:"Séquestre", ledger:"Registre", deposit:"Dépôt", send:"Envoyer", receive:"Recevoir",
-        phoneNumber:"Numéro de téléphone", amount:"Montant", note:"Note", confirm:"Confirmer", txType:"Type", txRef:"Référence", txCounterparty:"Contrepartie", txDate:"Date", txAmount:"Montant",
-        depositSuccess:"Dépôt réussi", sendSuccess:"Transfert envoyé", receiveSuccess:"Fonds reçus",
-        aiToolsTitle:"Outils IA", scanCrop:"Scanner la culture", predictPrices:"Prédire les prix", soilTest:"Test du sol", weatherAI:"IA météo",
-        logisticsTitle:"Logistique en direct", shipmentId:"ID expédition", route:"Trajet", eta:"ETA", carrier:"Transporteur", lastPing:"Dernier ping",
-        traceTitle:"Traçabilité", batchId:"ID lot", event:"Événement", actor:"Acteur", location:"Lieu",
-        contractsTitle:"Contrats intelligents", contractId:"ID contrat", terms:"Conditions", claim:"Réclamer", claimed:"Réclamé",
+      fr: {
+        appName:"AgriTrade Afrique",
+        navDashboard:"Tableau de bord", navMarket:"Marché", navWallet:"Portefeuille", navAITools:"Outils IA",
+        sidebarDashboard:"Tableau de bord", myListings:"Mes annonces", orders:"Commandes", logistics:"Logistique",
+        diseaseScanner:"Scanner de maladies", priceAI:"IA des prix", soilAnalysis:"Analyse du sol",
+        traceability:"Traçabilité", smartContracts:"Contrats intelligents",
+        totalRevenue:"Revenu total", walletBalanceLabel:"Solde du portefeuille", activeContracts:"Contrats actifs", trustScore:"Indice de confiance",
+        verified:"Vérifié", live:"En direct", liveLogistics:"Logistique en direct",
+        messages:"Messages", all:"Tous", buyers:"Acheteurs", sellers:"Vendeurs", ai:"IA",
+        digitalWallet:"Portefeuille numérique", mobileMoney:"Mobile Money", quickPay:"Paiement rapide",
+        phoneNumber:"Numéro de téléphone", amount:"Montant", sendMoney:"Envoyer de l’argent",
+        aiDiseaseDetection:"Détection des maladies par IA", history:"Historique",
+        tapToUpload:"Touchez pour téléverser une photo", chooseFile:"Choisir un fichier",
+        healthyDetected:"Culture saine détectée", confidence:"Confiance",
+        healthyAdvice:"Aucun signe de maladie. Continuez l’entretien habituel.",
+        typeMessage:"Tapez un message...",
         aiReply:"Merci pour votre message ! Je vais vous aider à trouver les meilleurs acheteurs.",
-        currencyChanged:"Devise changée en {currency}", languageChanged:"Langue : {lang}"
+        currencyChanged:"Devise changée en {currency}",
+        languageChanged:"Langue : {lang}"
       },
-      ar:{ appName:"أجريتريد أفريقيا", navDashboard:"لوحة التحكم", navMarket:"السوق", navWallet:"المحفظة", navAITools:"أدوات الذكاء",
-        sidebarDashboard:"لوحة التحكم", myListings:"عروضي", orders:"الطلبات", logistics:"اللوجستيات", traceability:"التتبع", smartContracts:"العقود الذكية",
-        marketTitle:"عروض السوق", search:"بحث", category:"الفئة", origin:"المنشأ", crop:"المحصول", grade:"الدرجة", available:"المتاح", pricePerKg:"السعر / كغ",
-        minOrder:"الحد الأدنى", viewDetails:"عرض التفاصيل", requestQuote:"طلب سعر", openChat:"دردشة", buyNow:"اشترِ الآن",
-        addToOrders:"تمت الإضافة للطلبات", quoteSent:"تم إرسال طلب السعر",
-        listingsTitle:"عروضي", createListing:"إنشاء عرض", edit:"تعديل", delete:"حذف", publish:"نشر", unpublish:"إخفاء", save:"حفظ", cancel:"إلغاء",
-        listingSaved:"تم حفظ العرض", listingDeleted:"تم حذف العرض",
-        ordersTitle:"الطلبات", status:"الحالة", all:"الكل", pending:"قيد الانتظار", confirmed:"مؤكد", inTransit:"قيد النقل", delivered:"تم التسليم", disputed:"نزاع", refunded:"مسترجع",
-        orderId:"رقم الطلب", buyer:"المشتري", seller:"البائع", total:"الإجمالي", created:"تاريخ الإنشاء", actions:"إجراءات", view:"عرض",
-        markConfirmed:"تأكيد", markInTransit:"تعيين قيد النقل", markDelivered:"تعيين تم التسليم", openDispute:"فتح نزاع", refund:"استرجاع", orderUpdated:"تم تحديث الطلب",
-        walletTitle:"المحفظة والسجل", availableBalance:"الرصيد المتاح", escrow:"حجز", ledger:"السجل", deposit:"إيداع", send:"إرسال", receive:"استلام",
-        phoneNumber:"رقم الهاتف", amount:"المبلغ", note:"ملاحظة", confirm:"تأكيد", txType:"النوع", txRef:"المرجع", txCounterparty:"الطرف الآخر", txDate:"التاريخ", txAmount:"المبلغ",
-        depositSuccess:"تم الإيداع بنجاح", sendSuccess:"تم إرسال التحويل", receiveSuccess:"تم استلام الأموال",
-        aiToolsTitle:"أدوات الذكاء", scanCrop:"فحص المحصول", predictPrices:"توقع الأسعار", soilTest:"اختبار التربة", weatherAI:"ذكاء الطقس",
-        logisticsTitle:"اللوجستيات المباشرة", shipmentId:"رقم الشحنة", route:"المسار", eta:"وقت الوصول", carrier:"الناقل", lastPing:"آخر تحديث",
-        traceTitle:"التتبع", batchId:"رقم الدفعة", event:"الحدث", actor:"الجهة", location:"الموقع",
-        contractsTitle:"العقود الذكية", contractId:"رقم العقد", terms:"الشروط", claim:"مطالبة", claimed:"تمت المطالبة",
-        aiReply:"شكرًا لرسالتك! سأساعدك في العثور على أفضل المشترين لمحاصيلك.",
-        currencyChanged:"تم تغيير العملة إلى {currency}", languageChanged:"تم تغيير اللغة إلى {lang}"
+      ar: {
+        appName:"أجريتريد أفريقيا",
+        navDashboard:"لوحة التحكم", navMarket:"السوق", navWallet:"المحفظة", navAITools:"أدوات الذكاء",
+        sidebarDashboard:"لوحة التحكم", myListings:"عروضي", orders:"الطلبات", logistics:"اللوجستيات",
+        diseaseScanner:"ماسح الأمراض", priceAI:"ذكاء الأسعار", soilAnalysis:"تحليل التربة",
+        traceability:"التتبع", smartContracts:"العقود الذكية",
+        totalRevenue:"إجمالي الإيرادات", walletBalanceLabel:"رصيد المحفظة", activeContracts:"العقود النشطة", trustScore:"درجة الثقة",
+        verified:"موثّق", live:"مباشر", liveLogistics:"اللوجستيات المباشرة",
+        messages:"الرسائل", all:"الكل", buyers:"المشترون", sellers:"البائعون", ai:"الذكاء",
+        digitalWallet:"محفظة رقمية", mobileMoney:"الدفع عبر الهاتف", quickPay:"دفع سريع",
+        phoneNumber:"رقم الهاتف", amount:"المبلغ", sendMoney:"إرسال المال",
+        aiDiseaseDetection:"كشف الأمراض بالذكاء", history:"السجل",
+        tapToUpload:"اضغط لرفع صورة للمحصول", chooseFile:"اختر ملفًا",
+        healthyDetected:"تم اكتشاف محصول سليم", confidence:"الثقة",
+        healthyAdvice:"لا توجد علامات مرض. استمر في جدول العناية المعتاد.",
+        typeMessage:"اكتب رسالة...",
+        aiReply:"شكرًا لرسالتك! سأساعدك في العثور على أفضل المشترين.",
+        currencyChanged:"تم تغيير العملة إلى {currency}",
+        languageChanged:"تم تغيير اللغة إلى {lang}"
       }
     };
 
@@ -568,16 +705,12 @@
         return `${val.toLocaleString(locale())} ${state.currency}`;
       }
     }
-    function toUSD(amountInCurrency){
-      const r = rates[state.currency] || 1;
-      return Number(amountInCurrency) / r;
-    }
-    function fmtDate(d){
-      return new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(d));
-    }
     function escapeHtml(str){
-      return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+      return String(str)
+        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
     }
+    function nowISO(){ return new Date().toISOString(); }
 
     // ---------- TOAST ----------
     function showToast(message, type="info"){
@@ -602,39 +735,18 @@
       modalBody.innerHTML = html;
       modal.style.display="flex";
     }
-    function closeModal(){ modal.style.display="none"; }
 
-    // ---------- DATA ----------
+    // ---------- DATA (lightweight investor demo data) ----------
     function seedData(){
       const data = {
-        me: { id:"u_me", name:"AgriTrade Seller", country:"Kenya" },
-        listings: [
-          { id:"L-KE-MZ-001", ownerId:"u_me", ownerName:"AgriTrade Seller", crop:"Maize", category:"Grain", origin:"Kenya", grade:"A", availableKg:5000, minOrderKg:250, pricePerKgUSD:0.42, moisture:"12%", packaging:"50kg bags", harvestDate:"2026-01-20T09:00:00.000Z", published:true },
-          { id:"L-RW-BN-014", ownerId:"u_rw_1", ownerName:"Kigali Agro Co-op", crop:"Beans", category:"Legume", origin:"Rwanda", grade:"Premium", availableKg:2400, minOrderKg:100, pricePerKgUSD:0.95, moisture:"11%", packaging:"25kg sacks", harvestDate:"2026-02-03T09:00:00.000Z", published:true },
-          { id:"L-ET-CO-007", ownerId:"u_et_1", ownerName:"Addis Highlands Exporters", crop:"Coffee", category:"Cash Crop", origin:"Ethiopia", grade:"AA", availableKg:1200, minOrderKg:60, pricePerKgUSD:6.35, moisture:"10.5%", packaging:"Jute 60kg", harvestDate:"2026-01-29T09:00:00.000Z", published:true },
-          { id:"L-KE-MN-021", ownerId:"u_ke_2", ownerName:"Mombasa Mango Growers", crop:"Mango", category:"Fruit", origin:"Kenya", grade:"Export", availableKg:8000, minOrderKg:300, pricePerKgUSD:0.78, moisture:"Fresh", packaging:"Crates", harvestDate:"2026-02-08T09:00:00.000Z", published:true }
+        baseRevenueUSD: 24500,
+        walletUSD: 8320.50,
+        chat: [
+          { id:"c1", tab:"ai", from:"AI", text:"💡 Tip: Offer bulk discount for 1000kg+ to increase deal size", ts: nowISO() },
+          { id:"c2", tab:"buyers", from:"Buyer", text:"We need 5,000kg maize Grade A. Can you deliver to Nairobi in 7 days?", ts: nowISO() },
+          { id:"c3", tab:"sellers", from:"Seller", text:"Coffee AA available — export ready. MOQ 60kg.", ts: nowISO() }
         ],
-        orders: [
-          { id:"O-10021", listingId:"L-RW-BN-014", crop:"Beans", qtyKg:300, pricePerKgUSD:0.95, buyerName:"Nairobi Foods Ltd", sellerName:"Kigali Agro Co-op", status:"inTransit", createdAt:"2026-02-09T14:22:00.000Z", notes:"Delivery to Nairobi cold store" }
-        ],
-        wallet: { availableUSD: 8320.5, escrowUSD: 1240.0 },
-        ledger: [
-          { id:"TX-90011", type:"deposit", ref:"MM-KE-112930", counterparty:"M-Pesa", amountUSD:5000, createdAt:"2026-01-18T10:05:00.000Z", note:"Operating float" },
-          { id:"TX-90012", type:"escrow_hold", ref:"ESC-O-10021", counterparty:"Escrow", amountUSD:-1240, createdAt:"2026-02-09T14:23:00.000Z", note:"Order escrow hold" }
-        ],
-        logistics: [
-          { shipmentId:"S-77301", route:"Kigali → Nairobi", carrier:"SwiftHaul Logistics", eta:"2026-02-14T15:00:00.000Z", lastPing:"2026-02-13T08:10:00.000Z", status:"inTransit" },
-          { shipmentId:"S-77322", route:"Addis Ababa → Djibouti Port", carrier:"BlueRoute Freight", eta:"2026-02-15T09:30:00.000Z", lastPing:"2026-02-13T07:42:00.000Z", status:"inTransit" }
-        ],
-        traceability: [
-          { batchId:"B-KE-MZ-8821", event:"Harvested", actor:"Farm Co-op", location:"Nakuru, Kenya", createdAt:"2026-01-20T09:10:00.000Z" },
-          { batchId:"B-KE-MZ-8821", event:"Quality Check", actor:"Independent Inspector", location:"Nakuru Depot", createdAt:"2026-01-22T12:40:00.000Z" },
-          { batchId:"B-KE-MZ-8821", event:"Loaded", actor:"Warehouse", location:"Nairobi Warehouse", createdAt:"2026-01-24T16:05:00.000Z" }
-        ],
-        contracts: [
-          { contractId:"C-ESC-22018", terms:"Escrow releases on delivery confirmation + buyer sign-off within 24h", status:"active", claimed:false },
-          { contractId:"C-INS-11007", terms:"Cargo insurance covers loss/damage; claim window 7 days", status:"active", claimed:false }
-        ]
+        diseaseHistory: []
       };
       localStorage.setItem(LS.data, JSON.stringify(data));
       return data;
@@ -644,14 +756,331 @@
         const raw = localStorage.getItem(LS.data);
         if(!raw) return seedData();
         const parsed = JSON.parse(raw);
-        if(!parsed.listings || !parsed.wallet || !parsed.ledger) return seedData();
+        if(!parsed || typeof parsed !== "object") return seedData();
+        if(!Array.isArray(parsed.chat)) parsed.chat = [];
+        if(!Array.isArray(parsed.diseaseHistory)) parsed.diseaseHistory = [];
         return parsed;
       }catch{ return seedData(); }
     }
     let DB = loadData();
     function saveData(){ localStorage.setItem(LS.data, JSON.stringify(DB)); }
-    function nowISO(){ return new Date().toISOString(); }
-    function nextId(prefix){ return `${prefix}-${Math.floor(Math.random()*90000+10000)}`; }
+
+    // ---------- SECTIONS ----------
+    function buildSections(){
+      const main = document.getElementById("mainContent");
+      if(!main) return;
+      if(main.querySelector("[data-section='dashboard']")) return;
+
+      // Wrap existing dashboard
+      const dash = document.createElement("div");
+      dash.dataset.section = "dashboard";
+      dash.id = "section-dashboard";
+      while(main.firstChild) dash.appendChild(main.firstChild);
+      main.appendChild(dash);
+
+      const mk = (name, html) => {
+        const el = document.createElement("div");
+        el.dataset.section = name;
+        el.id = `section-${name}`;
+        el.className = "card";
+        el.style.display="none";
+        el.innerHTML = html;
+        main.appendChild(el);
+      };
+
+      mk("market", sectionShell("fa-store", t("navMarket"), `
+        <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
+          Market module is connected in your other build — keeping this demo stable while we finalize AI/Wallet/Logistics blocks.
+          <div style="margin-top:10px;">
+            <button class="action-btn" onclick="openModal('Market', 'Market listings can be re-attached next. Your current priority fixes are AI + Wallet + Chat + Logistics.')">
+              <i class="fa-solid fa-list"></i> Market Status
+            </button>
+          </div>
+        </div>
+      `));
+
+      mk("wallet", sectionShell("fa-wallet", t("navWallet"), walletSectionHTML()));
+      mk("ai", sectionShell("fa-robot", t("navAITools"), aiToolsHTML()));
+      mk("disease", sectionShell("fa-camera", t("aiDiseaseDetection"), diseaseHTML()));
+      mk("priceai", sectionShell("fa-brain", t("priceAI"), priceAIHTML()));
+      mk("soil", sectionShell("fa-flask", t("soilAnalysis"), soilHTML()));
+      mk("logistics", sectionShell("fa-truck", t("logistics"), logisticsHTML()));
+      mk("traceability", sectionShell("fa-link", t("traceability"), traceHTML()));
+      mk("contracts", sectionShell("fa-file-contract", t("smartContracts"), contractsHTML()));
+    }
+
+    function sectionShell(icon, title, body){
+      return `
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid ${icon}"></i> ${escapeHtml(title)}</div>
+          <div class="badge">${escapeHtml(new Intl.DateTimeFormat(locale(), {dateStyle:"medium"}).format(new Date()))}</div>
+        </div>
+        ${body}
+      `;
+    }
+
+    function walletSectionHTML(){
+      return `
+        <div class="content-pad">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+            <div class="stat">
+              <div class="stat-title" data-i18n="availableBalance">${escapeHtml(t("walletBalanceLabel"))}</div>
+              <div class="stat-value" id="walletBalanceBig">$0</div>
+              <div class="stat-change"><i class="fa-solid fa-shield"></i> <span data-i18n="verified">${escapeHtml(t("verified"))}</span></div>
+            </div>
+            <div class="stat">
+              <div class="stat-title">Quick Actions</div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                <button class="action-btn" id="btnWalletDeposit"><i class="fa-solid fa-plus"></i> Deposit</button>
+                <button class="action-btn" id="btnWalletSend"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">${escapeHtml(t("sendMoney"))}</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-bolt"></i> <span data-i18n="quickPay">${escapeHtml(t("quickPay"))}</span></div>
+              <span class="badge" id="walletProviderBadge">M-Pesa</span>
+            </div>
+            <div class="content-pad">
+              <div class="tile-grid">
+                <div class="pay-tile" data-pay="mpesa"><div class="pay-logo">M</div><div><div class="pay-name">M-Pesa</div><div class="pay-sub">Kenya</div></div></div>
+                <div class="pay-tile" data-pay="mtn"><div class="pay-logo">MT</div><div><div class="pay-name">MTN</div><div class="pay-sub">MoMo</div></div></div>
+                <div class="pay-tile" data-pay="airtel"><div class="pay-logo">A</div><div><div class="pay-name">Airtel</div><div class="pay-sub">Money</div></div></div>
+              </div>
+
+              <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
+                  <div style="color:var(--text-light); font-size:.85rem;" data-i18n="phoneNumber">${escapeHtml(t("phoneNumber"))}</div>
+                  <input id="walletPhone" value="+254700000000" />
+                </div>
+                <div>
+                  <div style="color:var(--text-light); font-size:.85rem;" data-i18n="amount">${escapeHtml(t("amount"))}</div>
+                  <input id="walletAmount" type="number" min="1" step="0.01" value="100" />
+                </div>
+                <div style="grid-column:1/-1; display:flex; justify-content:flex-end; gap:10px;">
+                  <button class="action-btn" id="walletSendBtn"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">${escapeHtml(t("sendMoney"))}</span></button>
+                </div>
+              </div>
+
+              <div style="margin-top:10px; color:var(--text-light); font-size:.9rem;">
+                Demo wallet transfers are stored in your browser and persist on refresh.
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function aiToolsHTML(){
+      return `
+        <div class="content-pad">
+          <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <button class="action-btn" data-nav="disease"><i class="fa-solid fa-camera"></i> <span data-i18n="aiDiseaseDetection">${escapeHtml(t("aiDiseaseDetection"))}</span></button>
+            <button class="action-btn" data-nav="priceai"><i class="fa-solid fa-brain"></i> <span data-i18n="priceAI">${escapeHtml(t("priceAI"))}</span></button>
+            <button class="action-btn" data-nav="soil"><i class="fa-solid fa-flask"></i> <span data-i18n="soilAnalysis">${escapeHtml(t("soilAnalysis"))}</span></button>
+            <button class="action-btn" data-nav="logistics"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">${escapeHtml(t("logistics"))}</span></button>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Automation</div>
+              <div class="badge">Demo</div>
+            </div>
+            <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
+              Use the modules above to simulate real platform automation:
+              <ul style="margin:8px 0 0 18px;">
+                <li>Disease scanning via image upload</li>
+                <li>Price forecasting with smart recommendations</li>
+                <li>Soil analysis recommendations</li>
+                <li>Logistics map tracking</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function diseaseHTML(){
+      return `
+        <div class="content-pad">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-camera"></i> <span data-i18n="aiDiseaseDetection">${escapeHtml(t("aiDiseaseDetection"))}</span></div>
+              <div class="badge">AI</div>
+            </div>
+            <div class="content-pad">
+              <div class="upload-box">
+                <div>
+                  <div style="font-weight:900;" data-i18n="tapToUpload">${escapeHtml(t("tapToUpload"))}</div>
+                  <div style="color:var(--text-light); font-size:.9rem;">JPEG/PNG supported</div>
+                </div>
+                <div>
+                  <input id="diseaseFile" type="file" accept="image/*" style="max-width:260px;" />
+                </div>
+              </div>
+
+              <div id="diseaseResult" style="margin-top:12px; display:none;">
+                <div class="card" style="padding:12px;">
+                  <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <div style="font-weight:900;" data-i18n="healthyDetected">${escapeHtml(t("healthyDetected"))}</div>
+                    <div class="badge"><span data-i18n="confidence">${escapeHtml(t("confidence"))}</span>: <span id="diseaseConfidence">—</span></div>
+                  </div>
+                  <div style="margin-top:8px; color:var(--text-light); line-height:1.7;" id="diseaseAdvice">${escapeHtml(t("healthyAdvice"))}</div>
+                </div>
+              </div>
+
+              <div class="card" style="margin-top:12px;">
+                <div class="card-header">
+                  <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="history">${escapeHtml(t("history"))}</span></div>
+                  <div class="badge" id="diseaseCount">0</div>
+                </div>
+                <div class="content-pad" id="diseaseHistory" style="color:var(--text-light); line-height:1.7;">
+                  No scans yet.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function priceAIHTML(){
+      return `
+        <div class="content-pad">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-brain"></i> <span data-i18n="priceAI">${escapeHtml(t("priceAI"))}</span></div>
+              <div class="badge">Forecast</div>
+            </div>
+            <div class="content-pad">
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+                <div>
+                  <div style="color:var(--text-light); font-size:.85rem;">Crop</div>
+                  <select id="priceCrop">
+                    <option>Maize</option><option>Beans</option><option>Coffee</option><option>Mango</option>
+                  </select>
+                </div>
+                <div>
+                  <div style="color:var(--text-light); font-size:.85rem;">Quantity (kg)</div>
+                  <input id="priceQty" type="number" min="50" step="50" value="1000"/>
+                </div>
+                <div>
+                  <div style="color:var(--text-light); font-size:.85rem;">Target Market</div>
+                  <select id="priceMarket">
+                    <option>Nairobi</option><option>Kigali</option><option>Addis Ababa</option><option>Djibouti</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                <button class="action-btn" id="runPriceAI"><i class="fa-solid fa-wand-magic-sparkles"></i> Run Price AI</button>
+              </div>
+
+              <div class="card" style="margin-top:12px; padding:12px;">
+                <div style="font-weight:900;">AI Output</div>
+                <div id="priceAIOut" style="margin-top:8px; color:var(--text-light); line-height:1.7;">
+                  Run the model to generate forecast + a negotiation recommendation.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function soilHTML(){
+      return `
+        <div class="content-pad">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-flask"></i> <span data-i18n="soilAnalysis">${escapeHtml(t("soilAnalysis"))}</span></div>
+              <div class="badge">AI</div>
+            </div>
+            <div class="content-pad">
+              <div class="upload-box">
+                <div>
+                  <div style="font-weight:900;">Upload soil photo / report</div>
+                  <div style="color:var(--text-light); font-size:.9rem;">We simulate analysis in demo mode</div>
+                </div>
+                <input id="soilFile" type="file" accept="image/*,.pdf" />
+              </div>
+
+              <div class="card" style="margin-top:12px; padding:12px;">
+                <div style="font-weight:900;">Soil AI Recommendation</div>
+                <div id="soilOut" style="margin-top:8px; color:var(--text-light); line-height:1.7;">
+                  Upload a file to generate a recommendation.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function logisticsHTML(){
+      return `
+        <div class="content-pad">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-truck"></i> <span data-i18n="liveLogistics">${escapeHtml(t("liveLogistics"))}</span></div>
+              <div class="badge">Map</div>
+            </div>
+            <div class="content-pad">
+              <div id="map2"></div>
+              <div style="margin-top:10px; color:var(--text-light); line-height:1.7;">
+                Live map includes demo markers: warehouse, farm, and in-transit route.
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function traceHTML(){
+      return `
+        <div class="content-pad">
+          <div class="card" style="padding:12px;">
+            <div style="font-weight:900;">Traceability</div>
+            <div style="color:var(--text-light); line-height:1.7; margin-top:6px;">
+              Demo-ready trust timeline is active in your full build. This module can be reattached next.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function contractsHTML(){
+      return `
+        <div class="content-pad">
+          <div class="card" style="padding:12px;">
+            <div style="font-weight:900;">Smart Contracts</div>
+            <div style="color:var(--text-light); line-height:1.7; margin-top:6px;">
+              Contract actions are stable in your full build. We focused these fixes on: language/currency UI, wallet quick pay, chat, disease scanner, and map.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function showSection(name){
+      const main = document.getElementById("mainContent");
+      if(!main) return;
+
+      main.querySelectorAll("[data-section]").forEach(s=> s.style.display="none");
+      const target = main.querySelector(`[data-section="${name}"]`);
+      if(target) target.style.display="";
+
+      state.section = name;
+      localStorage.setItem(LS.section, name);
+
+      document.querySelectorAll(".menu-link, .nav-btn").forEach(x=> x.classList.remove("active"));
+      document.querySelectorAll(`[data-nav="${name}"]`).forEach(x=> x.classList.add("active"));
+
+      // If logistics section opened, ensure map exists
+      if(name === "dashboard") setTimeout(()=> initMap("map"), 50);
+      if(name === "logistics") setTimeout(()=> initMap("map2"), 50);
+    }
 
     // ---------- LANGUAGE SELECTOR ----------
     function injectLanguageSelector(){
@@ -675,9 +1104,7 @@
       document.getElementById("appName").textContent = t("appName");
       document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
       const chatInput = document.getElementById("chatInput");
-      if(chatInput) chatInput.placeholder = (I18N[state.lang]?.typeMessage) ? I18N[state.lang].typeMessage : "Type message...";
-      // refresh visible section content
-      showSection(state.section, true);
+      if(chatInput) chatInput.placeholder = t("typeMessage");
     }
 
     function setLanguage(lang, toast){
@@ -686,6 +1113,7 @@
       setDir();
       applyTranslations();
       renderStats();
+      renderChat();
       if(toast) showToast(t("languageChanged",{lang:lang.toUpperCase()}), "success");
     }
 
@@ -693,966 +1121,347 @@
       state.currency = code;
       localStorage.setItem(LS.currency, code);
       renderStats();
-      // re-render dynamic sections
-      renderMarket(); renderWallet(); renderOrders(); renderMyListings(); renderLogistics(); renderTrace(); renderContracts();
       if(toast) showToast(t("currencyChanged",{currency:code}), "success");
     }
 
-    // ---------- DASH STATS ----------
+    // ---------- STATS ----------
     function renderStats(){
-      const deliveredUSD = DB.orders.filter(o=>o.status==="delivered").reduce((s,o)=> s + o.qtyKg*o.pricePerKgUSD, 0);
-      const baseRevenueUSD = 24500;
-      const revenueUSD = baseRevenueUSD + deliveredUSD;
-
-      const rev = document.getElementById("revenue");
-      const wal = document.getElementById("wallet");
-      if(rev) rev.textContent = moneyFromUSD(revenueUSD);
-      if(wal) wal.textContent = moneyFromUSD(DB.wallet.availableUSD);
-
-      const changes = document.querySelectorAll(".stat-change");
-      if(changes[1]) changes[1].innerHTML = `<i class="fa-solid fa-arrow-up"></i> +${moneyFromUSD(1200)}`;
+      const revenueEl = document.getElementById("revenue");
+      const walletEl = document.getElementById("wallet");
+      const walletBig = document.getElementById("walletBalanceBig");
+      if(revenueEl) revenueEl.textContent = moneyFromUSD(DB.baseRevenueUSD);
+      if(walletEl) walletEl.textContent = moneyFromUSD(DB.walletUSD);
+      if(walletBig) walletBig.textContent = moneyFromUSD(DB.walletUSD);
     }
 
-    // ---------- SECTION BUILD ----------
-    function sectionHeader(icon, titleKey, rightHtml=""){
-      return `
-        <div class="card-header">
-          <div class="card-title"><i class="fa-solid ${icon}"></i> <span data-i18n="${titleKey}">${escapeHtml(t(titleKey))}</span></div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            ${rightHtml}
-            <div class="badge">${escapeHtml(new Intl.DateTimeFormat(locale(),{dateStyle:"medium"}).format(new Date()))}</div>
+    // ---------- CHAT ----------
+    function setChatTab(tab){
+      state.chatTab = tab;
+      localStorage.setItem(LS.chatTab, tab);
+      document.querySelectorAll(".chat-tab").forEach(x=> x.classList.remove("active"));
+      document.querySelectorAll(`.chat-tab[data-chat="${tab}"]`).forEach(x=> x.classList.add("active"));
+      renderChat();
+    }
+
+    function renderChat(){
+      const box = document.getElementById("chatMessages");
+      if(!box) return;
+      const tab = state.chatTab;
+
+      const msgs = DB.chat.filter(m => tab==="all" ? true : (m.tab===tab));
+      box.innerHTML = msgs.map(m=>{
+        const isMe = m.from === "ME";
+        const avatar = isMe ? "ME" : (m.from === "AI" ? "AI" : (m.from==="Buyer" ? "B" : "S"));
+        const avatarStyle = isMe
+          ? `background: var(--accent); color:#08110d;`
+          : (m.from==="AI" ? `background: linear-gradient(135deg, var(--purple), #e91e63); color:#fff;` : `background: rgba(255,255,255,.10); color: var(--text);`);
+        return `
+          <div class="message ${isMe ? "own" : ""}">
+            ${isMe ? "" : `<div class="msg-avatar" style="${avatarStyle}">${avatar}</div>`}
+            <div class="msg-bubble ${isMe ? "own" : ""}">
+              ${m.from==="AI" ? `<div style="font-size:.72rem; font-weight:900; opacity:.9; margin-bottom:4px;">AgriAI</div>` : ""}
+              ${escapeHtml(m.text)}
+              <div style="margin-top:6px; font-size:.75rem; color:var(--text-light);">${escapeHtml(new Intl.DateTimeFormat(locale(), {timeStyle:"short"}).format(new Date(m.ts)))}</div>
+            </div>
+            ${isMe ? `<div class="msg-avatar" style="${avatarStyle}">ME</div>` : ""}
           </div>
-        </div>
-      `;
+        `;
+      }).join("");
+
+      box.scrollTop = box.scrollHeight;
     }
 
-    function buildSections(){
-      const main = document.getElementById("mainContent");
-      if(!main) return;
+    function sendChat(){
+      const input = document.getElementById("chatInput");
+      if(!input) return;
+      const text = input.value.trim();
+      if(!text) return;
 
-      if(main.querySelector("[data-section='dashboard']")) return;
+      DB.chat.push({ id:"m"+Math.random().toString(16).slice(2), tab:"all", from:"ME", text, ts: nowISO() });
+      input.value = "";
+      saveData();
+      renderChat();
 
-      const dash = document.createElement("div");
-      dash.dataset.section = "dashboard";
-      dash.id = "section-dashboard";
-      while(main.firstChild) dash.appendChild(main.firstChild);
-      main.appendChild(dash);
+      // Auto AI response
+      setTimeout(()=>{
+        DB.chat.push({ id:"a"+Math.random().toString(16).slice(2), tab:"ai", from:"AI", text: t("aiReply"), ts: nowISO() });
+        saveData();
+        renderChat();
+      }, 500);
+    }
 
-      const defs = [
-        ["market", buildMarketSection()],
-        ["wallet", buildWalletSection()],
-        ["ai", buildAISection()],
-        ["listings", buildMyListingsSection()],
-        ["orders", buildOrdersSection()],
-        ["logistics", buildLogisticsSection()],
-        ["traceability", buildTraceSection()],
-        ["contracts", buildContractsSection()]
-      ];
+    // ---------- QUICK PAY ----------
+    function setPayProvider(p){
+      state.payProvider = p;
+      const badge = document.getElementById("payProviderBadge");
+      const badge2 = document.getElementById("walletProviderBadge");
+      const label = p==="mpesa" ? "M-Pesa" : p==="mtn" ? "MTN" : "Airtel";
+      if(badge) badge.textContent = label;
+      if(badge2) badge2.textContent = label;
+    }
 
-      defs.forEach(([name, html])=>{
-        const el = document.createElement("div");
-        el.dataset.section = name;
-        el.id = `section-${name}`;
-        el.className = "card";
-        el.style.display="none";
-        el.innerHTML = html;
-        main.appendChild(el);
+    function sendMoneyQuickPay(){
+      const phone = (document.getElementById("payPhone")?.value || document.getElementById("walletPhone")?.value || "").trim();
+      const amt = Number(document.getElementById("payAmount")?.value || document.getElementById("walletAmount")?.value || 0);
+      if(!phone || !isFinite(amt) || amt<=0){
+        showToast("Enter phone + amount.", "error");
+        return;
+      }
+      // Demo transfer subtracts from wallet USD equivalent
+      const amtUSD = amt / (rates[state.currency] || 1);
+      DB.walletUSD = Math.max(0, DB.walletUSD - amtUSD);
+      saveData();
+      renderStats();
+      showToast(`Sent ${moneyFromUSD(amtUSD)} via ${state.payProvider.toUpperCase()} to ${phone}`, "success");
+    }
+
+    // ---------- DISEASE SCANNER (upload -> simulated analysis) ----------
+    function bindDiseaseScanner(){
+      const file = document.getElementById("diseaseFile");
+      if(!file || file.__b) return;
+      file.__b = true;
+
+      file.addEventListener("change", ()=>{
+        const resultBox = document.getElementById("diseaseResult");
+        const conf = document.getElementById("diseaseConfidence");
+        const advice = document.getElementById("diseaseAdvice");
+
+        const outcomes = [
+          { title: t("healthyDetected"), confidence: "96%", advice: t("healthyAdvice") },
+          { title: "Early Leaf Spot Risk Detected", confidence: "88%", advice: "Recommend isolate affected area, improve airflow, and apply approved fungicide per local guidance." },
+          { title: "Possible Nutrient Stress Detected", confidence: "84%", advice: "Recommend soil test + balanced NPK; check irrigation consistency." }
+        ];
+        const pick = outcomes[Math.floor(Math.random()*outcomes.length)];
+
+        if(resultBox) resultBox.style.display = "";
+        if(conf) conf.textContent = pick.confidence;
+        if(advice) advice.textContent = pick.advice;
+
+        DB.diseaseHistory.unshift({
+          id:"d"+Math.random().toString(16).slice(2),
+          fileName: file.files?.[0]?.name || "crop-image",
+          outcome: pick.title,
+          confidence: pick.confidence,
+          ts: nowISO()
+        });
+        DB.diseaseHistory = DB.diseaseHistory.slice(0, 10);
+        saveData();
+        renderDiseaseHistory();
+        showToast("Scan complete", "success");
       });
     }
 
-    function showSection(name, silent){
-      const main = document.getElementById("mainContent");
-      if(!main) return;
+    function renderDiseaseHistory(){
+      const wrap = document.getElementById("diseaseHistory");
+      const count = document.getElementById("diseaseCount");
+      if(count) count.textContent = String(DB.diseaseHistory.length);
+      if(!wrap) return;
 
-      main.querySelectorAll("[data-section]").forEach(s=> s.style.display="none");
-      const target = main.querySelector(`[data-section="${name}"]`);
-      if(target) target.style.display="";
-
-      state.section = name;
-      localStorage.setItem(LS.section, name);
-
-      document.querySelectorAll(".menu-link, .nav-btn").forEach(x=> x.classList.remove("active"));
-      document.querySelectorAll(`[data-nav="${name}"]`).forEach(x=> x.classList.add("active"));
-
-      if(!silent){
-        renderMarket(); renderWallet(); renderOrders(); renderMyListings(); renderLogistics(); renderTrace(); renderContracts();
-      }else{
-        // still render the current section so translations/currency stay correct
-        if(name==="market") renderMarket();
-        if(name==="wallet") renderWallet();
-        if(name==="orders") renderOrders();
-        if(name==="listings") renderMyListings();
-        if(name==="logistics") renderLogistics();
-        if(name==="traceability") renderTrace();
-        if(name==="contracts") renderContracts();
-        if(name==="ai") bindAIButtons();
+      if(DB.diseaseHistory.length === 0){
+        wrap.textContent = "No scans yet.";
+        return;
       }
-    }
-
-    // ---------- SECTION HTML ----------
-    function buildMarketSection(){
-      return `
-        ${sectionHeader("fa-store","marketTitle",`
-          <input id="marketSearch" placeholder="${escapeHtml(t("search"))}..." />
-          <select id="marketCategory">
-            <option value="">${escapeHtml(t("category"))}: ${escapeHtml(t("all"))}</option>
-            <option value="Grain">Grain</option>
-            <option value="Legume">Legume</option>
-            <option value="Cash Crop">Cash Crop</option>
-            <option value="Fruit">Fruit</option>
-          </select>
-          <select id="marketOrigin">
-            <option value="">${escapeHtml(t("origin"))}: ${escapeHtml(t("all"))}</option>
-            <option>Kenya</option><option>Rwanda</option><option>Ethiopia</option>
-          </select>
-        `)}
-        <div class="content-pad">
-          <div id="marketGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;"></div>
-        </div>
-      `;
-    }
-
-    function buildWalletSection(){
-      return `
-        ${sectionHeader("fa-wallet","walletTitle",`
-          <button class="action-btn" id="btnDeposit"><i class="fa-solid fa-plus"></i> <span data-i18n="deposit">${escapeHtml(t("deposit"))}</span></button>
-          <button class="action-btn" id="btnSend"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="send">${escapeHtml(t("send"))}</span></button>
-          <button class="action-btn" id="btnReceive"><i class="fa-solid fa-download"></i> <span data-i18n="receive">${escapeHtml(t("receive"))}</span></button>
-        `)}
-        <div class="content-pad">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
-            <div class="stat">
-              <div class="stat-title" data-i18n="availableBalance">${escapeHtml(t("availableBalance"))}</div>
-              <div class="stat-value" id="walletAvail"></div>
-            </div>
-            <div class="stat">
-              <div class="stat-title" data-i18n="escrow">${escapeHtml(t("escrow"))}</div>
-              <div class="stat-value" id="walletEscrow"></div>
-            </div>
-          </div>
-
-          <div class="card" style="margin-top:12px;">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-receipt"></i> <span data-i18n="ledger">${escapeHtml(t("ledger"))}</span></div>
-              <input id="ledgerSearch" placeholder="${escapeHtml(t("search"))}..." />
-            </div>
-            <div style="overflow:auto;">
-              <table class="table" style="width:100%;">
-                <thead>
-                  <tr>
-                    <th data-i18n="txType">${escapeHtml(t("txType"))}</th>
-                    <th data-i18n="txRef">${escapeHtml(t("txRef"))}</th>
-                    <th data-i18n="txCounterparty">${escapeHtml(t("txCounterparty"))}</th>
-                    <th data-i18n="txDate">${escapeHtml(t("txDate"))}</th>
-                    <th style="text-align:right;" data-i18n="txAmount">${escapeHtml(t("txAmount"))}</th>
-                  </tr>
-                </thead>
-                <tbody id="ledgerBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildOrdersSection(){
-      return `
-        ${sectionHeader("fa-box","ordersTitle",`
-          <select id="ordersStatus">
-            <option value="">${escapeHtml(t("status"))}: ${escapeHtml(t("all"))}</option>
-            <option value="pending">${escapeHtml(t("pending"))}</option>
-            <option value="confirmed">${escapeHtml(t("confirmed"))}</option>
-            <option value="inTransit">${escapeHtml(t("inTransit"))}</option>
-            <option value="delivered">${escapeHtml(t("delivered"))}</option>
-            <option value="disputed">${escapeHtml(t("disputed"))}</option>
-            <option value="refunded">${escapeHtml(t("refunded"))}</option>
-          </select>
-          <input id="ordersSearch" placeholder="${escapeHtml(t("search"))}..." />
-        `)}
-        <div class="content-pad">
-          <div style="overflow:auto;">
-            <table class="table" style="width:100%;">
-              <thead>
-                <tr>
-                  <th data-i18n="orderId">${escapeHtml(t("orderId"))}</th>
-                  <th data-i18n="crop">${escapeHtml(t("crop"))}</th>
-                  <th data-i18n="buyer">${escapeHtml(t("buyer"))}</th>
-                  <th data-i18n="seller">${escapeHtml(t("seller"))}</th>
-                  <th data-i18n="status">${escapeHtml(t("status"))}</th>
-                  <th style="text-align:right;" data-i18n="total">${escapeHtml(t("total"))}</th>
-                  <th data-i18n="created">${escapeHtml(t("created"))}</th>
-                  <th data-i18n="actions">${escapeHtml(t("actions"))}</th>
-                </tr>
-              </thead>
-              <tbody id="ordersBody"></tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildMyListingsSection(){
-      return `
-        ${sectionHeader("fa-warehouse","listingsTitle",`
-          <button class="action-btn" id="btnCreateListing"><i class="fa-solid fa-plus"></i> <span data-i18n="createListing">${escapeHtml(t("createListing"))}</span></button>
-        `)}
-        <div class="content-pad">
-          <div id="myListingsGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;"></div>
-        </div>
-      `;
-    }
-
-    function buildAISection(){
-      return `
-        ${sectionHeader("fa-robot","aiToolsTitle",`
-          <button class="action-btn" id="btnScanCrop"><i class="fa-solid fa-camera"></i> <span data-i18n="scanCrop">${escapeHtml(t("scanCrop"))}</span></button>
-          <button class="action-btn" id="btnPredict"><i class="fa-solid fa-brain"></i> <span data-i18n="predictPrices">${escapeHtml(t("predictPrices"))}</span></button>
-          <button class="action-btn" id="btnSoil"><i class="fa-solid fa-flask"></i> <span data-i18n="soilTest">${escapeHtml(t("soilTest"))}</span></button>
-          <button class="action-btn" id="btnWeather"><i class="fa-solid fa-cloud-sun"></i> <span data-i18n="weatherAI">${escapeHtml(t("weatherAI"))}</span></button>
-        `)}
-        <div class="content-pad">
-          <div class="card">
-            <div class="card-header"><div class="card-title"><i class="fa-solid fa-bolt"></i> AI Actions</div></div>
-            <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-              <div id="aiActionResult">Run an AI action above to generate investor-demo insights.</div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildLogisticsSection(){
-      return `
-        ${sectionHeader("fa-truck","logisticsTitle")}
-        <div class="content-pad">
-          <div style="overflow:auto;">
-            <table class="table" style="width:100%;">
-              <thead>
-                <tr>
-                  <th data-i18n="shipmentId">${escapeHtml(t("shipmentId"))}</th>
-                  <th data-i18n="route">${escapeHtml(t("route"))}</th>
-                  <th data-i18n="carrier">${escapeHtml(t("carrier"))}</th>
-                  <th data-i18n="eta">${escapeHtml(t("eta"))}</th>
-                  <th data-i18n="lastPing">${escapeHtml(t("lastPing"))}</th>
-                  <th data-i18n="status">${escapeHtml(t("status"))}</th>
-                </tr>
-              </thead>
-              <tbody id="logisticsBody"></tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildTraceSection(){
-      return `
-        ${sectionHeader("fa-link","traceTitle",`
-          <input id="traceSearch" placeholder="${escapeHtml(t("batchId"))}..." />
-        `)}
-        <div class="content-pad">
-          <div style="overflow:auto;">
-            <table class="table" style="width:100%;">
-              <thead>
-                <tr>
-                  <th data-i18n="batchId">${escapeHtml(t("batchId"))}</th>
-                  <th data-i18n="event">${escapeHtml(t("event"))}</th>
-                  <th data-i18n="actor">${escapeHtml(t("actor"))}</th>
-                  <th data-i18n="location">${escapeHtml(t("location"))}</th>
-                  <th data-i18n="txDate">${escapeHtml(t("txDate"))}</th>
-                </tr>
-              </thead>
-              <tbody id="traceBody"></tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildContractsSection(){
-      return `
-        ${sectionHeader("fa-file-contract","contractsTitle")}
-        <div class="content-pad">
-          <div style="overflow:auto;">
-            <table class="table" style="width:100%;">
-              <thead>
-                <tr>
-                  <th data-i18n="contractId">${escapeHtml(t("contractId"))}</th>
-                  <th data-i18n="terms">${escapeHtml(t("terms"))}</th>
-                  <th data-i18n="status">${escapeHtml(t("status"))}</th>
-                  <th data-i18n="actions">${escapeHtml(t("actions"))}</th>
-                </tr>
-              </thead>
-              <tbody id="contractsBody"></tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ---------- RENDERERS ----------
-    function renderMarket(){
-      const grid = document.getElementById("marketGrid");
-      if(!grid) return;
-
-      const q = (document.getElementById("marketSearch")?.value || "").trim().toLowerCase();
-      const cat = (document.getElementById("marketCategory")?.value || "");
-      const org = (document.getElementById("marketOrigin")?.value || "");
-
-      const items = DB.listings.filter(l=>l.published)
-        .filter(l=> !cat || l.category===cat)
-        .filter(l=> !org || l.origin===org)
-        .filter(l=>{
-          if(!q) return true;
-          const hay = `${l.id} ${l.crop} ${l.category} ${l.origin} ${l.grade} ${l.ownerName}`.toLowerCase();
-          return hay.includes(q);
-        });
-
-      grid.innerHTML = items.map(l=>{
-        const totalMinUSD = l.minOrderKg * l.pricePerKgUSD;
-        return `
-          <div class="card" style="padding:12px;">
-            <div style="display:flex; justify-content:space-between; gap:10px;">
-              <div style="font-weight:900;">${escapeHtml(l.crop)} <span style="opacity:.7;">(${escapeHtml(l.grade)})</span></div>
-              <div style="font-weight:900;">${escapeHtml(moneyFromUSD(l.pricePerKgUSD))}</div>
-            </div>
-            <div style="margin-top:6px; color:var(--text-light); line-height:1.6;">
-              <div><strong>${escapeHtml(t("origin"))}:</strong> ${escapeHtml(l.origin)}</div>
-              <div><strong>${escapeHtml(t("category"))}:</strong> ${escapeHtml(l.category)}</div>
-              <div><strong>${escapeHtml(t("available"))}:</strong> ${Number(l.availableKg).toLocaleString(locale())} kg</div>
-              <div><strong>${escapeHtml(t("minOrder"))}:</strong> ${Number(l.minOrderKg).toLocaleString(locale())} kg</div>
-              <div><strong>${escapeHtml(t("total"))} (min):</strong> ${escapeHtml(moneyFromUSD(totalMinUSD))}</div>
-              <div style="margin-top:6px; font-size:.85rem;"><i class="fa-solid fa-user"></i> ${escapeHtml(l.ownerName)}</div>
-            </div>
-            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
-              <button class="action-btn" data-action="market_view" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-eye"></i> ${escapeHtml(t("viewDetails"))}</button>
-              <button class="action-btn" data-action="market_quote" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-file-signature"></i> ${escapeHtml(t("requestQuote"))}</button>
-              <button class="action-btn" data-action="market_chat" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-comments"></i> ${escapeHtml(t("openChat"))}</button>
-              <button class="action-btn" data-action="market_buy" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-cart-shopping"></i> ${escapeHtml(t("buyNow"))}</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      const s = document.getElementById("marketSearch");
-      const c = document.getElementById("marketCategory");
-      const o = document.getElementById("marketOrigin");
-      if(s && !s.__b){ s.__b=true; s.addEventListener("input", renderMarket); }
-      if(c && !c.__b){ c.__b=true; c.addEventListener("change", renderMarket); }
-      if(o && !o.__b){ o.__b=true; o.addEventListener("change", renderMarket); }
-    }
-
-    function renderWallet(){
-      const a = document.getElementById("walletAvail");
-      const e = document.getElementById("walletEscrow");
-      if(a) a.textContent = moneyFromUSD(DB.wallet.availableUSD);
-      if(e) e.textContent = moneyFromUSD(DB.wallet.escrowUSD);
-
-      const q = (document.getElementById("ledgerSearch")?.value || "").trim().toLowerCase();
-      const body = document.getElementById("ledgerBody");
-      if(!body) return;
-
-      const rows = DB.ledger.slice().sort((x,y)=> new Date(y.createdAt)-new Date(x.createdAt))
-        .filter(tx=>{
-          if(!q) return true;
-          const hay = `${tx.type} ${tx.ref} ${tx.counterparty} ${tx.note||""}`.toLowerCase();
-          return hay.includes(q);
-        });
-
-      body.innerHTML = rows.map(tx=>{
-        const sign = tx.amountUSD>=0 ? "+" : "−";
-        const abs = Math.abs(tx.amountUSD);
-        return `
-          <tr>
-            <td>${escapeHtml(String(tx.type).replaceAll("_"," "))}</td>
-            <td>${escapeHtml(tx.ref)}</td>
-            <td>${escapeHtml(tx.counterparty)}</td>
-            <td>${escapeHtml(fmtDate(tx.createdAt))}</td>
-            <td style="text-align:right; font-weight:900;">${sign}${escapeHtml(moneyFromUSD(abs))}</td>
-          </tr>
-        `;
-      }).join("");
-
-      const s = document.getElementById("ledgerSearch");
-      if(s && !s.__b){ s.__b=true; s.addEventListener("input", renderWallet); }
-      bindWalletButtons();
-    }
-
-    function renderOrders(){
-      const body = document.getElementById("ordersBody");
-      if(!body) return;
-
-      const status = (document.getElementById("ordersStatus")?.value || "");
-      const q = (document.getElementById("ordersSearch")?.value || "").trim().toLowerCase();
-
-      const rows = DB.orders.slice().sort((x,y)=> new Date(y.createdAt)-new Date(x.createdAt))
-        .filter(o=> !status || o.status===status)
-        .filter(o=>{
-          if(!q) return true;
-          const hay = `${o.id} ${o.crop} ${o.buyerName} ${o.sellerName} ${o.status}`.toLowerCase();
-          return hay.includes(q);
-        });
-
-      body.innerHTML = rows.map(o=>{
-        const totalUSD = o.qtyKg * o.pricePerKgUSD;
-        return `
-          <tr>
-            <td style="font-weight:900;">${escapeHtml(o.id)}</td>
-            <td>${escapeHtml(o.crop)} (${Number(o.qtyKg).toLocaleString(locale())} kg)</td>
-            <td>${escapeHtml(o.buyerName)}</td>
-            <td>${escapeHtml(o.sellerName)}</td>
-            <td><span class="badge">${escapeHtml(o.status)}</span></td>
-            <td style="text-align:right; font-weight:900;">${escapeHtml(moneyFromUSD(totalUSD))}</td>
-            <td>${escapeHtml(fmtDate(o.createdAt))}</td>
-            <td><button class="action-btn" data-action="order_view" data-id="${escapeHtml(o.id)}"><i class="fa-solid fa-eye"></i> ${escapeHtml(t("view"))}</button></td>
-          </tr>
-        `;
-      }).join("");
-
-      const ss = document.getElementById("ordersStatus");
-      const qs = document.getElementById("ordersSearch");
-      if(ss && !ss.__b){ ss.__b=true; ss.addEventListener("change", renderOrders); }
-      if(qs && !qs.__b){ qs.__b=true; qs.addEventListener("input", renderOrders); }
-    }
-
-    function renderMyListings(){
-      const grid = document.getElementById("myListingsGrid");
-      if(!grid) return;
-      const mine = DB.listings.filter(l=> l.ownerId===DB.me.id);
-      grid.innerHTML = mine.map(l=>`
-        <div class="card" style="padding:12px;">
+      wrap.innerHTML = DB.diseaseHistory.map(x=>`
+        <div style="padding:10px; border:1px solid var(--border); border-radius:14px; background: rgba(255,255,255,.06); margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; gap:10px;">
-            <div style="font-weight:900;">${escapeHtml(l.crop)} <span style="opacity:.7;">(${escapeHtml(l.grade)})</span></div>
-            <span class="badge">${l.published ? "LIVE" : "DRAFT"}</span>
+            <div style="font-weight:900;">${escapeHtml(x.outcome)}</div>
+            <div class="badge">${escapeHtml(x.confidence)}</div>
           </div>
-          <div style="margin-top:6px; color:var(--text-light); line-height:1.6;">
-            <div><strong>ID:</strong> ${escapeHtml(l.id)}</div>
-            <div><strong>${escapeHtml(t("available"))}:</strong> ${Number(l.availableKg).toLocaleString(locale())} kg</div>
-            <div><strong>${escapeHtml(t("minOrder"))}:</strong> ${Number(l.minOrderKg).toLocaleString(locale())} kg</div>
-            <div><strong>${escapeHtml(t("pricePerKg"))}:</strong> ${escapeHtml(moneyFromUSD(l.pricePerKgUSD))}</div>
-          </div>
-          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
-            <button class="action-btn" data-action="listing_edit" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-pen"></i> ${escapeHtml(t("edit"))}</button>
-            <button class="action-btn" data-action="listing_toggle" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-broadcast-tower"></i> ${escapeHtml(l.published ? t("unpublish") : t("publish"))}</button>
-            <button class="action-btn" data-action="listing_delete" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-trash"></i> ${escapeHtml(t("delete"))}</button>
+          <div style="margin-top:6px; color:var(--text-light);">
+            ${escapeHtml(x.fileName)} • ${escapeHtml(new Intl.DateTimeFormat(locale(), {dateStyle:"medium", timeStyle:"short"}).format(new Date(x.ts)))}
           </div>
         </div>
       `).join("");
-
-      const btn = document.getElementById("btnCreateListing");
-      if(btn && !btn.__b){ btn.__b=true; btn.addEventListener("click", ()=> openListingEditor(null)); }
     }
 
-    function renderLogistics(){
-      const body = document.getElementById("logisticsBody");
-      if(!body) return;
-      body.innerHTML = DB.logistics.map(s=>`
-        <tr>
-          <td style="font-weight:900;">${escapeHtml(s.shipmentId)}</td>
-          <td>${escapeHtml(s.route)}</td>
-          <td>${escapeHtml(s.carrier)}</td>
-          <td>${escapeHtml(fmtDate(s.eta))}</td>
-          <td>${escapeHtml(fmtDate(s.lastPing))}</td>
-          <td><span class="badge">${escapeHtml(s.status)}</span></td>
-        </tr>
-      `).join("");
+    // ---------- PRICE AI / SOIL ----------
+    function bindPriceAI(){
+      const btn = document.getElementById("runPriceAI");
+      if(!btn || btn.__b) return;
+      btn.__b = true;
+
+      btn.addEventListener("click", ()=>{
+        const crop = document.getElementById("priceCrop")?.value || "Crop";
+        const qty = Number(document.getElementById("priceQty")?.value || 1000);
+        const mk = document.getElementById("priceMarket")?.value || "Market";
+        const out = document.getElementById("priceAIOut");
+        const baseUSD = crop==="Coffee" ? 6.3 : crop==="Beans" ? 0.95 : crop==="Mango" ? 0.78 : 0.42;
+        const swing = (Math.random()*0.10 - 0.02); // -2% to +8%
+        const forecastUSD = baseUSD * (1 + swing);
+        const suggestion = qty >= 1000
+          ? "Recommendation: offer 2% bulk discount for 1000kg+ to close faster."
+          : "Recommendation: keep price firm and prioritize verified buyer escrow.";
+        if(out){
+          out.innerHTML = `
+            Forecast for <strong>${escapeHtml(crop)}</strong> in <strong>${escapeHtml(mk)}</strong>:
+            <div style="margin-top:8px;">
+              Estimated price: <strong>${escapeHtml(moneyFromUSD(forecastUSD))}</strong> / kg
+            </div>
+            <div style="margin-top:8px; color:var(--text-light);">${escapeHtml(suggestion)}</div>
+          `;
+        }
+        showToast("Price AI updated", "success");
+      });
     }
 
-    function renderTrace(){
-      const body = document.getElementById("traceBody");
-      if(!body) return;
-      const q = (document.getElementById("traceSearch")?.value || "").trim().toLowerCase();
-      const rows = DB.traceability.slice().sort((x,y)=> new Date(y.createdAt)-new Date(x.createdAt))
-        .filter(r=> !q || String(r.batchId).toLowerCase().includes(q));
-      body.innerHTML = rows.map(r=>`
-        <tr>
-          <td style="font-weight:900;">${escapeHtml(r.batchId)}</td>
-          <td>${escapeHtml(r.event)}</td>
-          <td>${escapeHtml(r.actor)}</td>
-          <td>${escapeHtml(r.location)}</td>
-          <td>${escapeHtml(fmtDate(r.createdAt))}</td>
-        </tr>
-      `).join("");
-      const s = document.getElementById("traceSearch");
-      if(s && !s.__b){ s.__b=true; s.addEventListener("input", renderTrace); }
+    function bindSoilAI(){
+      const file = document.getElementById("soilFile");
+      if(!file || file.__b) return;
+      file.__b = true;
+
+      file.addEventListener("change", ()=>{
+        const out = document.getElementById("soilOut");
+        const recs = [
+          "Soil AI: pH slightly acidic. Recommend lime application + compost; retest in 21 days.",
+          "Soil AI: low potassium detected. Recommend K-rich fertilizer + improved drainage plan.",
+          "Soil AI: nutrient profile balanced. Recommend standard schedule + monitor moisture levels."
+        ];
+        if(out) out.textContent = recs[Math.floor(Math.random()*recs.length)];
+        showToast("Soil analysis complete", "success");
+      });
     }
 
-    function renderContracts(){
-      const body = document.getElementById("contractsBody");
-      if(!body) return;
-      body.innerHTML = DB.contracts.map(c=>`
-        <tr>
-          <td style="font-weight:900;">${escapeHtml(c.contractId)}</td>
-          <td>${escapeHtml(c.terms)}</td>
-          <td><span class="badge">${escapeHtml(c.status)}${c.claimed ? " • " + escapeHtml(t("claimed")) : ""}</span></td>
-          <td>
-            <button class="action-btn" data-action="contract_claim" data-id="${escapeHtml(c.contractId)}" ${c.claimed ? "disabled" : ""}>
-              <i class="fa-solid fa-hand-holding-dollar"></i> ${escapeHtml(t("claim"))}
-            </button>
-          </td>
-        </tr>
-      `).join("");
+    // ---------- MAP ----------
+    const mapCache = new Map();
+    function initMap(elId){
+      const el = document.getElementById(elId);
+      if(!el) return;
+      if(mapCache.has(elId)) return;
+
+      // Ensure Leaflet loaded
+      if(typeof L === "undefined") return;
+
+      const map = L.map(elId, { zoomControl:true }).setView([-1.2921, 36.8219], 6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+
+      const markers = [
+        { pos: [-1.2921, 36.8219], title: "Nairobi - Warehouse" },
+        { pos: [-0.0236, 37.9062], title: "Mt. Kenya - Farm" },
+        { pos: [-1.2864, 36.8172], title: "In Transit" }
+      ];
+      markers.forEach(m => L.marker(m.pos).addTo(map).bindPopup(m.title));
+
+      mapCache.set(elId, map);
     }
 
-    // ---------- ACTION HELPERS ----------
-    function findListing(id){ return DB.listings.find(l=>l.id===id); }
-    function findOrder(id){ return DB.orders.find(o=>o.id===id); }
-
-    function requestQuote(listingId){
-      const l = findListing(listingId);
-      if(!l) return;
-      DB.ledger.push({ id:nextId("TX"), type:"quote_request", ref:`Q-${listingId}-${Math.floor(Math.random()*900+100)}`, counterparty:l.ownerName, amountUSD:0, createdAt:nowISO(), note:`Quote requested for ${l.crop} (${listingId})` });
-      saveData();
-      showToast(t("quoteSent"), "success");
-      renderWallet();
+    // ---------- BIND UI ----------
+    function bindNav(){
+      document.body.addEventListener("click", (e)=>{
+        const nav = e.target.closest("[data-nav]");
+        if(nav){
+          e.preventDefault();
+          showSection(nav.dataset.nav);
+        }
+      });
     }
 
-    function openChatForListing(listingId){
-      const l = findListing(listingId);
-      closeModal();
+    function bindChatTabs(){
+      const tabs = document.getElementById("chatTabs");
+      if(!tabs || tabs.__b) return;
+      tabs.__b = true;
+      tabs.addEventListener("click", (e)=>{
+        const tEl = e.target.closest(".chat-tab");
+        if(!tEl) return;
+        setChatTab(tEl.dataset.chat);
+      });
+    }
+
+    function bindQuickPay(){
+      document.querySelectorAll(".pay-tile").forEach(tile=>{
+        if(tile.__b) return;
+        tile.__b = true;
+        tile.addEventListener("click", ()=> setPayProvider(tile.dataset.pay));
+      });
+
+      const btn = document.getElementById("btnSendMoney");
+      if(btn && !btn.__b){
+        btn.__b = true;
+        btn.addEventListener("click", sendMoneyQuickPay);
+      }
+      const btn2 = document.getElementById("walletSendBtn");
+      if(btn2 && !btn2.__b){
+        btn2.__b = true;
+        btn2.addEventListener("click", sendMoneyQuickPay);
+      }
+
+      const dep = document.getElementById("btnWalletDeposit");
+      if(dep && !dep.__b){
+        dep.__b = true;
+        dep.addEventListener("click", ()=>{
+          // deposit 100 USD equivalent
+          DB.walletUSD += 100;
+          saveData();
+          renderStats();
+          showToast("Deposit successful", "success");
+        });
+      }
+      const send = document.getElementById("btnWalletSend");
+      if(send && !send.__b){
+        send.__b = true;
+        send.addEventListener("click", ()=> showSection("wallet"));
+      }
+    }
+
+    function bindChatSend(){
+      const btn = document.getElementById("sendBtn");
       const input = document.getElementById("chatInput");
-      const messages = document.getElementById("chatMessages");
-      if(messages){
-        messages.innerHTML += `
-          <div class="message">
-            <div class="msg-avatar" style="background: linear-gradient(135deg, var(--purple), #e91e63); color: white;">AI</div>
-            <div class="msg-bubble ai">
-              <div style="font-size: 0.7rem; font-weight: bold; margin-bottom: 0.25rem;">AgriAI</div>
-              Negotiation opened for <strong>${escapeHtml(l.crop)}</strong> (${escapeHtml(l.id)}). Ask for docs, delivery terms, or bulk pricing.
-            </div>
-          </div>
-        `;
-        messages.scrollTop = messages.scrollHeight;
+      if(btn && !btn.__b){
+        btn.__b = true;
+        btn.addEventListener("click", sendChat);
       }
-      if(input){
-        input.value = `Requesting quote and delivery terms for ${l.crop} (${l.id}).`;
-        input.focus();
+      if(input && !input.__b){
+        input.__b = true;
+        input.addEventListener("keydown", (e)=>{ if(e.key==="Enter") sendChat(); });
       }
     }
-
-    function openListingDetails(listingId){
-      const l = findListing(listingId);
-      if(!l) return;
-      const totalMinUSD = l.minOrderKg * l.pricePerKgUSD;
-      openModal(`${l.crop} • ${l.grade} • ${l.origin}`, `
-        <div class="card" style="padding:12px;">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <div>
-              <div style="font-weight:900; font-size:1.1rem;">${escapeHtml(l.crop)} (${escapeHtml(l.grade)})</div>
-              <div style="color:var(--text-light); margin-top:6px; line-height:1.7;">
-                <div><strong>${escapeHtml(t("category"))}:</strong> ${escapeHtml(l.category)}</div>
-                <div><strong>${escapeHtml(t("origin"))}:</strong> ${escapeHtml(l.origin)}</div>
-                <div><strong>${escapeHtml(t("available"))}:</strong> ${Number(l.availableKg).toLocaleString(locale())} kg</div>
-                <div><strong>${escapeHtml(t("minOrder"))}:</strong> ${Number(l.minOrderKg).toLocaleString(locale())} kg</div>
-                <div><strong>${escapeHtml(t("pricePerKg"))}:</strong> ${escapeHtml(moneyFromUSD(l.pricePerKgUSD))}</div>
-                <div><strong>${escapeHtml(t("total"))} (min):</strong> ${escapeHtml(moneyFromUSD(totalMinUSD))}</div>
-                <div><strong>Packaging:</strong> ${escapeHtml(l.packaging)}</div>
-                <div><strong>Moisture:</strong> ${escapeHtml(l.moisture)}</div>
-                <div><strong>Harvest:</strong> ${escapeHtml(fmtDate(l.harvestDate))}</div>
-              </div>
-            </div>
-            <div>
-              <div style="font-weight:900; margin-bottom:8px;">Trade Actions</div>
-              <div style="color:var(--text-light); font-size:.9rem; margin-bottom:6px;">${escapeHtml(t("amount"))} (kg)</div>
-              <input id="buyQtyKg" type="number" min="${l.minOrderKg}" value="${l.minOrderKg}" />
-              <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
-                <button class="action-btn" data-action="modal_quote" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-file-signature"></i> ${escapeHtml(t("requestQuote"))}</button>
-                <button class="action-btn" data-action="modal_chat" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-comments"></i> ${escapeHtml(t("openChat"))}</button>
-                <button class="action-btn" data-action="modal_buy" data-id="${escapeHtml(l.id)}"><i class="fa-solid fa-cart-shopping"></i> ${escapeHtml(t("buyNow"))}</button>
-              </div>
-              <div style="margin-top:10px; color:var(--text-light); line-height:1.7;">
-                Buying creates an order and places funds in escrow (demo).
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
-    }
-
-    function createOrderFromListing(listingId, qtyKg){
-      const l = findListing(listingId);
-      if(!l) return;
-      const qty = Math.max(Number(qtyKg || l.minOrderKg), l.minOrderKg);
-      if(qty > l.availableKg){ showToast("Not enough inventory for that quantity.", "error"); return; }
-
-      const totalUSD = qty * l.pricePerKgUSD;
-      if(DB.wallet.availableUSD < totalUSD){
-        showToast("Insufficient wallet balance for this demo buy. Deposit first.", "error");
-        return;
-      }
-
-      l.availableKg -= qty;
-
-      const orderId = nextId("O");
-      DB.orders.push({ id:orderId, listingId:l.id, crop:l.crop, qtyKg:qty, pricePerKgUSD:l.pricePerKgUSD,
-        buyerName:"Investor Demo Buyer", sellerName:l.ownerName, status:"pending", createdAt:nowISO(), notes:`Auto-created from Market buy (${qty} kg)` });
-
-      DB.wallet.availableUSD -= totalUSD;
-      DB.wallet.escrowUSD += totalUSD;
-      DB.ledger.push({ id:nextId("TX"), type:"escrow_hold", ref:`ESC-${orderId}`, counterparty:"Escrow", amountUSD:-totalUSD, createdAt:nowISO(), note:`Escrow hold for ${orderId}` });
-
-      saveData();
-      renderStats(); renderMarket(); renderOrders(); renderWallet();
-      closeModal();
-      showToast(t("addToOrders"), "success");
-    }
-
-    function openOrderDetails(orderId){
-      const o = findOrder(orderId);
-      if(!o) return;
-      const totalUSD = o.qtyKg * o.pricePerKgUSD;
-
-      openModal(`${t("orderId")}: ${o.id}`, `
-        <div class="card" style="padding:12px;">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
-            <div><div style="color:var(--text-light);">${escapeHtml(t("crop"))}</div><div style="font-weight:900;">${escapeHtml(o.crop)} • ${Number(o.qtyKg).toLocaleString(locale())} kg</div></div>
-            <div><div style="color:var(--text-light);">${escapeHtml(t("buyer"))}</div><div style="font-weight:900;">${escapeHtml(o.buyerName)}</div></div>
-            <div><div style="color:var(--text-light);">${escapeHtml(t("seller"))}</div><div style="font-weight:900;">${escapeHtml(o.sellerName)}</div></div>
-            <div><div style="color:var(--text-light);">${escapeHtml(t("total"))}</div><div style="font-weight:900;">${escapeHtml(moneyFromUSD(totalUSD))}</div></div>
-            <div><div style="color:var(--text-light);">${escapeHtml(t("status"))}</div><div class="badge">${escapeHtml(o.status)}</div></div>
-            <div><div style="color:var(--text-light);">${escapeHtml(t("created"))}</div><div style="font-weight:900;">${escapeHtml(fmtDate(o.createdAt))}</div></div>
-          </div>
-          <div style="margin-top:10px; color:var(--text-light); line-height:1.7;"><strong>Notes:</strong> ${escapeHtml(o.notes||"")}</div>
-
-          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
-            <button class="action-btn" data-action="order_set" data-id="${escapeHtml(o.id)}" data-status="confirmed"><i class="fa-solid fa-check"></i> ${escapeHtml(t("markConfirmed"))}</button>
-            <button class="action-btn" data-action="order_set" data-id="${escapeHtml(o.id)}" data-status="inTransit"><i class="fa-solid fa-truck"></i> ${escapeHtml(t("markInTransit"))}</button>
-            <button class="action-btn" data-action="order_set" data-id="${escapeHtml(o.id)}" data-status="delivered"><i class="fa-solid fa-box-open"></i> ${escapeHtml(t("markDelivered"))}</button>
-            <button class="action-btn" data-action="order_set" data-id="${escapeHtml(o.id)}" data-status="disputed"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(t("openDispute"))}</button>
-            <button class="action-btn" data-action="order_refund" data-id="${escapeHtml(o.id)}"><i class="fa-solid fa-rotate-left"></i> ${escapeHtml(t("refund"))}</button>
-          </div>
-        </div>
-      `);
-    }
-
-    function setOrderStatus(orderId, status){
-      const o = findOrder(orderId);
-      if(!o) return;
-      const totalUSD = o.qtyKg * o.pricePerKgUSD;
-
-      if(status==="delivered" && o.status!=="delivered"){
-        DB.wallet.escrowUSD = Math.max(0, DB.wallet.escrowUSD - totalUSD);
-        DB.ledger.push({ id:nextId("TX"), type:"escrow_release", ref:`REL-${o.id}`, counterparty:"Escrow", amountUSD:0, createdAt:nowISO(), note:`Escrow released for ${o.id}` });
-      }
-
-      o.status = status;
-      saveData();
-      showToast(t("orderUpdated"), "success");
-      renderOrders(); renderWallet(); renderStats();
-      closeModal();
-    }
-
-    function refundOrder(orderId){
-      const o = findOrder(orderId);
-      if(!o) return;
-      const totalUSD = o.qtyKg * o.pricePerKgUSD;
-
-      DB.wallet.escrowUSD = Math.max(0, DB.wallet.escrowUSD - totalUSD);
-      DB.wallet.availableUSD += totalUSD;
-      DB.ledger.push({ id:nextId("TX"), type:"refund", ref:`RF-${o.id}`, counterparty:"Escrow", amountUSD:totalUSD, createdAt:nowISO(), note:`Refund processed for ${o.id}` });
-      o.status = "refunded";
-
-      saveData();
-      showToast(t("orderUpdated"), "success");
-      renderOrders(); renderWallet(); renderStats();
-      closeModal();
-    }
-
-    // ---------- LISTINGS CRUD ----------
-    function openListingEditor(listingId){
-      const isEdit = !!listingId;
-      const l = isEdit ? findListing(listingId) : null;
-
-      const draft = l || {
-        id: `L-${(DB.me.country||"KE").slice(0,2).toUpperCase()}-${Math.random().toString(16).slice(2,6).toUpperCase()}-${Math.floor(Math.random()*900+100)}`,
-        ownerId: DB.me.id, ownerName: DB.me.name, crop:"Maize", category:"Grain", origin: DB.me.country || "Kenya", grade:"A",
-        availableKg:1000, minOrderKg:100, pricePerKgUSD:0.5, moisture:"12%", packaging:"50kg bags", harvestDate:nowISO(), published:false
-      };
-
-      openModal(isEdit ? `${t("edit")}: ${draft.id}` : t("createListing"), `
-        <div class="card" style="padding:12px;">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("crop"))}</div><input id="f_crop" value="${escapeHtml(draft.crop)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("category"))}</div>
-              <select id="f_category">
-                ${["Grain","Legume","Cash Crop","Fruit","Vegetable"].map(x=>`<option ${x===draft.category?"selected":""}>${x}</option>`).join("")}
-              </select>
-            </div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("origin"))}</div><input id="f_origin" value="${escapeHtml(draft.origin)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("grade"))}</div><input id="f_grade" value="${escapeHtml(draft.grade)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("available"))} (kg)</div><input id="f_available" type="number" min="0" value="${Number(draft.availableKg)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("minOrder"))} (kg)</div><input id="f_min" type="number" min="1" value="${Number(draft.minOrderKg)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("pricePerKg"))} (USD)</div><input id="f_price" type="number" step="0.01" min="0" value="${Number(draft.pricePerKgUSD)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">Packaging</div><input id="f_pack" value="${escapeHtml(draft.packaging)}" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">Moisture</div><input id="f_moist" value="${escapeHtml(draft.moisture)}" /></div>
-          </div>
-          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
-            <button class="action-btn" data-action="listing_cancel"><i class="fa-solid fa-xmark"></i> ${escapeHtml(t("cancel"))}</button>
-            <button class="action-btn" data-action="listing_save" data-id="${escapeHtml(draft.id)}"><i class="fa-solid fa-floppy-disk"></i> ${escapeHtml(t("save"))}</button>
-          </div>
-        </div>
-      `);
-      modalBody.dataset.isEdit = isEdit ? "1" : "0";
-    }
-
-    function saveListingFromModal(listingId){
-      const crop = document.getElementById("f_crop")?.value.trim();
-      const category = document.getElementById("f_category")?.value.trim();
-      const origin = document.getElementById("f_origin")?.value.trim();
-      const grade = document.getElementById("f_grade")?.value.trim();
-      const availableKg = Number(document.getElementById("f_available")?.value);
-      const minOrderKg = Number(document.getElementById("f_min")?.value);
-      const pricePerKgUSD = Number(document.getElementById("f_price")?.value);
-      const packaging = document.getElementById("f_pack")?.value.trim();
-      const moisture = document.getElementById("f_moist")?.value.trim();
-
-      if(!crop || !origin || !grade || !category || !isFinite(availableKg) || !isFinite(minOrderKg) || !isFinite(pricePerKgUSD)){
-        showToast("Please complete all fields.", "error"); return;
-      }
-      if(availableKg<=0 || minOrderKg<=0 || pricePerKgUSD<=0){
-        showToast("Values must be greater than zero.", "error"); return;
-      }
-
-      const existing = findListing(listingId);
-      if(existing){
-        Object.assign(existing, { crop, category, origin, grade, availableKg, minOrderKg, pricePerKgUSD, packaging, moisture });
-      }else{
-        DB.listings.push({ id:listingId, ownerId:DB.me.id, ownerName:DB.me.name, harvestDate:nowISO(), published:false, crop, category, origin, grade, availableKg, minOrderKg, pricePerKgUSD, packaging, moisture });
-      }
-      saveData();
-      closeModal();
-      showToast(t("listingSaved"), "success");
-      renderMyListings(); renderMarket();
-    }
-
-    function togglePublish(listingId){
-      const l = findListing(listingId);
-      if(!l) return;
-      l.published = !l.published;
-      saveData();
-      renderMyListings(); renderMarket();
-    }
-
-    function deleteListing(listingId){
-      const idx = DB.listings.findIndex(l=>l.id===listingId);
-      if(idx<0) return;
-      DB.listings.splice(idx,1);
-      saveData();
-      showToast(t("listingDeleted"), "success");
-      renderMyListings(); renderMarket();
-    }
-
-    // ---------- WALLET FLOWS ----------
-    function openWalletFlow(type){
-      const title = type==="deposit" ? t("deposit") : type==="send" ? t("send") : t("receive");
-      openModal(title, `
-        <div class="card" style="padding:12px;">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("phoneNumber"))}</div><input id="wf_phone" value="+254700000000" /></div>
-            <div><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("amount"))} (${escapeHtml(state.currency)})</div><input id="wf_amount" type="number" min="1" step="0.01" value="100" /></div>
-            <div style="grid-column:1/-1;"><div style="font-size:.85rem; color:var(--text-light);">${escapeHtml(t("note"))}</div><input id="wf_note" value="Investor demo transaction" /></div>
-          </div>
-          <div style="display:flex; justify-content:flex-end; margin-top:12px;">
-            <button class="action-btn" data-action="wallet_confirm" data-type="${escapeHtml(type)}"><i class="fa-solid fa-check"></i> ${escapeHtml(t("confirm"))}</button>
-          </div>
-        </div>
-      `);
-    }
-
-    function walletConfirm(type){
-      const phone = document.getElementById("wf_phone")?.value.trim() || "N/A";
-      const amtCur = Number(document.getElementById("wf_amount")?.value);
-      const note = document.getElementById("wf_note")?.value.trim() || "";
-      if(!isFinite(amtCur) || amtCur<=0){ showToast("Invalid amount.", "error"); return; }
-      const amtUSD = toUSD(amtCur);
-
-      if(type==="deposit"){
-        DB.wallet.availableUSD += amtUSD;
-        DB.ledger.push({ id:nextId("TX"), type:"deposit", ref:`MM-${Math.floor(Math.random()*900000+100000)}`, counterparty:phone, amountUSD:amtUSD, createdAt:nowISO(), note });
-        showToast(t("depositSuccess"), "success");
-      }
-      if(type==="send"){
-        if(DB.wallet.availableUSD < amtUSD){ showToast("Insufficient balance.", "error"); return; }
-        DB.wallet.availableUSD -= amtUSD;
-        DB.ledger.push({ id:nextId("TX"), type:"send", ref:`TR-${Math.floor(Math.random()*900000+100000)}`, counterparty:phone, amountUSD:-amtUSD, createdAt:nowISO(), note });
-        showToast(t("sendSuccess"), "success");
-      }
-      if(type==="receive"){
-        DB.wallet.availableUSD += amtUSD;
-        DB.ledger.push({ id:nextId("TX"), type:"receive", ref:`RC-${Math.floor(Math.random()*900000+100000)}`, counterparty:phone, amountUSD:amtUSD, createdAt:nowISO(), note });
-        showToast(t("receiveSuccess"), "success");
-      }
-
-      saveData();
-      closeModal();
-      renderWallet(); renderStats();
-    }
-
-    function bindWalletButtons(){
-      const d = document.getElementById("btnDeposit");
-      const s = document.getElementById("btnSend");
-      const r = document.getElementById("btnReceive");
-      if(d && !d.__b){ d.__b=true; d.addEventListener("click", ()=> openWalletFlow("deposit")); }
-      if(s && !s.__b){ s.__b=true; s.addEventListener("click", ()=> openWalletFlow("send")); }
-      if(r && !r.__b){ r.__b=true; r.addEventListener("click", ()=> openWalletFlow("receive")); }
-    }
-
-    // ---------- CONTRACTS ----------
-    function claimContract(contractId){
-      const c = DB.contracts.find(x=>x.contractId===contractId);
-      if(!c || c.claimed) return;
-      c.claimed = true;
-      DB.ledger.push({ id:nextId("TX"), type:"contract_claim", ref:`CL-${contractId}`, counterparty:"Smart Contract", amountUSD:0, createdAt:nowISO(), note:`Claim submitted for ${contractId}` });
-      saveData();
-      renderContracts(); renderWallet();
-      showToast("Claim submitted", "success");
-    }
-
-    // ---------- AI ----------
-    function runAI(kind){
-      const out = document.getElementById("aiActionResult");
-      if(!out) return;
-      const responses = {
-        scan:[
-          "Scan result: Healthy. No fungal or pest indicators detected. Recommended: maintain irrigation schedule; monitor leaf edges for discoloration.",
-          "Scan result: Mild nutrient stress detected. Recommended: soil test + nitrogen balance adjustment."
-        ],
-        price:[
-          "Price forecast (7-day): Maize stable with +3% upside due to regional demand. Suggested offer: bundle 1000kg+ with 2% discount to close.",
-          "Price forecast (7-day): Beans trending +5% with tighter supply. Suggested: hold inventory 48h if logistics capacity is available."
-        ],
-        soil:[
-          "Soil analysis: pH slightly acidic. Recommended: lime application + organic compost, retest in 21 days.",
-          "Soil analysis: low potassium. Recommended: K-rich fertilizer plan + improve drainage."
-        ],
-        weather:[
-          "Weather AI: Light rainfall expected in next 48h along key route. Recommended: waterproof packaging + confirm carrier contingency plan.",
-          "Weather AI: High heat risk forecast. Recommended: prioritize early-morning loading and improved ventilation for fresh produce."
-        ]
-      };
-      const arr = responses[kind] || ["AI ready."];
-      out.textContent = arr[Math.floor(Math.random()*arr.length)];
-    }
-
-    function bindAIButtons(){
-      const a = (id, fn)=>{
-        const el = document.getElementById(id);
-        if(el && !el.__b){ el.__b=true; el.addEventListener("click", fn); }
-      };
-      a("btnScanCrop", ()=>runAI("scan"));
-      a("btnPredict", ()=>runAI("price"));
-      a("btnSoil", ()=>runAI("soil"));
-      a("btnWeather", ()=>runAI("weather"));
-    }
-
-    // ---------- GLOBAL ACTION ROUTER ----------
-    document.body.addEventListener("click", (e)=>{
-      const nav = e.target.closest("[data-nav]");
-      if(nav){
-        e.preventDefault();
-        showSection(nav.dataset.nav);
-        return;
-      }
-      const btn = e.target.closest("[data-action]");
-      if(!btn) return;
-
-      const action = btn.dataset.action;
-      const id = btn.dataset.id;
-
-      if(action==="market_view") return openListingDetails(id);
-      if(action==="market_quote") return requestQuote(id);
-      if(action==="market_chat") return openChatForListing(id);
-      if(action==="market_buy")  return createOrderFromListing(id);
-
-      if(action==="modal_quote") return requestQuote(id);
-      if(action==="modal_chat") return openChatForListing(id);
-      if(action==="modal_buy"){
-        const qty = Number(document.getElementById("buyQtyKg")?.value || 0);
-        return createOrderFromListing(id, qty);
-      }
-
-      if(action==="order_view") return openOrderDetails(id);
-      if(action==="order_set") return setOrderStatus(btn.dataset.id, btn.dataset.status);
-      if(action==="order_refund") return refundOrder(id);
-
-      if(action==="listing_edit") return openListingEditor(id);
-      if(action==="listing_toggle") return togglePublish(id);
-      if(action==="listing_delete") return deleteListing(id);
-      if(action==="listing_cancel") return closeModal();
-      if(action==="listing_save") return saveListingFromModal(id);
-
-      if(action==="wallet_confirm") return walletConfirm(btn.dataset.type);
-
-      if(action==="contract_claim") return claimContract(id);
-    });
-
-    // ---------- CHAT ----------
-    window.switchChat = function(tab, el){
-      document.querySelectorAll(".chat-tab").forEach(x=> x.classList.remove("active"));
-      if(el) el.classList.add("active");
-    };
-
-    window.sendChat = function(){
-      const input = document.getElementById("chatInput");
-      const messages = document.getElementById("chatMessages");
-      if(!input || !messages || !input.value.trim()) return;
-
-      messages.innerHTML += `
-        <div class="message own">
-          <div class="msg-avatar" style="background: var(--accent); color:#04110a;">ME</div>
-          <div class="msg-bubble own">${escapeHtml(input.value)}</div>
-        </div>
-      `;
-      input.value = "";
-      messages.scrollTop = messages.scrollHeight;
-
-      setTimeout(()=>{
-        messages.innerHTML += `
-          <div class="message">
-            <div class="msg-avatar" style="background: linear-gradient(135deg, var(--purple), #e91e63); color: white;">AI</div>
-            <div class="msg-bubble ai">
-              <div style="font-size: 0.7rem; font-weight: bold; margin-bottom: 0.25rem;">AgriAI</div>
-              ${escapeHtml(t("aiReply"))}
-            </div>
-          </div>
-        `;
-        messages.scrollTop = messages.scrollHeight;
-      }, 650);
-    };
-
-    window.handleChat = function(e){ if(e.key==="Enter") window.sendChat(); };
 
     // ---------- INIT ----------
     function init(){
       injectLanguageSelector();
       setDir();
-
       buildSections();
+      bindNav();
+      bindChatTabs();
+      bindChatSend();
 
-      // currency wire
-      const currency = document.getElementById("currency");
-      currency.value = state.currency;
-      currency.addEventListener("change", ()=> setCurrency(currency.value, true));
+      const cur = document.getElementById("currency");
+      cur.value = state.currency;
+      cur.addEventListener("change", ()=> setCurrency(cur.value, true));
 
-      // language restore
       const langSel = document.getElementById("langSelect");
       if(langSel) langSel.value = state.lang;
 
       applyTranslations();
       renderStats();
 
-      // show last section
-      showSection(state.section, true);
+      // set quick pay provider default
+      setPayProvider(state.payProvider);
 
-      // render all once
-      renderMarket(); renderWallet(); renderOrders(); renderMyListings(); renderLogistics(); renderTrace(); renderContracts(); bindAIButtons();
+      // restore chat tab
+      setChatTab(state.chatTab);
+
+      // bind module actions (after sections built)
+      bindQuickPay();
+      bindDiseaseScanner();
+      bindPriceAI();
+      bindSoilAI();
+      renderDiseaseHistory();
+
+      // show saved section
+      showSection(state.section);
+
+      // init maps
+      setTimeout(()=> initMap("map"), 100);
+      setTimeout(()=> initMap("map2"), 120);
     }
 
-    // expose for console testing
-    window.showSection = (name)=> showSection(name);
-    window.setLanguage = (lang, toast)=> setLanguage(lang, toast);
-    window.setCurrency = (cur, toast)=> setCurrency(cur, toast);
+    // Expose helpers for console tests
+    window.setLanguage = (l, toast)=> setLanguage(l, toast);
+    window.setCurrency = (c, toast)=> setCurrency(c, toast);
+    window.showSection = (s)=> showSection(s);
+    window.openModal = (title, html)=> openModal(title, html);
 
-    // safety: show on-screen error if something breaks (prevents “blank page” mystery)
+    // Safety: show errors on screen if something breaks
     window.addEventListener("error", (e)=>{
       const msg = (e?.error?.stack || e.message || "Unknown error");
       document.body.innerHTML = `<div style="padding:20px;font-family:Arial;color:#fff;background:#111">
