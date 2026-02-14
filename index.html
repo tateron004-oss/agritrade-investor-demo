@@ -5,22 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AgriTrade Africa — Investor Demo</title>
 
-  <!-- Font Awesome (no SRI) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer"/>
-
-  <!-- Leaflet (no SRI) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <style>
     :root{
-      --bg:#f6fff8;
-      --bg2:#ecfdf3;
+      --bg:#f6fff8; --bg2:#ecfdf3;
       --card: rgba(255,255,255,.92);
-      --text:#0b1220;
-      --text-light: rgba(11,18,32,.68);
-      --accent:#16a34a;
-      --accent2:#22c55e;
+      --text:#0b1220; --text-light: rgba(11,18,32,.68);
+      --accent:#16a34a; --accent2:#22c55e;
       --border: rgba(11,18,32,.12);
       --shadow: 0 18px 40px rgba(11,18,32,.10);
       --radius:14px;
@@ -28,7 +22,7 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:var(--text);
       background:
         radial-gradient(900px 500px at 10% 10%, rgba(34,197,94,.18), transparent 55%),
@@ -36,41 +30,8 @@
         linear-gradient(180deg, var(--bg), var(--bg2));
       min-height:100vh;
     }
-    a{color:inherit; text-decoration:none}
-
-    /* BIG visible "JS status" */
-    .status-pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.95);
-      box-shadow: 0 8px 22px rgba(11,18,32,.06);
-      font-size:.85rem;
-      user-select:none;
-    }
-    .dot{width:10px; height:10px; border-radius:99px; background:#9ca3af}
-    .dot.on{background: var(--accent)}
-    .dot.off{background: #ef4444}
-
-    .debugbar{
-      display:none;
-      position:fixed;
-      top:10px; left:10px; right:10px;
-      z-index:99999;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(220,38,38,.25);
-      background: rgba(255,255,255,.96);
-      box-shadow: var(--shadow);
-      color:#111;
-      font-size:.9rem;
-      line-height:1.4;
-      white-space:pre-wrap;
-    }
-
     .navbar{
-      position:sticky; top:0; z-index:20;
+      position:sticky; top:0; z-index:50;
       display:flex; align-items:center; justify-content:space-between;
       padding:12px 16px;
       border-bottom:1px solid var(--border);
@@ -78,30 +39,25 @@
       backdrop-filter: blur(12px);
     }
     .brand{display:flex; align-items:center; gap:10px; font-weight:900;}
-    .brand .logo{
+    .logo{
       width:34px; height:34px; border-radius:10px;
-      overflow:hidden;
       display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:white;
       box-shadow: 0 10px 22px rgba(11,18,32,.12);
+      font-weight:900;
     }
-
     .nav-center{display:flex; gap:10px; align-items:center;}
-    .nav-btn{
+    .btn{
       border:1px solid var(--border);
       background: rgba(255,255,255,.92);
-      color:var(--text);
-      padding:9px 12px;
-      border-radius:12px;
+      padding:9px 12px; border-radius:12px;
       cursor:pointer;
       display:flex; gap:8px; align-items:center;
-      transition: transform .08s ease, background .15s ease;
-      user-select:none;
       box-shadow: 0 6px 18px rgba(11,18,32,.06);
+      user-select:none;
     }
-    .nav-btn:hover{background: rgba(255,255,255,.98)}
-    .nav-btn:active{transform: translateY(1px)}
-    .nav-btn.active{outline:2px solid rgba(22,163,74,.18); border-color: rgba(22,163,74,.30)}
-
+    .btn.active{outline:2px solid rgba(22,163,74,.18); border-color: rgba(22,163,74,.30)}
     .nav-right{display:flex; gap:10px; align-items:center;}
 
     select, input{
@@ -111,29 +67,24 @@
       padding:9px 10px;
       border-radius:12px;
       outline:none;
-      appearance:none;
-      -webkit-appearance:none;
       box-shadow: 0 6px 18px rgba(11,18,32,.06);
     }
-    option{background:#fff; color:var(--text)}
 
     .layout{
       display:grid;
-      grid-template-columns: 260px 1fr 360px;
+      grid-template-columns: 260px 1fr;
       gap:14px;
       padding:14px;
-      max-width: 1550px;
+      max-width: 1350px;
       margin: 0 auto;
     }
-
     .panel{
       border:1px solid var(--border);
       background: rgba(255,255,255,.78);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
-
-    .sidebar-left{padding:12px}
+    .sidebar{padding:12px}
     .menu-title{font-size:.85rem; color:var(--text-light); margin:10px 8px 8px;}
     .menu-link{
       display:flex; align-items:center; gap:10px;
@@ -141,7 +92,6 @@
       border-radius:12px;
       cursor:pointer;
       user-select:none;
-      transition: background .15s ease;
     }
     .menu-link:hover{background: rgba(22,163,74,.10)}
     .menu-link.active{background: rgba(22,163,74,.14); outline:1px solid rgba(22,163,74,.22)}
@@ -169,29 +119,20 @@
     .card-title{font-weight:900; display:flex; align-items:center; gap:10px}
     .content-pad{padding:12px 14px}
 
-    .grid4{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;}
-    @media(max-width:1180px){
-      .layout{grid-template-columns: 240px 1fr;}
-      .sidebar-right{display:none}
-      .grid4{grid-template-columns: repeat(2, minmax(0,1fr));}
-    }
-    @media(max-width:760px){
-      .layout{grid-template-columns: 1fr;}
-      .sidebar-left{display:none}
-      .grid4{grid-template-columns: 1fr;}
-    }
+    #map{height:520px; border-radius:14px; border:1px solid var(--border); overflow:hidden; background:#fff;}
 
-    .stat{
-      padding:12px;
+    .status-pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.94);
-      border-radius: 14px;
+      background: rgba(255,255,255,.95);
       box-shadow: 0 8px 22px rgba(11,18,32,.06);
+      font-size:.85rem;
+      user-select:none;
     }
-    .stat-title{font-size:.85rem; color:var(--text-light)}
-    .stat-value{font-size:1.6rem; font-weight:900; margin-top:6px}
-    .stat-change{font-size:.85rem; margin-top:6px; color: #166534}
-
+    .dot{width:10px; height:10px; border-radius:99px; background:#9ca3af}
+    .dot.on{background: var(--accent)}
     .badge{
       display:inline-flex; align-items:center; justify-content:center;
       padding:4px 10px;
@@ -202,173 +143,185 @@
       color: var(--text-light);
     }
 
-    .action-btn{
-      border:1px solid rgba(22,163,74,.25);
-      background: rgba(22,163,74,.10);
-      color:var(--text);
-      padding:9px 12px;
-      border-radius:12px;
-      cursor:pointer;
-      display:inline-flex; gap:8px; align-items:center;
-      transition: background .15s ease, transform .08s ease;
-      box-shadow: 0 6px 18px rgba(11,18,32,.06);
-    }
-    .action-btn:hover{background: rgba(22,163,74,.16)}
-    .action-btn:active{transform: translateY(1px)}
-
-    #map, #map2{
-      height: 520px;
-      border-radius: 14px;
-      border:1px solid var(--border);
-      overflow:hidden;
-      background: rgba(255,255,255,.9);
-    }
-
-    /* Chat */
-    .chat-wrap{padding:12px}
-    .chat-box{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.94);
-      border-radius: 14px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      height: 560px;
-      box-shadow: 0 10px 26px rgba(11,18,32,.07);
-    }
-    .chat-tabs{display:flex; gap:8px; flex-wrap:wrap}
-    .chat-tab{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      cursor:pointer;
-      font-size:.82rem;
-      color:var(--text-light);
-      user-select:none;
-      background: rgba(255,255,255,.92);
-    }
-    .chat-tab.active{color:var(--text); outline:2px solid rgba(22,163,74,.16)}
-    .chat-messages{padding:10px; overflow:auto; flex:1}
-    .message{display:flex; gap:10px; margin:10px 0}
-    .message.own{justify-content:flex-end}
-    .msg-avatar{
-      width:34px; height:34px; border-radius:12px;
-      display:flex; align-items:center; justify-content:center;
-      border:1px solid var(--border);
-      background: rgba(22,163,74,.10);
-      font-weight:900; font-size:.78rem;
-    }
-    .msg-bubble{
-      max-width: 75%;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.94);
-      padding:10px 12px;
-      border-radius: 14px;
-      line-height:1.55;
-    }
-    .msg-bubble.own{background: rgba(22,163,74,.12)}
-    .chat-input{
-      display:flex; gap:8px;
-      padding:10px;
-      border-top:1px solid var(--border);
-      background: rgba(255,255,255,.96);
-    }
-    .chat-input input{flex:1}
-
-    .tile-grid{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px;}
-    .pay-tile{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.94);
-      border-radius:14px;
-      padding:10px;
-      cursor:pointer;
-      display:flex; align-items:center; gap:10px;
-      box-shadow: 0 8px 22px rgba(11,18,32,.06);
-    }
-    .pay-tile:hover{background: rgba(22,163,74,.08)}
-    .pay-logo{
-      width:36px; height:36px; border-radius:12px;
-      border:1px solid var(--border);
-      background: rgba(22,163,74,.12);
-      display:flex; align-items:center; justify-content:center;
-      font-weight:900;
-    }
-
-    .toast-container{
-      position:fixed;
-      right:20px;
-      bottom:20px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      z-index:9999;
-    }
-    .toast{
-      display:flex; gap:10px; align-items:center;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.96);
-      box-shadow: var(--shadow);
-      max-width: 460px;
-    }
-    .toast.success i{color:#16a34a}
-    .toast.error i{color:#dc2626}
-    .toast.info i{color:#2563eb}
-
+    [dir="rtl"] body { direction: rtl; }
     [dir="rtl"] .navbar { flex-direction: row-reverse; }
     [dir="rtl"] .nav-center { flex-direction: row-reverse; }
     [dir="rtl"] .nav-right { flex-direction: row-reverse; }
     [dir="rtl"] .menu-link{justify-content:flex-end}
-    [dir="rtl"] .toast-container{right:auto; left:20px}
-    [dir="rtl"] .message{ text-align:right }
-    [dir="rtl"] .message.own{ flex-direction: row }
   </style>
+
+  <script>
+    // ========= GLOBALS (INLINE ONCLICK DEPENDS ON THESE) =========
+    window.__AGRI = window.__AGRI || { clicks:0, section:"dashboard", lang:"en", cur:"USD" };
+
+    const LOCALES = { en:"en-US", es:"es-ES", fr:"fr-FR", ar:"ar" };
+    const RTL = new Set(["ar"]);
+    const rates = { USD:1, KES:130.5, ETB:54.2, RWF:1220 };
+
+    const I18N = {
+      en:{ appName:"AgriTrade Africa", dash:"Dashboard", market:"Market", wallet:"Wallet", ai:"AI Tools", liveLog:"Live Logistics", lang:"Language", cur:"Currency" },
+      es:{ appName:"AgriTrade África", dash:"Panel", market:"Mercado", wallet:"Billetera", ai:"Herramientas IA", liveLog:"Logística en vivo", lang:"Idioma", cur:"Moneda" },
+      fr:{ appName:"AgriTrade Afrique", dash:"Tableau de bord", market:"Marché", wallet:"Portefeuille", ai:"Outils IA", liveLog:"Logistique en direct", lang:"Langue", cur:"Devise" },
+      ar:{ appName:"أجريتريد أفريقيا", dash:"لوحة التحكم", market:"السوق", wallet:"المحفظة", ai:"أدوات الذكاء", liveLog:"اللوجستيات المباشرة", lang:"اللغة", cur:"العملة" }
+    };
+
+    function __(k){
+      const d = I18N[window.__AGRI.lang] || I18N.en;
+      return d[k] || (I18N.en[k] || k);
+    }
+    function __locale(){ return LOCALES[window.__AGRI.lang] || "en-US"; }
+
+    function __setDir(){
+      const rtl = RTL.has(window.__AGRI.lang);
+      document.documentElement.setAttribute("dir", rtl ? "rtl" : "ltr");
+      document.documentElement.setAttribute("lang", window.__AGRI.lang);
+    }
+
+    function __money(usd){
+      const r = rates[window.__AGRI.cur] || 1;
+      const v = usd * r;
+      try { return new Intl.NumberFormat(__locale(), { style:"currency", currency: window.__AGRI.cur, maximumFractionDigits:2 }).format(v); }
+      catch { return v.toLocaleString(__locale()) + " " + window.__AGRI.cur; }
+    }
+
+    // NAV: show/hide sections (NO delegation needed)
+    window.__agri_nav = function(section){
+      window.__AGRI.clicks++;
+      const cc = document.getElementById("clickCount");
+      if(cc) cc.textContent = String(window.__AGRI.clicks);
+
+      window.__AGRI.section = section;
+      localStorage.setItem("agri_section", section);
+
+      document.querySelectorAll("[data-section]").forEach(s => s.style.display = "none");
+      const target = document.querySelector('[data-section="'+section+'"]');
+      if(target) target.style.display = "";
+
+      document.querySelectorAll(".btn,.menu-link").forEach(x => x.classList.remove("active"));
+      document.querySelectorAll('[data-nav="'+section+'"]').forEach(x => x.classList.add("active"));
+
+      // resize map when returning to dashboard
+      if(section==="dashboard") setTimeout(()=>window.__agri_map_init(), 120);
+    };
+
+    window.__agri_set_lang = function(lang){
+      window.__AGRI.lang = lang;
+      localStorage.setItem("agri_lang", lang);
+      __setDir();
+      window.__agri_render();
+    };
+
+    window.__agri_set_cur = function(cur){
+      window.__AGRI.cur = cur;
+      localStorage.setItem("agri_currency", cur);
+      window.__agri_render();
+    };
+
+    window.__agri_render = function(){
+      // basic labels
+      const appName = document.getElementById("appName");
+      if(appName) appName.textContent = __("appName");
+
+      // nav text
+      const d = document.getElementById("txtDash"); if(d) d.textContent = __("dash");
+      const m = document.getElementById("txtMarket"); if(m) m.textContent = __("market");
+      const w = document.getElementById("txtWallet"); if(w) w.textContent = __("wallet");
+      const a = document.getElementById("txtAI"); if(a) a.textContent = __("ai");
+
+      const d2 = document.getElementById("txtDash2"); if(d2) d2.textContent = __("dash");
+      const m2 = document.getElementById("txtMarket2"); if(m2) m2.textContent = __("market");
+      const w2 = document.getElementById("txtWallet2"); if(w2) w2.textContent = __("wallet");
+      const a2 = document.getElementById("txtAI2"); if(a2) a2.textContent = __("ai");
+
+      const liveLog = document.getElementById("txtLiveLog"); if(liveLog) liveLog.textContent = __("liveLog");
+
+      // money demo
+      const revenue = document.getElementById("revenue"); if(revenue) revenue.textContent = __money(24500);
+      const wallet = document.getElementById("wallet"); if(wallet) wallet.textContent = __money(8320.50);
+    };
+
+    // Map (safe)
+    let __map;
+    window.__agri_map_init = function(){
+      const mapEl = document.getElementById("map");
+      const fb = document.getElementById("mapFallback");
+      if(!mapEl) return;
+
+      if(typeof window.L === "undefined"){
+        if(fb) fb.style.display = "block";
+        return;
+      }
+
+      try{
+        if(__map){
+          setTimeout(()=>{ try{ __map.invalidateSize(); }catch{} }, 50);
+          return;
+        }
+        __map = L.map("map").setView([-1.2921, 36.8219], 6);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(__map);
+        [
+          { pos: [-1.2921, 36.8219], title: "Nairobi - Warehouse" },
+          { pos: [-0.0236, 37.9062], title: "Mt. Kenya - Farm" },
+          { pos: [-1.2864, 36.8172], title: "In Transit" }
+        ].forEach(m => L.marker(m.pos).addTo(__map).bindPopup(m.title));
+        setTimeout(()=>{ try{ __map.invalidateSize(); }catch{} }, 250);
+        setTimeout(()=>{ try{ __map.invalidateSize(); }catch{} }, 800);
+      }catch{
+        if(fb) fb.style.display = "block";
+      }
+    };
+
+    // Boot
+    document.addEventListener("DOMContentLoaded", ()=>{
+      // prove JS is running
+      const dot = document.getElementById("jsDot");
+      const txt = document.getElementById("jsText");
+      if(dot) dot.classList.add("on");
+      if(txt) txt.textContent = "JS: ON";
+
+      // load saved state
+      window.__AGRI.lang = localStorage.getItem("agri_lang") || "en";
+      window.__AGRI.cur = localStorage.getItem("agri_currency") || "USD";
+      window.__AGRI.section = localStorage.getItem("agri_section") || "dashboard";
+
+      // set dropdowns
+      const langSel = document.getElementById("langSelect");
+      const curSel = document.getElementById("currency");
+      if(langSel){ langSel.value = window.__AGRI.lang; langSel.onchange = ()=>window.__agri_set_lang(langSel.value); }
+      if(curSel){ curSel.value = window.__AGRI.cur; curSel.onchange = ()=>window.__agri_set_cur(curSel.value); }
+
+      __setDir();
+      window.__agri_render();
+
+      // show saved section
+      window.__agri_nav(window.__AGRI.section);
+
+      // init map
+      setTimeout(()=>window.__agri_map_init(), 250);
+    });
+  </script>
 </head>
 
 <body>
-  <div id="debugbar" class="debugbar"></div>
-
   <div class="navbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true">
-        <svg viewBox="0 0 64 64" width="34" height="34">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#16a34a"/>
-              <stop offset="1" stop-color="#22c55e"/>
-            </linearGradient>
-          </defs>
-          <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#g)"/>
-          <path d="M44 18c-10 2-18 10-20 20 10-2 18-10 20-20Z" fill="#ffffff" opacity="0.95"/>
-          <path d="M22 42c7-8 14-13 22-16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.95"/>
-        </svg>
-      </div>
+      <div class="logo">A</div>
       <div>
         <div id="appName" style="font-weight:900; line-height:1;">AgriTrade Africa</div>
-        <div style="font-size:.8rem; color:var(--text-light); margin-top:2px;">Market • Wallet • AI • Logistics</div>
+        <div style="font-size:.8rem; color:var(--text-light); margin-top:2px;">Investor Demo</div>
       </div>
     </div>
 
     <div class="nav-center">
-      <!-- Fallback onclicks so buttons ALWAYS work -->
-      <div class="nav-btn active" data-nav="dashboard" onclick="window.__agri_nav && window.__agri_nav('dashboard')">
-        <i class="fa-solid fa-chart-line"></i> <span data-i18n="navDashboard">Dashboard</span>
-      </div>
-      <div class="nav-btn" data-nav="market" onclick="window.__agri_nav && window.__agri_nav('market')">
-        <i class="fa-solid fa-store"></i> <span data-i18n="navMarket">Market</span>
-      </div>
-      <div class="nav-btn" data-nav="wallet" onclick="window.__agri_nav && window.__agri_nav('wallet')">
-        <i class="fa-solid fa-wallet"></i> <span data-i18n="navWallet">Wallet</span>
-      </div>
-      <div class="nav-btn" data-nav="ai" onclick="window.__agri_nav && window.__agri_nav('ai')">
-        <i class="fa-solid fa-robot"></i> <span data-i18n="navAITools">AI Tools</span>
-      </div>
+      <div class="btn active" data-nav="dashboard" onclick="__agri_nav('dashboard')"><i class="fa-solid fa-chart-line"></i> <span id="txtDash">Dashboard</span></div>
+      <div class="btn" data-nav="market" onclick="__agri_nav('market')"><i class="fa-solid fa-store"></i> <span id="txtMarket">Market</span></div>
+      <div class="btn" data-nav="wallet" onclick="__agri_nav('wallet')"><i class="fa-solid fa-wallet"></i> <span id="txtWallet">Wallet</span></div>
+      <div class="btn" data-nav="ai" onclick="__agri_nav('ai')"><i class="fa-solid fa-robot"></i> <span id="txtAI">AI Tools</span></div>
     </div>
 
     <div class="nav-right">
-      <div class="status-pill" id="jsStatus">
-        <span class="dot off" id="jsDot"></span>
+      <div class="status-pill">
+        <span class="dot" id="jsDot"></span>
         <span id="jsText">JS: OFF</span>
         <span class="badge" id="clickCount">0</span>
       </div>
@@ -390,81 +343,43 @@
   </div>
 
   <div class="layout">
-    <aside class="sidebar-left panel">
+    <aside class="panel sidebar">
       <div class="menu-title">NAV</div>
-
-      <div class="menu-link active" data-nav="dashboard" onclick="window.__agri_nav && window.__agri_nav('dashboard')">
-        <div class="menu-icon"><i class="fa-solid fa-chart-line"></i></div>
-        <div data-i18n="navDashboard">Dashboard</div>
+      <div class="menu-link active" data-nav="dashboard" onclick="__agri_nav('dashboard')">
+        <div class="menu-icon"><i class="fa-solid fa-chart-line"></i></div><div id="txtDash2">Dashboard</div>
       </div>
-
-      <div class="menu-link" data-nav="market" onclick="window.__agri_nav && window.__agri_nav('market')">
-        <div class="menu-icon"><i class="fa-solid fa-store"></i></div>
-        <div data-i18n="navMarket">Market</div>
+      <div class="menu-link" data-nav="market" onclick="__agri_nav('market')">
+        <div class="menu-icon"><i class="fa-solid fa-store"></i></div><div id="txtMarket2">Market</div>
       </div>
-
-      <div class="menu-link" data-nav="wallet" onclick="window.__agri_nav && window.__agri_nav('wallet')">
-        <div class="menu-icon"><i class="fa-solid fa-wallet"></i></div>
-        <div data-i18n="navWallet">Wallet</div>
+      <div class="menu-link" data-nav="wallet" onclick="__agri_nav('wallet')">
+        <div class="menu-icon"><i class="fa-solid fa-wallet"></i></div><div id="txtWallet2">Wallet</div>
       </div>
-
-      <div class="menu-title">AI & AUTOMATION</div>
-
-      <div class="menu-link" data-nav="ai" onclick="window.__agri_nav && window.__agri_nav('ai')">
-        <div class="menu-icon"><i class="fa-solid fa-robot"></i></div>
-        <div data-i18n="navAITools">AI Tools</div>
-      </div>
-
-      <div class="menu-link" data-nav="disease" onclick="window.__agri_nav && window.__agri_nav('disease')">
-        <div class="menu-icon"><i class="fa-solid fa-camera"></i></div>
-        <div data-i18n="diseaseScanner">Disease Scanner</div>
-      </div>
-
-      <div class="menu-link" data-nav="logistics" onclick="window.__agri_nav && window.__agri_nav('logistics')">
-        <div class="menu-icon"><i class="fa-solid fa-truck"></i></div>
-        <div data-i18n="logistics">Logistics</div>
+      <div class="menu-link" data-nav="ai" onclick="__agri_nav('ai')">
+        <div class="menu-icon"><i class="fa-solid fa-robot"></i></div><div id="txtAI2">AI Tools</div>
       </div>
     </aside>
 
-    <main id="mainContent">
-      <section class="card" data-section="dashboard" id="section-dashboard">
+    <main>
+      <section class="card" data-section="dashboard">
         <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="navDashboard">Dashboard</span></div>
-          <div class="badge"><span data-i18n="live">Live</span></div>
+          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> Dashboard</div>
+          <div class="badge">Live</div>
         </div>
         <div class="content-pad">
-          <div class="grid4">
-            <div class="stat">
-              <div class="stat-title" data-i18n="totalRevenue">Total Revenue</div>
-              <div class="stat-value" id="revenue">—</div>
-              <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> 15%</div>
-            </div>
-            <div class="stat">
-              <div class="stat-title" data-i18n="walletBalanceLabel">Wallet Balance</div>
-              <div class="stat-value" id="wallet">—</div>
-              <div class="stat-change" id="walletDelta"><i class="fa-solid fa-arrow-up"></i> +—</div>
-            </div>
-            <div class="stat">
-              <div class="stat-title" data-i18n="activeContracts">Active Contracts</div>
-              <div class="stat-value">12</div>
-              <div class="stat-change"><i class="fa-solid fa-circle-check"></i> <span data-i18n="verified">Verified</span></div>
-            </div>
-            <div class="stat">
-              <div class="stat-title" data-i18n="trustScore">Trust Score</div>
-              <div class="stat-value">94</div>
-              <div class="stat-change"><i class="fa-solid fa-shield"></i> <span data-i18n="verified">Verified</span></div>
-            </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="card"><div class="content-pad"><div style="color:var(--text-light);">Total Revenue</div><div style="font-size:1.6rem;font-weight:900;" id="revenue">—</div></div></div>
+            <div class="card"><div class="content-pad"><div style="color:var(--text-light);">Wallet Balance</div><div style="font-size:1.6rem;font-weight:900;" id="wallet">—</div></div></div>
           </div>
 
           <div class="card" style="margin-top:12px;">
             <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="liveLogistics">Live Logistics</span></div>
+              <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span id="txtLiveLog">Live Logistics</span></div>
               <div class="badge">Map</div>
             </div>
             <div class="content-pad">
               <div id="map"></div>
               <div id="mapFallback" style="display:none; margin-top:8px; color:var(--text-light);">
-                Map library did not load, but the app is still running.
+                Map library did not load, but the app is running.
               </div>
             </div>
           </div>
@@ -472,272 +387,20 @@
       </section>
 
       <section class="card" data-section="market" style="display:none;">
-        <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-store"></i> <span data-i18n="navMarket">Market</span></div>
-          <div class="badge">Demo</div>
-        </div>
-        <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-          Market panel loaded.
-        </div>
+        <div class="card-header"><div class="card-title"><i class="fa-solid fa-store"></i> Market</div><div class="badge">OK</div></div>
+        <div class="content-pad" style="color:var(--text-light);">Market panel is working.</div>
       </section>
 
       <section class="card" data-section="wallet" style="display:none;">
-        <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-wallet"></i> <span data-i18n="navWallet">Wallet</span></div>
-          <div class="badge">Mobile Money</div>
-        </div>
-        <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-          Wallet panel loaded.
-        </div>
+        <div class="card-header"><div class="card-title"><i class="fa-solid fa-wallet"></i> Wallet</div><div class="badge">OK</div></div>
+        <div class="content-pad" style="color:var(--text-light);">Wallet panel is working.</div>
       </section>
 
       <section class="card" data-section="ai" style="display:none;">
-        <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-robot"></i> <span data-i18n="navAITools">AI Tools</span></div>
-          <div class="badge">Demo</div>
-        </div>
-        <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-          AI Tools panel loaded.
-        </div>
-      </section>
-
-      <section class="card" data-section="disease" style="display:none;">
-        <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-camera"></i> <span data-i18n="diseaseScanner">Disease Scanner</span></div>
-          <div class="badge">Demo</div>
-        </div>
-        <div class="content-pad" style="color:var(--text-light); line-height:1.7;">
-          Disease Scanner panel loaded.
-        </div>
-      </section>
-
-      <section class="card" data-section="logistics" style="display:none;">
-        <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">Logistics</span></div>
-          <div class="badge">Map</div>
-        </div>
-        <div class="content-pad">
-          <div id="map2"></div>
-          <div id="map2Fallback" style="display:none; margin-top:8px; color:var(--text-light);">
-            Map library did not load, but the app is still running.
-          </div>
-        </div>
+        <div class="card-header"><div class="card-title"><i class="fa-solid fa-robot"></i> AI Tools</div><div class="badge">OK</div></div>
+        <div class="content-pad" style="color:var(--text-light);">AI Tools panel is working.</div>
       </section>
     </main>
-
-    <aside class="sidebar-right panel">
-      <div class="chat-wrap">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><i class="fa-solid fa-comments"></i> Chat</div>
-            <div class="badge">Demo</div>
-          </div>
-
-          <div class="chat-box">
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-input">
-              <input id="chatInput" placeholder="Type message..." />
-              <button class="action-btn" onclick="window.__agri_sendChat && window.__agri_sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
   </div>
-
-  <div id="toastContainer" class="toast-container"></div>
-  <div id="debugbar" class="debugbar"></div>
-
-  <script>
-  (function(){
-    const debugbar = document.getElementById("debugbar");
-    const showDebug = (msg) => { if(debugbar){ debugbar.style.display="block"; debugbar.textContent = msg; } };
-
-    window.addEventListener("error", (e) => {
-      showDebug("JS Error:\n" + (e?.error?.stack || e?.message || "Unknown error"));
-    });
-
-    const LS = { lang:"agri_lang", currency:"agri_currency", section:"agri_section" };
-    const state = {
-      lang: localStorage.getItem(LS.lang) || "en",
-      currency: localStorage.getItem(LS.currency) || "USD",
-      section: localStorage.getItem(LS.section) || "dashboard",
-      clicks: 0
-    };
-
-    const rates = { USD:1, KES:130.5, ETB:54.2, RWF:1220 };
-    const LOCALES = { en:"en-US", es:"es-ES", fr:"fr-FR", ar:"ar" };
-    const RTL = new Set(["ar"]);
-
-    const I18N = {
-      en:{ appName:"AgriTrade Africa", navDashboard:"Dashboard", navMarket:"Market", navWallet:"Wallet", navAITools:"AI Tools", totalRevenue:"Total Revenue", walletBalanceLabel:"Wallet Balance", activeContracts:"Active Contracts", trustScore:"Trust Score", verified:"Verified", live:"Live", liveLogistics:"Live Logistics", logistics:"Logistics", diseaseScanner:"Disease Scanner", typeMessage:"Type message..." },
-      es:{ appName:"AgriTrade África", navDashboard:"Panel", navMarket:"Mercado", navWallet:"Billetera", navAITools:"Herramientas IA", totalRevenue:"Ingresos totales", walletBalanceLabel:"Saldo de billetera", activeContracts:"Contratos activos", trustScore:"Puntuación de confianza", verified:"Verificado", live:"En vivo", liveLogistics:"Logística en vivo", logistics:"Logística", diseaseScanner:"Escáner de enfermedades", typeMessage:"Escribe un mensaje..." },
-      fr:{ appName:"AgriTrade Afrique", navDashboard:"Tableau de bord", navMarket:"Marché", navWallet:"Portefeuille", navAITools:"Outils IA", totalRevenue:"Revenu total", walletBalanceLabel:"Solde du portefeuille", activeContracts:"Contrats actifs", trustScore:"Indice de confiance", verified:"Vérifié", live:"En direct", liveLogistics:"Logistique en direct", logistics:"Logistique", diseaseScanner:"Scanner de maladies", typeMessage:"Tapez un message..." },
-      ar:{ appName:"أجريتريد أفريقيا", navDashboard:"لوحة التحكم", navMarket:"السوق", navWallet:"المحفظة", navAITools:"أدوات الذكاء", totalRevenue:"إجمالي الإيرادات", walletBalanceLabel:"رصيد المحفظة", activeContracts:"العقود النشطة", trustScore:"درجة الثقة", verified:"موثّق", live:"مباشر", liveLogistics:"اللوجستيات المباشرة", logistics:"اللوجستيات", diseaseScanner:"ماسح الأمراض", typeMessage:"اكتب رسالة..." }
-    };
-
-    const t = (k) => (I18N[state.lang] && I18N[state.lang][k]) || I18N.en[k] || k;
-    const locale = () => LOCALES[state.lang] || "en-US";
-
-    const setDir = () => {
-      const rtl = RTL.has(state.lang);
-      document.documentElement.setAttribute("dir", rtl ? "rtl" : "ltr");
-      document.documentElement.setAttribute("lang", state.lang);
-    };
-
-    const moneyFromUSD = (usd) => {
-      const r = rates[state.currency] || 1;
-      const v = usd * r;
-      try { return new Intl.NumberFormat(locale(), { style:"currency", currency: state.currency, maximumFractionDigits:2 }).format(v); }
-      catch { return v.toLocaleString(locale()) + " " + state.currency; }
-    };
-
-    const showToast = (message, type="info") => {
-      const c = document.getElementById("toastContainer");
-      if(!c) return;
-      const el = document.createElement("div");
-      el.className = "toast " + type;
-      const icon = type==="success" ? "check-circle" : type==="error" ? "exclamation-circle" : "info-circle";
-      el.innerHTML = `<i class="fas fa-${icon}"></i><span>${String(message)}</span>`;
-      c.appendChild(el);
-      setTimeout(()=> el.remove(), 2600);
-    };
-
-    const renderI18n = () => {
-      document.getElementById("appName").textContent = t("appName");
-      document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
-      const chatInput = document.getElementById("chatInput");
-      if(chatInput) chatInput.placeholder = t("typeMessage");
-    };
-
-    const renderStats = () => {
-      document.getElementById("revenue").textContent = moneyFromUSD(24500);
-      document.getElementById("wallet").textContent = moneyFromUSD(8320.50);
-      document.getElementById("walletDelta").innerHTML = `<i class="fa-solid fa-arrow-up"></i> +${moneyFromUSD(1200)}`;
-    };
-
-    const showSection = (name) => {
-      document.querySelectorAll("[data-section]").forEach(s => s.style.display = "none");
-      const target = document.querySelector(`[data-section="${name}"]`);
-      if(target) target.style.display = "";
-
-      document.querySelectorAll(".menu-link, .nav-btn").forEach(x => x.classList.remove("active"));
-      document.querySelectorAll(`[data-nav="${name}"]`).forEach(x => x.classList.add("active"));
-
-      state.section = name;
-      localStorage.setItem(LS.section, name);
-
-      // maps on section switch
-      if(name === "dashboard") setTimeout(()=> initMapSafe("map"), 100);
-      if(name === "logistics") setTimeout(()=> initMapSafe("map2"), 100);
-    };
-
-    // GLOBAL fallback function (onclick uses this)
-    window.__agri_nav = (name) => {
-      state.clicks++;
-      const cc = document.getElementById("clickCount");
-      if(cc) cc.textContent = String(state.clicks);
-      showSection(name);
-    };
-
-    window.__agri_sendChat = () => {
-      const input = document.getElementById("chatInput");
-      const messages = document.getElementById("chatMessages");
-      if(!input || !messages) return;
-      const text = input.value.trim();
-      if(!text) return;
-      messages.innerHTML += `<div class="message own"><div class="msg-bubble own">${text}</div><div class="msg-avatar">ME</div></div>`;
-      input.value = "";
-      messages.scrollTop = messages.scrollHeight;
-      setTimeout(()=>{
-        messages.innerHTML += `<div class="message"><div class="msg-avatar">AI</div><div class="msg-bubble"><div style="font-size:.72rem;font-weight:900;margin-bottom:4px;">AgriAI</div>✅ Message received.</div></div>`;
-        messages.scrollTop = messages.scrollHeight;
-      }, 450);
-    };
-
-    const mapCache = new Map();
-    const initMapSafe = (id) => {
-      const el = document.getElementById(id);
-      if(!el) return;
-
-      if(typeof window.L === "undefined"){
-        const fallback = document.getElementById(id==="map" ? "mapFallback" : "map2Fallback");
-        if(fallback) fallback.style.display = "block";
-        return;
-      }
-
-      if(mapCache.has(id)){
-        try{ mapCache.get(id).invalidateSize(); }catch{}
-        return;
-      }
-
-      try{
-        const map = L.map(id).setView([-1.2921, 36.8219], 6);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
-        [
-          { pos: [-1.2921, 36.8219], title: "Nairobi - Warehouse" },
-          { pos: [-0.0236, 37.9062], title: "Mt. Kenya - Farm" },
-          { pos: [-1.2864, 36.8172], title: "In Transit" }
-        ].forEach(m => L.marker(m.pos).addTo(map).bindPopup(m.title));
-        mapCache.set(id, map);
-        setTimeout(()=> map.invalidateSize(), 250);
-        setTimeout(()=> map.invalidateSize(), 700);
-      }catch(err){
-        showDebug("Map init failed:\n" + (err?.stack || String(err)));
-      }
-    };
-
-    const init = () => {
-      // JS status ON (this is the proof)
-      document.getElementById("jsDot").classList.remove("off");
-      document.getElementById("jsDot").classList.add("on");
-      document.getElementById("jsText").textContent = "JS: ON";
-
-      // Controls from storage
-      document.getElementById("langSelect").value = state.lang;
-      document.getElementById("currency").value = state.currency;
-
-      setDir();
-      renderI18n();
-      renderStats();
-      showSection(state.section);
-
-      document.getElementById("langSelect").addEventListener("change", (e)=>{
-        state.lang = e.target.value;
-        localStorage.setItem(LS.lang, state.lang);
-        setDir(); renderI18n(); renderStats();
-        showToast("Language updated", "success");
-      });
-
-      document.getElementById("currency").addEventListener("change", (e)=>{
-        state.currency = e.target.value;
-        localStorage.setItem(LS.currency, state.currency);
-        renderStats();
-        showToast("Currency updated", "success");
-      });
-
-      // delegated click tracker (even if onclick fails, this proves events are firing)
-      document.body.addEventListener("click", ()=>{
-        state.clicks++;
-        const cc = document.getElementById("clickCount");
-        if(cc) cc.textContent = String(state.clicks);
-      }, { passive:true });
-
-      // maps
-      setTimeout(()=> initMapSafe("map"), 350);
-      setTimeout(()=> initMapSafe("map2"), 600);
-
-      // seed chat
-      const messages = document.getElementById("chatMessages");
-      if(messages){
-        messages.innerHTML = `<div class="message"><div class="msg-avatar">AI</div><div class="msg-bubble"><div style="font-size:.72rem;font-weight:900;margin-bottom:4px;">AgriAI</div>Welcome. Click Dashboard / Wallet / AI Tools to test navigation.</div></div>`;
-      }
-    };
-
-    document.addEventListener("DOMContentLoaded", ()=>{
-      try{ init(); } catch(err){ showDebug("Init crashed:\n" + (err?.stack || String(err))); }
-    });
-  })();
-  </script>
 </body>
 </html>
