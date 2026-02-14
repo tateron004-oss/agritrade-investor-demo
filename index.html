@@ -6,15 +6,20 @@
   <title>AgriTrade Africa — Investor Demo</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer"/>
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <style>
     :root{
-      --bg:#f6fff8; --bg2:#ecfdf3;
-      --card: rgba(255,255,255,.92);
-      --text:#0b1220; --text-light: rgba(11,18,32,.68);
-      --accent:#16a34a; --accent2:#22c55e;
+      --bg:#f5fff7;
+      --bg2:#ecfdf3;
+      --card: rgba(255,255,255,.93);
+      --text:#0b1220;
+      --muted: rgba(11,18,32,.68);
+      --accent:#16a34a;
+      --accent2:#22c55e;
+      --danger:#dc2626;
       --border: rgba(11,18,32,.12);
       --shadow: 0 18px 40px rgba(11,18,32,.10);
       --radius:14px;
@@ -22,7 +27,7 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
       color:var(--text);
       background:
         radial-gradient(900px 500px at 10% 10%, rgba(34,197,94,.18), transparent 55%),
@@ -30,6 +35,7 @@
         linear-gradient(180deg, var(--bg), var(--bg2));
       min-height:100vh;
     }
+    a{color:inherit; text-decoration:none}
     .navbar{
       position:sticky; top:0; z-index:50;
       display:flex; align-items:center; justify-content:space-between;
@@ -40,27 +46,42 @@
     }
     .brand{display:flex; align-items:center; gap:10px; font-weight:900;}
     .logo{
-      width:34px; height:34px; border-radius:10px;
+      width:36px; height:36px; border-radius:12px;
       display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color:white;
       box-shadow: 0 10px 22px rgba(11,18,32,.12);
-      font-weight:900;
+      overflow:hidden;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
-    .nav-center{display:flex; gap:10px; align-items:center;}
+    .nav-center{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
     .btn{
       border:1px solid var(--border);
       background: rgba(255,255,255,.92);
-      padding:9px 12px; border-radius:12px;
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:12px;
       cursor:pointer;
-      display:flex; gap:8px; align-items:center;
-      box-shadow: 0 6px 18px rgba(11,18,32,.06);
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      transition: transform .08s ease, background .15s ease;
       user-select:none;
+      box-shadow: 0 6px 18px rgba(11,18,32,.06);
+      white-space:nowrap;
     }
+    .btn:hover{background: rgba(255,255,255,.98)}
+    .btn:active{transform: translateY(1px)}
     .btn.active{outline:2px solid rgba(22,163,74,.18); border-color: rgba(22,163,74,.30)}
-    .nav-right{display:flex; gap:10px; align-items:center;}
+    .btn.primary{
+      border-color: rgba(22,163,74,.28);
+      background: rgba(22,163,74,.12);
+    }
+    .btn.danger{
+      border-color: rgba(220,38,38,.25);
+      background: rgba(220,38,38,.08);
+    }
 
-    select, input{
+    .nav-right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    select, input, textarea{
       border:1px solid var(--border);
       background: rgba(255,255,255,.94);
       color:var(--text);
@@ -69,29 +90,42 @@
       outline:none;
       box-shadow: 0 6px 18px rgba(11,18,32,.06);
     }
+    textarea{min-height:84px; resize:vertical}
+    option{background:#fff; color:var(--text)}
 
     .layout{
       display:grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 270px 1fr 360px;
       gap:14px;
       padding:14px;
-      max-width: 1350px;
+      max-width: 1550px;
       margin: 0 auto;
     }
+    @media(max-width:1180px){
+      .layout{grid-template-columns: 250px 1fr;}
+      .right{display:none}
+    }
+    @media(max-width:760px){
+      .layout{grid-template-columns: 1fr;}
+      .left{display:none}
+      .right{display:none}
+    }
+
     .panel{
       border:1px solid var(--border);
       background: rgba(255,255,255,.78);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
-    .sidebar{padding:12px}
-    .menu-title{font-size:.85rem; color:var(--text-light); margin:10px 8px 8px;}
+    .left{padding:12px}
+    .menu-title{font-size:.85rem; color:var(--muted); margin:10px 8px 8px;}
     .menu-link{
       display:flex; align-items:center; gap:10px;
       padding:10px 10px;
       border-radius:12px;
       cursor:pointer;
       user-select:none;
+      transition: background .15s ease;
     }
     .menu-link:hover{background: rgba(22,163,74,.10)}
     .menu-link.active{background: rgba(22,163,74,.14); outline:1px solid rgba(22,163,74,.22)}
@@ -118,11 +152,45 @@
     }
     .card-title{font-weight:900; display:flex; align-items:center; gap:10px}
     .content-pad{padding:12px 14px}
+    .muted{color:var(--muted)}
+
+    .grid4{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;}
+    @media(max-width:1180px){ .grid4{grid-template-columns: repeat(2, minmax(0, 1fr));} }
+    @media(max-width:760px){ .grid4{grid-template-columns: 1fr;} }
+
+    .stat{
+      padding:12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.94);
+      border-radius: 14px;
+      box-shadow: 0 8px 22px rgba(11,18,32,.06);
+    }
+    .stat-title{font-size:.85rem; color:var(--muted)}
+    .stat-value{font-size:1.6rem; font-weight:900; margin-top:6px}
+    .stat-change{font-size:.85rem; margin-top:6px; color:#166534}
 
     #map{height:520px; border-radius:14px; border:1px solid var(--border); overflow:hidden; background:#fff;}
+    .badge{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(11,18,32,.12);
+      background: rgba(255,255,255,.92);
+      font-size:.78rem;
+      color: var(--muted);
+      white-space:nowrap;
+    }
 
-    .status-pill{
-      display:inline-flex; align-items:center; gap:8px;
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .grow{flex:1}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid var(--border); background: rgba(255,255,255,.94);}
+    th, td{padding:10px 10px; border-bottom:1px solid rgba(11,18,32,.08); text-align:left; font-size:.92rem;}
+    th{font-size:.82rem; color:var(--muted); background: rgba(22,163,74,.06)}
+    tr:last-child td{border-bottom:none}
+
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
       padding:7px 10px;
       border-radius:999px;
       border:1px solid var(--border);
@@ -133,14 +201,113 @@
     }
     .dot{width:10px; height:10px; border-radius:99px; background:#9ca3af}
     .dot.on{background: var(--accent)}
-    .badge{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:4px 10px;
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+    }
+    @media(max-width:1180px){ .kpi{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media(max-width:760px){ .kpi{grid-template-columns: 1fr;} }
+
+    /* Right panel: chat + gamification */
+    .right{padding:12px}
+    .chat-box{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.94);
+      border-radius: 14px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      height: 520px;
+      box-shadow: 0 10px 26px rgba(11,18,32,.07);
+    }
+    .tabs{display:flex; gap:8px; padding:10px; border-bottom:1px solid rgba(11,18,32,.08); background: rgba(255,255,255,.96); flex-wrap:wrap;}
+    .tab{
+      padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(11,18,32,.12);
+      border:1px solid var(--border);
+      cursor:pointer;
+      font-size:.82rem;
+      color:var(--muted);
+      user-select:none;
       background: rgba(255,255,255,.92);
-      font-size:.78rem;
-      color: var(--text-light);
+    }
+    .tab.active{color:var(--text); outline:2px solid rgba(22,163,74,.16)}
+    .chat-messages{padding:10px; overflow:auto; flex:1}
+    .message{display:flex; gap:10px; margin:10px 0}
+    .message.own{justify-content:flex-end}
+    .avatar{
+      width:34px; height:34px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      border:1px solid var(--border);
+      background: rgba(22,163,74,.10);
+      font-weight:900; font-size:.78rem;
+    }
+    .bubble{
+      max-width: 78%;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.94);
+      padding:10px 12px;
+      border-radius: 14px;
+      line-height:1.55;
+    }
+    .bubble.own{background: rgba(22,163,74,.12)}
+    .chat-input{display:flex; gap:8px; padding:10px; border-top:1px solid rgba(11,18,32,.08); background: rgba(255,255,255,.96);}
+    .chat-input input{flex:1}
+
+    .toast-container{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      z-index:9999;
+    }
+    .toast{
+      display:flex; gap:10px; align-items:center;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.96);
+      box-shadow: var(--shadow);
+      max-width: 520px;
+    }
+    .toast.success i{color:#16a34a}
+    .toast.error i{color:#dc2626}
+    .toast.info i{color:#2563eb}
+
+    /* Provider tiles */
+    .tile-grid{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px;}
+    .tile{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.94);
+      border-radius:14px;
+      padding:10px;
+      cursor:pointer;
+      display:flex; align-items:center; gap:10px;
+      box-shadow: 0 8px 22px rgba(11,18,32,.06);
+      user-select:none;
+    }
+    .tile:hover{background: rgba(22,163,74,.08)}
+    .tile-logo{
+      width:36px; height:36px; border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(22,163,74,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+    }
+
+    /* Progress bar */
+    .bar{
+      height:10px; border-radius:999px; border:1px solid rgba(11,18,32,.10);
+      background: rgba(255,255,255,.9);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
 
     [dir="rtl"] body { direction: rtl; }
@@ -148,181 +315,46 @@
     [dir="rtl"] .nav-center { flex-direction: row-reverse; }
     [dir="rtl"] .nav-right { flex-direction: row-reverse; }
     [dir="rtl"] .menu-link{justify-content:flex-end}
+    [dir="rtl"] .toast-container{right:auto; left:20px}
+    [dir="rtl"] .message{ text-align:right }
+    [dir="rtl"] .message.own{ flex-direction: row }
   </style>
-
-  <script>
-    // ========= GLOBALS (INLINE ONCLICK DEPENDS ON THESE) =========
-    window.__AGRI = window.__AGRI || { clicks:0, section:"dashboard", lang:"en", cur:"USD" };
-
-    const LOCALES = { en:"en-US", es:"es-ES", fr:"fr-FR", ar:"ar" };
-    const RTL = new Set(["ar"]);
-    const rates = { USD:1, KES:130.5, ETB:54.2, RWF:1220 };
-
-    const I18N = {
-      en:{ appName:"AgriTrade Africa", dash:"Dashboard", market:"Market", wallet:"Wallet", ai:"AI Tools", liveLog:"Live Logistics", lang:"Language", cur:"Currency" },
-      es:{ appName:"AgriTrade África", dash:"Panel", market:"Mercado", wallet:"Billetera", ai:"Herramientas IA", liveLog:"Logística en vivo", lang:"Idioma", cur:"Moneda" },
-      fr:{ appName:"AgriTrade Afrique", dash:"Tableau de bord", market:"Marché", wallet:"Portefeuille", ai:"Outils IA", liveLog:"Logistique en direct", lang:"Langue", cur:"Devise" },
-      ar:{ appName:"أجريتريد أفريقيا", dash:"لوحة التحكم", market:"السوق", wallet:"المحفظة", ai:"أدوات الذكاء", liveLog:"اللوجستيات المباشرة", lang:"اللغة", cur:"العملة" }
-    };
-
-    function __(k){
-      const d = I18N[window.__AGRI.lang] || I18N.en;
-      return d[k] || (I18N.en[k] || k);
-    }
-    function __locale(){ return LOCALES[window.__AGRI.lang] || "en-US"; }
-
-    function __setDir(){
-      const rtl = RTL.has(window.__AGRI.lang);
-      document.documentElement.setAttribute("dir", rtl ? "rtl" : "ltr");
-      document.documentElement.setAttribute("lang", window.__AGRI.lang);
-    }
-
-    function __money(usd){
-      const r = rates[window.__AGRI.cur] || 1;
-      const v = usd * r;
-      try { return new Intl.NumberFormat(__locale(), { style:"currency", currency: window.__AGRI.cur, maximumFractionDigits:2 }).format(v); }
-      catch { return v.toLocaleString(__locale()) + " " + window.__AGRI.cur; }
-    }
-
-    // NAV: show/hide sections (NO delegation needed)
-    window.__agri_nav = function(section){
-      window.__AGRI.clicks++;
-      const cc = document.getElementById("clickCount");
-      if(cc) cc.textContent = String(window.__AGRI.clicks);
-
-      window.__AGRI.section = section;
-      localStorage.setItem("agri_section", section);
-
-      document.querySelectorAll("[data-section]").forEach(s => s.style.display = "none");
-      const target = document.querySelector('[data-section="'+section+'"]');
-      if(target) target.style.display = "";
-
-      document.querySelectorAll(".btn,.menu-link").forEach(x => x.classList.remove("active"));
-      document.querySelectorAll('[data-nav="'+section+'"]').forEach(x => x.classList.add("active"));
-
-      // resize map when returning to dashboard
-      if(section==="dashboard") setTimeout(()=>window.__agri_map_init(), 120);
-    };
-
-    window.__agri_set_lang = function(lang){
-      window.__AGRI.lang = lang;
-      localStorage.setItem("agri_lang", lang);
-      __setDir();
-      window.__agri_render();
-    };
-
-    window.__agri_set_cur = function(cur){
-      window.__AGRI.cur = cur;
-      localStorage.setItem("agri_currency", cur);
-      window.__agri_render();
-    };
-
-    window.__agri_render = function(){
-      // basic labels
-      const appName = document.getElementById("appName");
-      if(appName) appName.textContent = __("appName");
-
-      // nav text
-      const d = document.getElementById("txtDash"); if(d) d.textContent = __("dash");
-      const m = document.getElementById("txtMarket"); if(m) m.textContent = __("market");
-      const w = document.getElementById("txtWallet"); if(w) w.textContent = __("wallet");
-      const a = document.getElementById("txtAI"); if(a) a.textContent = __("ai");
-
-      const d2 = document.getElementById("txtDash2"); if(d2) d2.textContent = __("dash");
-      const m2 = document.getElementById("txtMarket2"); if(m2) m2.textContent = __("market");
-      const w2 = document.getElementById("txtWallet2"); if(w2) w2.textContent = __("wallet");
-      const a2 = document.getElementById("txtAI2"); if(a2) a2.textContent = __("ai");
-
-      const liveLog = document.getElementById("txtLiveLog"); if(liveLog) liveLog.textContent = __("liveLog");
-
-      // money demo
-      const revenue = document.getElementById("revenue"); if(revenue) revenue.textContent = __money(24500);
-      const wallet = document.getElementById("wallet"); if(wallet) wallet.textContent = __money(8320.50);
-    };
-
-    // Map (safe)
-    let __map;
-    window.__agri_map_init = function(){
-      const mapEl = document.getElementById("map");
-      const fb = document.getElementById("mapFallback");
-      if(!mapEl) return;
-
-      if(typeof window.L === "undefined"){
-        if(fb) fb.style.display = "block";
-        return;
-      }
-
-      try{
-        if(__map){
-          setTimeout(()=>{ try{ __map.invalidateSize(); }catch{} }, 50);
-          return;
-        }
-        __map = L.map("map").setView([-1.2921, 36.8219], 6);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(__map);
-        [
-          { pos: [-1.2921, 36.8219], title: "Nairobi - Warehouse" },
-          { pos: [-0.0236, 37.9062], title: "Mt. Kenya - Farm" },
-          { pos: [-1.2864, 36.8172], title: "In Transit" }
-        ].forEach(m => L.marker(m.pos).addTo(__map).bindPopup(m.title));
-        setTimeout(()=>{ try{ __map.invalidateSize(); }catch{} }, 250);
-        setTimeout(()=>{ try{ __map.invalidateSize(); }catch{} }, 800);
-      }catch{
-        if(fb) fb.style.display = "block";
-      }
-    };
-
-    // Boot
-    document.addEventListener("DOMContentLoaded", ()=>{
-      // prove JS is running
-      const dot = document.getElementById("jsDot");
-      const txt = document.getElementById("jsText");
-      if(dot) dot.classList.add("on");
-      if(txt) txt.textContent = "JS: ON";
-
-      // load saved state
-      window.__AGRI.lang = localStorage.getItem("agri_lang") || "en";
-      window.__AGRI.cur = localStorage.getItem("agri_currency") || "USD";
-      window.__AGRI.section = localStorage.getItem("agri_section") || "dashboard";
-
-      // set dropdowns
-      const langSel = document.getElementById("langSelect");
-      const curSel = document.getElementById("currency");
-      if(langSel){ langSel.value = window.__AGRI.lang; langSel.onchange = ()=>window.__agri_set_lang(langSel.value); }
-      if(curSel){ curSel.value = window.__AGRI.cur; curSel.onchange = ()=>window.__agri_set_cur(curSel.value); }
-
-      __setDir();
-      window.__agri_render();
-
-      // show saved section
-      window.__agri_nav(window.__AGRI.section);
-
-      // init map
-      setTimeout(()=>window.__agri_map_init(), 250);
-    });
-  </script>
 </head>
 
 <body>
   <div class="navbar">
     <div class="brand">
-      <div class="logo">A</div>
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="36" height="36">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#16a34a"/>
+              <stop offset="1" stop-color="#22c55e"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#g)"/>
+          <path d="M44 18c-10 2-18 10-20 20 10-2 18-10 20-20Z" fill="#ffffff" opacity="0.95"/>
+          <path d="M22 42c7-8 14-13 22-16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.95"/>
+        </svg>
+      </div>
       <div>
         <div id="appName" style="font-weight:900; line-height:1;">AgriTrade Africa</div>
-        <div style="font-size:.8rem; color:var(--text-light); margin-top:2px;">Investor Demo</div>
+        <div class="muted" style="font-size:.8rem; margin-top:2px;">Investor Demo • LocalStorage Sim</div>
       </div>
     </div>
 
     <div class="nav-center">
-      <div class="btn active" data-nav="dashboard" onclick="__agri_nav('dashboard')"><i class="fa-solid fa-chart-line"></i> <span id="txtDash">Dashboard</span></div>
-      <div class="btn" data-nav="market" onclick="__agri_nav('market')"><i class="fa-solid fa-store"></i> <span id="txtMarket">Market</span></div>
-      <div class="btn" data-nav="wallet" onclick="__agri_nav('wallet')"><i class="fa-solid fa-wallet"></i> <span id="txtWallet">Wallet</span></div>
-      <div class="btn" data-nav="ai" onclick="__agri_nav('ai')"><i class="fa-solid fa-robot"></i> <span id="txtAI">AI Tools</span></div>
+      <button class="btn active" data-nav="dashboard" onclick="__agri_nav('dashboard')"><i class="fa-solid fa-chart-line"></i> <span data-i18n="navDashboard">Dashboard</span></button>
+      <button class="btn" data-nav="market" onclick="__agri_nav('market')"><i class="fa-solid fa-store"></i> <span data-i18n="navMarket">Market</span></button>
+      <button class="btn" data-nav="wallet" onclick="__agri_nav('wallet')"><i class="fa-solid fa-wallet"></i> <span data-i18n="navWallet">Wallet</span></button>
+      <button class="btn" data-nav="ai" onclick="__agri_nav('ai')"><i class="fa-solid fa-robot"></i> <span data-i18n="navAITools">AI Tools</span></button>
+      <button class="btn" data-nav="orders" onclick="__agri_nav('orders')"><i class="fa-solid fa-box"></i> <span data-i18n="orders">Orders</span></button>
     </div>
 
     <div class="nav-right">
-      <div class="status-pill">
-        <span class="dot" id="jsDot"></span>
-        <span id="jsText">JS: OFF</span>
+      <div class="pill">
+        <span class="dot on"></span>
+        <span>JS: ON</span>
         <span class="badge" id="clickCount">0</span>
       </div>
 
@@ -343,42 +375,95 @@
   </div>
 
   <div class="layout">
-    <aside class="panel sidebar">
-      <div class="menu-title">NAV</div>
+    <!-- LEFT -->
+    <aside class="panel left">
+      <div class="menu-title" data-i18n="nav">NAV</div>
+
       <div class="menu-link active" data-nav="dashboard" onclick="__agri_nav('dashboard')">
-        <div class="menu-icon"><i class="fa-solid fa-chart-line"></i></div><div id="txtDash2">Dashboard</div>
+        <div class="menu-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div data-i18n="navDashboard">Dashboard</div>
       </div>
+
       <div class="menu-link" data-nav="market" onclick="__agri_nav('market')">
-        <div class="menu-icon"><i class="fa-solid fa-store"></i></div><div id="txtMarket2">Market</div>
+        <div class="menu-icon"><i class="fa-solid fa-store"></i></div>
+        <div data-i18n="navMarket">Market</div>
       </div>
+
       <div class="menu-link" data-nav="wallet" onclick="__agri_nav('wallet')">
-        <div class="menu-icon"><i class="fa-solid fa-wallet"></i></div><div id="txtWallet2">Wallet</div>
+        <div class="menu-icon"><i class="fa-solid fa-wallet"></i></div>
+        <div data-i18n="navWallet">Wallet</div>
       </div>
+
+      <div class="menu-link" data-nav="orders" onclick="__agri_nav('orders')">
+        <div class="menu-icon"><i class="fa-solid fa-box"></i></div>
+        <div data-i18n="orders">Orders</div>
+      </div>
+
+      <div class="menu-title" data-i18n="aiAutomation">AI & Automation</div>
+
       <div class="menu-link" data-nav="ai" onclick="__agri_nav('ai')">
-        <div class="menu-icon"><i class="fa-solid fa-robot"></i></div><div id="txtAI2">AI Tools</div>
+        <div class="menu-icon"><i class="fa-solid fa-robot"></i></div>
+        <div data-i18n="navAITools">AI Tools</div>
+      </div>
+
+      <div class="menu-link" data-nav="disease" onclick="__agri_nav('disease')">
+        <div class="menu-icon"><i class="fa-solid fa-camera"></i></div>
+        <div data-i18n="diseaseScanner">Disease Scanner</div>
+      </div>
+
+      <div class="menu-link" data-nav="logistics" onclick="__agri_nav('logistics')">
+        <div class="menu-icon"><i class="fa-solid fa-truck"></i></div>
+        <div data-i18n="logistics">Logistics</div>
+      </div>
+
+      <div class="menu-title" data-i18n="gamification">Gamification</div>
+      <div class="menu-link" data-nav="progress" onclick="__agri_nav('progress')">
+        <div class="menu-icon"><i class="fa-solid fa-trophy"></i></div>
+        <div data-i18n="progress">Progress</div>
       </div>
     </aside>
 
-    <main>
-      <section class="card" data-section="dashboard">
+    <!-- MAIN -->
+    <main id="mainContent">
+      <!-- DASHBOARD -->
+      <section class="card" data-section="dashboard" id="section-dashboard">
         <div class="card-header">
-          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> Dashboard</div>
-          <div class="badge">Live</div>
+          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="navDashboard">Dashboard</span></div>
+          <div class="badge"><span data-i18n="live">Live</span></div>
         </div>
+
         <div class="content-pad">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <div class="card"><div class="content-pad"><div style="color:var(--text-light);">Total Revenue</div><div style="font-size:1.6rem;font-weight:900;" id="revenue">—</div></div></div>
-            <div class="card"><div class="content-pad"><div style="color:var(--text-light);">Wallet Balance</div><div style="font-size:1.6rem;font-weight:900;" id="wallet">—</div></div></div>
+          <div class="grid4">
+            <div class="stat">
+              <div class="stat-title" data-i18n="totalRevenue">Total Revenue</div>
+              <div class="stat-value" id="revenue">—</div>
+              <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> <span id="revPct">15%</span></div>
+            </div>
+            <div class="stat">
+              <div class="stat-title" data-i18n="walletBalanceLabel">Wallet Balance</div>
+              <div class="stat-value" id="walletKpi">—</div>
+              <div class="stat-change" id="walletDelta"><i class="fa-solid fa-arrow-up"></i> +—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-title" data-i18n="activeContracts">Active Contracts</div>
+              <div class="stat-value" id="contractsKpi">12</div>
+              <div class="stat-change"><i class="fa-solid fa-circle-check"></i> <span data-i18n="verified">Verified</span></div>
+            </div>
+            <div class="stat">
+              <div class="stat-title" data-i18n="trustScore">Trust Score</div>
+              <div class="stat-value" id="trustKpi">94</div>
+              <div class="stat-change"><i class="fa-solid fa-shield"></i> <span data-i18n="verified">Verified</span></div>
+            </div>
           </div>
 
           <div class="card" style="margin-top:12px;">
             <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span id="txtLiveLog">Live Logistics</span></div>
+              <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="liveLogistics">Live Logistics</span></div>
               <div class="badge">Map</div>
             </div>
             <div class="content-pad">
               <div id="map"></div>
-              <div id="mapFallback" style="display:none; margin-top:8px; color:var(--text-light);">
+              <div id="mapFallback" class="muted" style="display:none; margin-top:8px;">
                 Map library did not load, but the app is running.
               </div>
             </div>
@@ -386,121 +471,1394 @@
         </div>
       </section>
 
+      <!-- MARKET -->
       <section class="card" data-section="market" style="display:none;">
-        <div class="card-header"><div class="card-title"><i class="fa-solid fa-store"></i> Market</div><div class="badge">OK</div></div>
-        <div class="content-pad" style="color:var(--text-light);">Market panel is working.</div>
-      </section>
-
-      <section class="card" data-section="wallet" style="display:none;">
-        <div class="card-header"><div class="card-title"><i class="fa-solid fa-wallet"></i> Wallet</div><div class="badge">OK</div></div>
-        <div class="content-pad" style="color:var(--text-light);">Wallet panel is working.</div>
-      </section>
-
-      <section class="card" data-section="ai" style="display:none;">
-        <div class="card-header"><div class="card-title"><i class="fa-solid fa-robot"></i> AI Tools</div><div class="badge">OK</div></div>
-        <div class="content-pad" style="color:var(--text-light);">AI Tools panel is working.</div>
-      </section>
-    </main>
-  </div>
-  <script>
-(function(){
-  // ---- Helpers ----
-  function ensureToast(){
-    if (document.getElementById("toastContainer")) return;
-    const c = document.createElement("div");
-    c.id = "toastContainer";
-    c.style.cssText = "position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:99999;";
-    document.body.appendChild(c);
-  }
-  function toast(msg){
-    ensureToast();
-    const c = document.getElementById("toastContainer");
-    const t = document.createElement("div");
-    t.style.cssText = "padding:10px 12px;border-radius:14px;border:1px solid rgba(0,0,0,.15);background:rgba(255,255,255,.96);box-shadow:0 18px 40px rgba(0,0,0,.10);max-width:420px;font-family:system-ui;";
-    t.textContent = msg;
-    c.appendChild(t);
-    setTimeout(()=>t.remove(), 2200);
-  }
-
-  // ---- Ensure mainContent exists ----
-  function getMain(){
-    return document.getElementById("mainContent") || document.querySelector("main") || document.body;
-  }
-
-  // ---- Create a section if missing ----
-  function ensureSection(name){
-    const main = getMain();
-    let sec = main.querySelector(`[data-section="${name}"]`);
-    if (sec) return sec;
-
-    sec = document.createElement("section");
-    sec.className = "card";
-    sec.dataset.section = name;
-    sec.style.display = "none";
-    sec.innerHTML = `
-      <div class="card-header">
-        <div class="card-title">
-          <i class="fa-solid fa-layer-group"></i>
-          <span style="text-transform:capitalize">${name}</span>
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-store"></i> <span data-i18n="navMarket">Market</span></div>
+          <div class="row">
+            <input id="marketSearch" class="grow" placeholder="Search listings..." />
+            <button class="btn primary" onclick="Market.openCreate()"><i class="fa-solid fa-plus"></i> <span data-i18n="createListing">Create Listing</span></button>
+          </div>
         </div>
-        <div class="badge">Demo</div>
+
+        <div class="content-pad">
+          <div class="muted" style="margin-bottom:10px;">
+            <span data-i18n="marketHint">Create listings, edit price/qty, and place orders. Data persists in your browser.</span>
+          </div>
+          <div id="marketList"></div>
+        </div>
+      </section>
+
+      <!-- WALLET -->
+      <section class="card" data-section="wallet" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-wallet"></i> <span data-i18n="navWallet">Wallet</span></div>
+          <div class="row">
+            <span class="badge"><span data-i18n="availableBalance">Available Balance</span>: <strong id="walletBalance">—</strong></span>
+            <button class="btn" onclick="Wallet.depositDemo()"><i class="fa-solid fa-circle-plus"></i> <span data-i18n="deposit">Deposit</span></button>
+          </div>
+        </div>
+
+        <div class="content-pad">
+          <div class="card" style="margin-bottom:12px;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-bolt"></i> <span data-i18n="quickPay">Quick Pay</span></div>
+              <div class="badge">M-Pesa • MTN • Airtel</div>
+            </div>
+            <div class="content-pad">
+              <div class="tile-grid" style="margin-bottom:10px;">
+                <div class="tile" onclick="Wallet.selectProvider('M-Pesa')"><div class="tile-logo">MP</div><div><strong>M-Pesa</strong><div class="muted" style="font-size:.85rem;">Safaricom</div></div></div>
+                <div class="tile" onclick="Wallet.selectProvider('MTN')"><div class="tile-logo">MT</div><div><strong>MTN</strong><div class="muted" style="font-size:.85rem;">Mobile Money</div></div></div>
+                <div class="tile" onclick="Wallet.selectProvider('Airtel')"><div class="tile-logo">AR</div><div><strong>Airtel</strong><div class="muted" style="font-size:.85rem;">Money</div></div></div>
+              </div>
+
+              <div class="row" style="margin-bottom:10px;">
+                <span class="badge"><span data-i18n="provider">Provider</span>: <strong id="payProvider">M-Pesa</strong></span>
+                <span class="badge"><span data-i18n="fee">Fee</span>: <strong id="payFee">—</strong></span>
+              </div>
+
+              <div class="row" style="margin-bottom:10px;">
+                <input id="payPhone" class="grow" placeholder="Phone Number" />
+                <input id="payAmount" type="number" min="1" step="1" placeholder="Amount" />
+                <button class="btn primary" onclick="Wallet.sendMoney()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendMoney">Send Money</span></button>
+              </div>
+
+              <div class="muted" id="payValidation" style="display:none; color:var(--danger);"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-receipt"></i> <span data-i18n="walletLedger">Wallet Ledger</span></div>
+              <button class="btn danger" onclick="Wallet.reset()"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset">Reset</span></button>
+            </div>
+            <div class="content-pad">
+              <div id="ledgerTable"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="card" data-section="orders" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-box"></i> <span data-i18n="orders">Orders</span></div>
+          <div class="row">
+            <button class="btn" onclick="Orders.seedOne()"><i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="simulateOrder">Simulate Order</span></button>
+            <button class="btn danger" onclick="Orders.reset()"><i class="fa-solid fa-trash"></i> <span data-i18n="clear">Clear</span></button>
+          </div>
+        </div>
+        <div class="content-pad">
+          <div id="ordersTable"></div>
+        </div>
+      </section>
+
+      <!-- AI TOOLS -->
+      <section class="card" data-section="ai" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-robot"></i> <span data-i18n="navAITools">AI Tools</span></div>
+          <div class="badge"><span data-i18n="aiPredictionAccuracy">Predictions accurate 94% of the time</span></div>
+        </div>
+
+        <div class="content-pad">
+          <div class="kpi" style="margin-bottom:12px;">
+            <div class="card">
+              <div class="content-pad">
+                <div class="row" style="justify-content:space-between;">
+                  <div><strong data-i18n="priceAI">Price AI</strong><div class="muted" style="font-size:.85rem;" data-i18n="priceAiHint">Estimate price by crop & grade</div></div>
+                  <button class="btn" onclick="__agri_nav('aiPrice')"><i class="fa-solid fa-tag"></i> <span data-i18n="open">Open</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="content-pad">
+                <div class="row" style="justify-content:space-between;">
+                  <div><strong data-i18n="soilAnalysis">Soil Analysis</strong><div class="muted" style="font-size:.85rem;" data-i18n="soilHint">Upload report image</div></div>
+                  <button class="btn" onclick="__agri_nav('aiSoil')"><i class="fa-solid fa-flask"></i> <span data-i18n="open">Open</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="content-pad">
+                <div class="row" style="justify-content:space-between;">
+                  <div><strong data-i18n="diseaseScanner">Disease Scanner</strong><div class="muted" style="font-size:.85rem;" data-i18n="diseaseHint">Upload crop photo</div></div>
+                  <button class="btn" onclick="__agri_nav('disease')"><i class="fa-solid fa-camera"></i> <span data-i18n="open">Open</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-comments"></i> <span data-i18n="aiCommandCenter">AI Command Center</span></div>
+              <div class="badge">AgriAI</div>
+            </div>
+            <div class="content-pad">
+              <div class="muted" data-i18n="aiTip">💡 Tip: Offer bulk discount for 1000kg+ to increase deal size</div>
+              <div class="row" style="margin-top:10px;">
+                <input id="aiPrompt" class="grow" placeholder="Ask AgriAI..." />
+                <button class="btn primary" onclick="AI.ask()"><i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="ask">Ask</span></button>
+              </div>
+              <div id="aiAnswer" class="card" style="margin-top:10px;">
+                <div class="content-pad muted" id="aiAnswerText">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI PRICE -->
+      <section class="card" data-section="aiPrice" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-tag"></i> <span data-i18n="priceAI">Price AI</span></div>
+          <button class="btn" onclick="__agri_nav('ai')"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="back">Back</span></button>
+        </div>
+        <div class="content-pad">
+          <div class="row" style="margin-bottom:10px;">
+            <select id="priceCrop">
+              <option value="maize">Maize</option>
+              <option value="beans">Beans</option>
+              <option value="coffee">Coffee</option>
+              <option value="cassava">Cassava</option>
+            </select>
+            <select id="priceGrade">
+              <option value="A">Grade A</option>
+              <option value="B">Grade B</option>
+              <option value="C">Grade C</option>
+            </select>
+            <input id="priceQty" type="number" min="1" step="1" placeholder="Qty (kg)" />
+            <button class="btn primary" onclick="AI.calcPrice()"><i class="fa-solid fa-calculator"></i> <span data-i18n="estimate">Estimate</span></button>
+          </div>
+          <div class="card">
+            <div class="content-pad">
+              <div class="muted" data-i18n="estimatedPayout">Estimated payout</div>
+              <div style="font-size:1.6rem;font-weight:900;" id="priceOut">—</div>
+              <div class="muted" id="priceNote" style="margin-top:6px;">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI SOIL -->
+      <section class="card" data-section="aiSoil" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-flask"></i> <span data-i18n="soilAnalysis">Soil Analysis</span></div>
+          <button class="btn" onclick="__agri_nav('ai')"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="back">Back</span></button>
+        </div>
+        <div class="content-pad">
+          <div class="row" style="margin-bottom:10px;">
+            <input id="soilFile" type="file" accept="image/*,application/pdf" />
+            <button class="btn primary" onclick="AI.soilAnalyze()"><i class="fa-solid fa-microscope"></i> <span data-i18n="analyze">Analyze</span></button>
+          </div>
+          <div class="card">
+            <div class="content-pad" id="soilResult" style="line-height:1.7;">
+              <div class="muted" data-i18n="soilResultHint">Upload a soil report image/PDF to simulate nutrient analysis.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DISEASE -->
+      <section class="card" data-section="disease" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-camera"></i> <span data-i18n="aiDiseaseDetection">AI Disease Detection</span></div>
+          <div class="row">
+            <button class="btn" onclick="__agri_nav('ai')"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="back">Back</span></button>
+          </div>
+        </div>
+        <div class="content-pad">
+          <div class="row" style="margin-bottom:10px;">
+            <input id="diseaseFile" type="file" accept="image/*" />
+            <button class="btn primary" onclick="AI.diseaseScan()"><i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="scanCrop">Scan Crop</span></button>
+          </div>
+          <div class="card">
+            <div class="content-pad" id="diseaseResult" style="line-height:1.7;">
+              <div class="muted" data-i18n="tapToUpload">Tap to upload crop photo</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGISTICS -->
+      <section class="card" data-section="logistics" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-truck"></i> <span data-i18n="logistics">Logistics</span></div>
+          <button class="btn" onclick="__agri_nav('dashboard')"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="backToDashboard">Back</span></button>
+        </div>
+        <div class="content-pad">
+          <div class="muted" data-i18n="logisticsHint">Track shipments. Map stays interactive and resizes correctly.</div>
+          <div class="card" style="margin-top:10px;">
+            <div class="content-pad">
+              <div id="mapMirror" style="height:520px;"></div>
+              <div id="mapMirrorFallback" class="muted" style="display:none; margin-top:8px;">Map library did not load.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROGRESS / GAMIFICATION -->
+      <section class="card" data-section="progress" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-trophy"></i> <span data-i18n="progress">Progress</span></div>
+          <button class="btn primary" onclick="Game.unlockProgress()"><i class="fa-solid fa-unlock"></i> <span data-i18n="unlockProgress">Unlock Progress</span></button>
+        </div>
+        <div class="content-pad">
+          <div class="row" style="justify-content:space-between; margin-bottom:10px;">
+            <span class="badge"><span data-i18n="level">Level</span>: <strong id="lvl">—</strong></span>
+            <span class="badge">XP: <strong id="xp">—</strong></span>
+            <span class="badge"><span data-i18n="nextReward">Next reward</span>: <strong id="nextReward">—</strong></span>
+          </div>
+          <div class="bar"><div id="xpBar"></div></div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-award"></i> <span data-i18n="achievements">Achievements</span></div>
+              <button class="btn danger" onclick="Game.reset()"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset">Reset</span></button>
+            </div>
+            <div class="content-pad" id="badges" style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- RIGHT -->
+    <aside class="panel right">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-comments"></i> <span data-i18n="messages">Messages</span></div>
+          <div class="badge">AgriChat</div>
+        </div>
+
+        <div class="chat-box">
+          <div class="tabs">
+            <div class="tab active" data-tab="buyers" onclick="Chat.switch('buyers')"><span data-i18n="buyers">Buyers</span></div>
+            <div class="tab" data-tab="sellers" onclick="Chat.switch('sellers')"><span data-i18n="sellers">Sellers</span></div>
+            <div class="tab" data-tab="ai" onclick="Chat.switch('ai')"><span data-i18n="ai">AI</span></div>
+          </div>
+
+          <div class="chat-messages" id="chatMessages"></div>
+
+          <div class="chat-input">
+            <input id="chatInput" placeholder="Type message..." onkeydown="if(event.key==='Enter'){Chat.send()}" />
+            <button class="btn primary" onclick="Chat.send()"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
       </div>
-      <div class="content-pad" style="color:rgba(11,18,32,.68);line-height:1.7;">
-        ${name.toUpperCase()} panel is now live. (Auto-created so navigation always works.)
-      </div>
-    `;
-    main.appendChild(sec);
-    return sec;
-  }
+    </aside>
+  </div>
 
-  // ---- Bulletproof navigation ----
-  window.__agri_nav = window.__agri_nav || function(section){
-    // Create missing target sections so nav never fails
-    ensureSection(section);
+  <div id="toastContainer" class="toast-container"></div>
 
-    // Hide all sections then show target
-    const main = getMain();
-    main.querySelectorAll("[data-section]").forEach(s => s.style.display = "none");
-    const target = main.querySelector(`[data-section="${section}"]`);
-    if (target) target.style.display = "";
+  <script>
+  (function(){
+    // ---------- STATE / STORAGE ----------
+    const LS = {
+      lang:"agri_lang",
+      currency:"agri_currency",
+      section:"agri_section",
+      listings:"agri_listings",
+      orders:"agri_orders",
+      wallet:"agri_wallet",
+      game:"agri_game",
+      chat:"agri_chat"
+    };
 
-    // Highlight active buttons
-    document.querySelectorAll(".menu-link, .nav-btn, .btn").forEach(x => x.classList.remove("active"));
-    document.querySelectorAll(`[data-nav="${section}"]`).forEach(x => x.classList.add("active"));
+    const rates = { USD:1, KES:130.5, ETB:54.2, RWF:1220 };
+    const LOCALES = { en:"en-US", es:"es-ES", fr:"fr-FR", ar:"ar" };
+    const RTL = new Set(["ar"]);
 
-    localStorage.setItem("agri_section", section);
-    toast("Opened: " + section);
-  };
+    const state = {
+      lang: localStorage.getItem(LS.lang) || "en",
+      currency: localStorage.getItem(LS.currency) || "USD",
+      section: localStorage.getItem(LS.section) || "dashboard",
+      clicks: 0
+    };
 
-  // ---- Force-bind clicks to everything with data-nav ----
-  function bindAllNav(){
-    document.querySelectorAll("[data-nav]").forEach(el=>{
-      el.style.cursor = "pointer";
-      el.addEventListener("click", (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-        const section = el.getAttribute("data-nav");
-        if (!section) return;
-        window.__agri_nav(section);
-      }, { capture:true });
+    // ---------- I18N ----------
+    const I18N = {
+      en: {
+        appName:"AgriTrade Africa",
+        nav:"NAV",
+        navDashboard:"Dashboard",
+        navMarket:"Market",
+        navWallet:"Wallet",
+        navAITools:"AI Tools",
+        orders:"Orders",
+        logistics:"Logistics",
+        aiAutomation:"AI & Automation",
+        diseaseScanner:"Disease Scanner",
+        aiDiseaseDetection:"AI Disease Detection",
+        aiCommandCenter:"AI Command Center",
+        aiPredictionAccuracy:"Predictions accurate 94% of the time",
+        totalRevenue:"Total Revenue",
+        walletBalanceLabel:"Wallet Balance",
+        activeContracts:"Active Contracts",
+        trustScore:"Trust Score",
+        verified:"Verified",
+        live:"Live",
+        liveLogistics:"Live Logistics",
+        marketHint:"Create listings, edit price/qty, and place orders. Data persists in your browser.",
+        createListing:"Create Listing",
+        availableBalance:"Available Balance",
+        deposit:"Deposit",
+        quickPay:"Quick Pay",
+        provider:"Provider",
+        fee:"Fee",
+        sendMoney:"Send Money",
+        walletLedger:"Wallet Ledger",
+        reset:"Reset",
+        simulateOrder:"Simulate Order",
+        clear:"Clear",
+        open:"Open",
+        back:"Back",
+        backToDashboard:"Back",
+        priceAI:"Price AI",
+        priceAiHint:"Estimate price by crop & grade",
+        soilAnalysis:"Soil Analysis",
+        soilHint:"Upload report image",
+        ask:"Ask",
+        aiTip:"💡 Tip: Offer bulk discount for 1000kg+ to increase deal size",
+        estimate:"Estimate",
+        estimatedPayout:"Estimated payout",
+        analyze:"Analyze",
+        soilResultHint:"Upload a soil report image/PDF to simulate nutrient analysis.",
+        scanCrop:"Scan Crop",
+        tapToUpload:"Tap to upload crop photo",
+        logisticsHint:"Track shipments. Map stays interactive and resizes correctly.",
+        messages:"Messages",
+        buyers:"Buyers",
+        sellers:"Sellers",
+        ai:"AI",
+        typeMessage:"Type message...",
+        progress:"Progress",
+        gamification:"Gamification",
+        unlockProgress:"Unlock Progress",
+        achievements:"Achievements",
+        level:"Level",
+        nextReward:"Next reward"
+      },
+      es: {
+        appName:"AgriTrade África",
+        nav:"NAV",
+        navDashboard:"Panel",
+        navMarket:"Mercado",
+        navWallet:"Billetera",
+        navAITools:"Herramientas IA",
+        orders:"Pedidos",
+        logistics:"Logística",
+        aiAutomation:"IA y automatización",
+        diseaseScanner:"Escáner de enfermedades",
+        aiDiseaseDetection:"Detección de enfermedades con IA",
+        aiCommandCenter:"Centro de mando IA",
+        aiPredictionAccuracy:"Predicciones precisas el 94% del tiempo",
+        totalRevenue:"Ingresos totales",
+        walletBalanceLabel:"Saldo de billetera",
+        activeContracts:"Contratos activos",
+        trustScore:"Puntuación de confianza",
+        verified:"Verificado",
+        live:"En vivo",
+        liveLogistics:"Logística en vivo",
+        marketHint:"Crea anuncios, edita precio/cantidad y realiza pedidos. Los datos se guardan en tu navegador.",
+        createListing:"Crear anuncio",
+        availableBalance:"Saldo disponible",
+        deposit:"Depositar",
+        quickPay:"Pago rápido",
+        provider:"Proveedor",
+        fee:"Comisión",
+        sendMoney:"Enviar dinero",
+        walletLedger:"Libro de la billetera",
+        reset:"Restablecer",
+        simulateOrder:"Simular pedido",
+        clear:"Borrar",
+        open:"Abrir",
+        back:"Volver",
+        backToDashboard:"Volver",
+        priceAI:"IA de precios",
+        priceAiHint:"Estimar por cultivo y calidad",
+        soilAnalysis:"Análisis de suelo",
+        soilHint:"Sube imagen del reporte",
+        ask:"Preguntar",
+        aiTip:"💡 Consejo: Ofrece descuento por 1000kg+ para aumentar el valor del trato",
+        estimate:"Estimar",
+        estimatedPayout:"Pago estimado",
+        analyze:"Analizar",
+        soilResultHint:"Sube una imagen/PDF para simular análisis de nutrientes.",
+        scanCrop:"Escanear cultivo",
+        tapToUpload:"Sube una foto del cultivo",
+        logisticsHint:"Rastrea envíos. El mapa se mantiene interactivo.",
+        messages:"Mensajes",
+        buyers:"Compradores",
+        sellers:"Vendedores",
+        ai:"IA",
+        typeMessage:"Escribe un mensaje...",
+        progress:"Progreso",
+        gamification:"Gamificación",
+        unlockProgress:"Desbloquear progreso",
+        achievements:"Logros",
+        level:"Nivel",
+        nextReward:"Siguiente recompensa"
+      },
+      fr: {
+        appName:"AgriTrade Afrique",
+        nav:"NAV",
+        navDashboard:"Tableau de bord",
+        navMarket:"Marché",
+        navWallet:"Portefeuille",
+        navAITools:"Outils IA",
+        orders:"Commandes",
+        logistics:"Logistique",
+        aiAutomation:"IA & automatisation",
+        diseaseScanner:"Scanner de maladies",
+        aiDiseaseDetection:"Détection des maladies par IA",
+        aiCommandCenter:"Centre de commande IA",
+        aiPredictionAccuracy:"Prédictions exactes 94% du temps",
+        totalRevenue:"Revenu total",
+        walletBalanceLabel:"Solde du portefeuille",
+        activeContracts:"Contrats actifs",
+        trustScore:"Indice de confiance",
+        verified:"Vérifié",
+        live:"En direct",
+        liveLogistics:"Logistique en direct",
+        marketHint:"Créez des annonces, modifiez prix/quantité et passez des commandes. Données enregistrées dans le navigateur.",
+        createListing:"Créer une annonce",
+        availableBalance:"Solde disponible",
+        deposit:"Dépôt",
+        quickPay:"Paiement rapide",
+        provider:"Fournisseur",
+        fee:"Frais",
+        sendMoney:"Envoyer de l’argent",
+        walletLedger:"Journal du portefeuille",
+        reset:"Réinitialiser",
+        simulateOrder:"Simuler commande",
+        clear:"Effacer",
+        open:"Ouvrir",
+        back:"Retour",
+        backToDashboard:"Retour",
+        priceAI:"IA des prix",
+        priceAiHint:"Estimer par culture et qualité",
+        soilAnalysis:"Analyse du sol",
+        soilHint:"Téléverser rapport",
+        ask:"Demander",
+        aiTip:"💡 Astuce : remise 1000kg+ pour augmenter la taille des ventes",
+        estimate:"Estimer",
+        estimatedPayout:"Paiement estimé",
+        analyze:"Analyser",
+        soilResultHint:"Téléversez image/PDF pour simuler l’analyse des nutriments.",
+        scanCrop:"Scanner la culture",
+        tapToUpload:"Téléversez une photo de la culture",
+        logisticsHint:"Suivi des expéditions. Carte interactive.",
+        messages:"Messages",
+        buyers:"Acheteurs",
+        sellers:"Vendeurs",
+        ai:"IA",
+        typeMessage:"Tapez un message...",
+        progress:"Progression",
+        gamification:"Gamification",
+        unlockProgress:"Débloquer",
+        achievements:"Succès",
+        level:"Niveau",
+        nextReward:"Prochaine récompense"
+      },
+      ar: {
+        appName:"أجريتريد أفريقيا",
+        nav:"التنقل",
+        navDashboard:"لوحة التحكم",
+        navMarket:"السوق",
+        navWallet:"المحفظة",
+        navAITools:"أدوات الذكاء",
+        orders:"الطلبات",
+        logistics:"اللوجستيات",
+        aiAutomation:"الذكاء والأتمتة",
+        diseaseScanner:"ماسح الأمراض",
+        aiDiseaseDetection:"كشف الأمراض بالذكاء",
+        aiCommandCenter:"مركز قيادة الذكاء",
+        aiPredictionAccuracy:"توقعات دقيقة بنسبة 94%",
+        totalRevenue:"إجمالي الإيرادات",
+        walletBalanceLabel:"رصيد المحفظة",
+        activeContracts:"العقود النشطة",
+        trustScore:"درجة الثقة",
+        verified:"موثّق",
+        live:"مباشر",
+        liveLogistics:"اللوجستيات المباشرة",
+        marketHint:"أنشئ عروضًا، عدّل السعر/الكمية، وأنشئ طلبات. البيانات محفوظة في المتصفح.",
+        createListing:"إنشاء عرض",
+        availableBalance:"الرصيد المتاح",
+        deposit:"إيداع",
+        quickPay:"دفع سريع",
+        provider:"المزوّد",
+        fee:"الرسوم",
+        sendMoney:"إرسال المال",
+        walletLedger:"سجل المحفظة",
+        reset:"إعادة ضبط",
+        simulateOrder:"محاكاة طلب",
+        clear:"مسح",
+        open:"فتح",
+        back:"رجوع",
+        backToDashboard:"رجوع",
+        priceAI:"ذكاء الأسعار",
+        priceAiHint:"تقدير حسب المحصول والجودة",
+        soilAnalysis:"تحليل التربة",
+        soilHint:"رفع تقرير",
+        ask:"اسأل",
+        aiTip:"💡 نصيحة: خصم 1000 كغ+ لزيادة قيمة الصفقة",
+        estimate:"تقدير",
+        estimatedPayout:"العائد المتوقع",
+        analyze:"تحليل",
+        soilResultHint:"ارفع صورة/ملف PDF لمحاكاة تحليل المغذيات.",
+        scanCrop:"فحص المحصول",
+        tapToUpload:"اضغط لرفع صورة للمحصول",
+        logisticsHint:"تتبع الشحنات. الخريطة تظل تفاعلية.",
+        messages:"الرسائل",
+        buyers:"المشترون",
+        sellers:"البائعون",
+        ai:"الذكاء",
+        typeMessage:"اكتب رسالة...",
+        progress:"التقدم",
+        gamification:"التحفيز",
+        unlockProgress:"فتح التقدم",
+        achievements:"الإنجازات",
+        level:"المستوى",
+        nextReward:"المكافأة التالية"
+      }
+    };
+
+    const t = (k)=> (I18N[state.lang] && I18N[state.lang][k]) || I18N.en[k] || k;
+    const locale = ()=> LOCALES[state.lang] || "en-US";
+
+    function setDir(){
+      const rtl = RTL.has(state.lang);
+      document.documentElement.setAttribute("dir", rtl ? "rtl" : "ltr");
+      document.documentElement.setAttribute("lang", state.lang);
+    }
+
+    function moneyFromUSD(usd){
+      const r = rates[state.currency] || 1;
+      const v = usd * r;
+      try { return new Intl.NumberFormat(locale(), { style:"currency", currency: state.currency, maximumFractionDigits:2 }).format(v); }
+      catch { return v.toLocaleString(locale()) + " " + state.currency; }
+    }
+
+    function showToast(msg, type="info"){
+      const c = document.getElementById("toastContainer");
+      if(!c) return;
+      const el = document.createElement("div");
+      el.className = "toast " + type;
+      const icon = type==="success" ? "check-circle" : type==="error" ? "exclamation-circle" : "info-circle";
+      el.innerHTML = `<i class="fas fa-${icon}"></i><span>${String(msg)}</span>`;
+      c.appendChild(el);
+      setTimeout(()=> el.remove(), 2600);
+    }
+
+    // ---------- NAV ----------
+    window.__agri_nav = function(name){
+      state.clicks++;
+      const cc = document.getElementById("clickCount");
+      if(cc) cc.textContent = String(state.clicks);
+
+      document.querySelectorAll("[data-section]").forEach(s=> s.style.display="none");
+      const target = document.querySelector(`[data-section="${name}"]`);
+      if(target) target.style.display="";
+
+      document.querySelectorAll(".menu-link,.btn").forEach(x=> x.classList.remove("active"));
+      document.querySelectorAll(`[data-nav="${name}"]`).forEach(x=> x.classList.add("active"));
+
+      state.section = name;
+      localStorage.setItem(LS.section, name);
+
+      // Map resize on show
+      if(name==="dashboard") setTimeout(()=> Maps.initMain(), 120);
+      if(name==="logistics") setTimeout(()=> Maps.initMirror(), 120);
+    };
+
+    function applyTranslations(){
+      document.getElementById("appName").textContent = t("appName");
+      document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+      const chatInput = document.getElementById("chatInput");
+      if(chatInput) chatInput.placeholder = t("typeMessage");
+    }
+
+    // ---------- DEMO DATA ----------
+    function loadJSON(key, fallback){
+      try{
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      }catch{ return fallback; }
+    }
+    function saveJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    // Market listings
+    const defaultListings = [
+      { id: crypto.randomUUID(), crop:"Maize", grade:"A", qtyKg: 1200, pricePerKgUSD: 0.42, location:"Nakuru, KE", seller:"Kiptoo Farm Co-op", updatedAt: Date.now() },
+      { id: crypto.randomUUID(), crop:"Beans", grade:"B", qtyKg: 650, pricePerKgUSD: 0.88, location:"Musanze, RW", seller:"Imbuto Traders", updatedAt: Date.now() },
+      { id: crypto.randomUUID(), crop:"Coffee", grade:"A", qtyKg: 300, pricePerKgUSD: 3.10, location:"Jimma, ET", seller:"Oromia Growers", updatedAt: Date.now() }
+    ];
+
+    // Wallet + ledger
+    const defaultWallet = {
+      balanceUSD: 8320.50,
+      ledger: [
+        { id: crypto.randomUUID(), type:"credit", provider:"Settlement", amountUSD: 1200, note:"Contract payout", ts: Date.now()-86400000 },
+        { id: crypto.randomUUID(), type:"debit", provider:"M-Pesa", amountUSD: 85, note:"Logistics fee", ts: Date.now()-42000000 }
+      ]
+    };
+
+    const defaultOrders = [
+      { id: "ORD-10021", crop:"Maize", qtyKg: 500, priceUSD: 0.42, buyer:"Nairobi Foods Ltd", status:"Pending", ts: Date.now()-7200000 },
+      { id: "ORD-10022", crop:"Beans", qtyKg: 200, priceUSD: 0.88, buyer:"Kigali Market Hub", status:"In Transit", ts: Date.now()-17200000 }
+    ];
+
+    // Game
+    const defaultGame = { xp: 120, level: 1, unlocked: {} };
+
+    // Chat
+    const defaultChat = {
+      tab:"buyers",
+      messages: [
+        { role:"ai", tab:"ai", text:"Welcome to AgriChat. Try: “Find maize buyers for 1000kg”", ts: Date.now()-60000 }
+      ]
+    };
+
+    // ---------- MODULES ----------
+    const Store = {
+      listings: ()=> loadJSON(LS.listings, defaultListings),
+      setListings: (v)=> saveJSON(LS.listings, v),
+      wallet: ()=> loadJSON(LS.wallet, defaultWallet),
+      setWallet: (v)=> saveJSON(LS.wallet, v),
+      orders: ()=> loadJSON(LS.orders, defaultOrders),
+      setOrders: (v)=> saveJSON(LS.orders, v),
+      game: ()=> loadJSON(LS.game, defaultGame),
+      setGame: (v)=> saveJSON(LS.game, v),
+      chat: ()=> loadJSON(LS.chat, defaultChat),
+      setChat: (v)=> saveJSON(LS.chat, v)
+    };
+
+    const Dashboard = {
+      render(){
+        // revenue derived from orders + listings as a demo KPI
+        const orders = Store.orders();
+        const wallet = Store.wallet();
+        const revenueUSD = orders.reduce((sum,o)=> sum + (o.qtyKg * o.priceUSD), 0) + 24500;
+
+        document.getElementById("revenue").textContent = moneyFromUSD(revenueUSD);
+        document.getElementById("walletKpi").textContent = moneyFromUSD(wallet.balanceUSD);
+        document.getElementById("walletBalance").textContent = moneyFromUSD(wallet.balanceUSD);
+        document.getElementById("walletDelta").innerHTML = `<i class="fa-solid fa-arrow-up"></i> +${moneyFromUSD(1200)}`;
+      }
+    };
+
+    const Market = {
+      openCreate(){
+        const crop = prompt("Crop (e.g., Maize, Beans, Coffee):");
+        if(!crop) return;
+        const grade = prompt("Grade (A/B/C):", "A") || "A";
+        const qty = Number(prompt("Quantity (kg):", "500"));
+        const price = Number(prompt("Price per kg (USD):", "0.50"));
+        const loc = prompt("Location (City, Country):", "Nairobi, KE") || "Nairobi, KE";
+        const seller = prompt("Seller name:", "Demo Seller") || "Demo Seller";
+
+        if(!Number.isFinite(qty) || qty <= 0) return showToast("Invalid quantity", "error");
+        if(!Number.isFinite(price) || price <= 0) return showToast("Invalid price", "error");
+
+        const listings = Store.listings();
+        listings.unshift({
+          id: crypto.randomUUID(),
+          crop: crop.trim(),
+          grade: grade.trim().toUpperCase(),
+          qtyKg: Math.round(qty),
+          pricePerKgUSD: price,
+          location: loc.trim(),
+          seller: seller.trim(),
+          updatedAt: Date.now()
+        });
+        Store.setListings(listings);
+        Game.addXP(25, "Created listing");
+        Market.render();
+        showToast("Listing created", "success");
+      },
+      placeOrder(listingId){
+        const listings = Store.listings();
+        const item = listings.find(x=> x.id===listingId);
+        if(!item) return;
+
+        const qty = Number(prompt(`Order qty (kg) for ${item.crop} (available ${item.qtyKg}kg):`, String(Math.min(200, item.qtyKg))));
+        if(!Number.isFinite(qty) || qty <= 0) return showToast("Invalid order qty", "error");
+        if(qty > item.qtyKg) return showToast("Not enough quantity available", "error");
+
+        const buyer = prompt("Buyer name:", "Demo Buyer Ltd") || "Demo Buyer Ltd";
+
+        // reduce listing qty
+        item.qtyKg -= Math.round(qty);
+        item.updatedAt = Date.now();
+
+        // create order
+        const orders = Store.orders();
+        const id = "ORD-" + String(Math.floor(10000 + Math.random()*89999));
+        orders.unshift({
+          id,
+          crop: item.crop,
+          qtyKg: Math.round(qty),
+          priceUSD: item.pricePerKgUSD,
+          buyer,
+          status: "Pending",
+          ts: Date.now()
+        });
+
+        // write back
+        Store.setListings(listings.filter(x=> x.qtyKg > 0)); // remove if zero
+        Store.setOrders(orders);
+
+        Game.addXP(35, "Placed order");
+        Orders.render();
+        Market.render();
+        Dashboard.render();
+        showToast(`Order created: ${id}`, "success");
+      },
+      editPrice(id){
+        const listings = Store.listings();
+        const item = listings.find(x=> x.id===id);
+        if(!item) return;
+        const p = Number(prompt("New price per kg (USD):", String(item.pricePerKgUSD)));
+        if(!Number.isFinite(p) || p<=0) return showToast("Invalid price", "error");
+        item.pricePerKgUSD = p;
+        item.updatedAt = Date.now();
+        Store.setListings(listings);
+        Game.addXP(10, "Updated price");
+        Market.render();
+        showToast("Price updated", "success");
+      },
+      editQty(id){
+        const listings = Store.listings();
+        const item = listings.find(x=> x.id===id);
+        if(!item) return;
+        const q = Number(prompt("New quantity (kg):", String(item.qtyKg)));
+        if(!Number.isFinite(q) || q<=0) return showToast("Invalid quantity", "error");
+        item.qtyKg = Math.round(q);
+        item.updatedAt = Date.now();
+        Store.setListings(listings);
+        Game.addXP(10, "Updated quantity");
+        Market.render();
+        showToast("Quantity updated", "success");
+      },
+      remove(id){
+        if(!confirm("Remove this listing?")) return;
+        const listings = Store.listings().filter(x=> x.id!==id);
+        Store.setListings(listings);
+        Game.addXP(5, "Removed listing");
+        Market.render();
+        showToast("Listing removed", "success");
+      },
+      render(){
+        const wrap = document.getElementById("marketList");
+        if(!wrap) return;
+
+        const q = (document.getElementById("marketSearch")?.value || "").trim().toLowerCase();
+        let listings = Store.listings();
+        if(q){
+          listings = listings.filter(x =>
+            x.crop.toLowerCase().includes(q) ||
+            x.location.toLowerCase().includes(q) ||
+            x.seller.toLowerCase().includes(q) ||
+            x.grade.toLowerCase().includes(q)
+          );
+        }
+
+        if(!listings.length){
+          wrap.innerHTML = `<div class="muted">No listings match your search.</div>`;
+          return;
+        }
+
+        const rows = listings.map(x=>{
+          const totalUSD = x.qtyKg * x.pricePerKgUSD;
+          return `
+            <tr>
+              <td><strong>${x.crop}</strong><div class="muted" style="font-size:.85rem;">${x.location}</div></td>
+              <td>${x.grade}</td>
+              <td>${x.qtyKg.toLocaleString(locale())}</td>
+              <td>${moneyFromUSD(x.pricePerKgUSD)}</td>
+              <td><strong>${moneyFromUSD(totalUSD)}</strong></td>
+              <td class="row" style="gap:6px;">
+                <button class="btn primary" onclick="Market.placeOrder('${x.id}')"><i class="fa-solid fa-cart-shopping"></i> Order</button>
+                <button class="btn" onclick="Market.editPrice('${x.id}')"><i class="fa-solid fa-tag"></i></button>
+                <button class="btn" onclick="Market.editQty('${x.id}')"><i class="fa-solid fa-scale-balanced"></i></button>
+                <button class="btn danger" onclick="Market.remove('${x.id}')"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        wrap.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Listing</th>
+                <th>Grade</th>
+                <th>Qty (kg)</th>
+                <th>Price/kg</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+    };
+
+    const Wallet = {
+      provider: "M-Pesa",
+      feeFor(provider){
+        // simple fee model (demo)
+        if(provider==="M-Pesa") return 0.012;
+        if(provider==="MTN") return 0.010;
+        if(provider==="Airtel") return 0.011;
+        return 0.012;
+      },
+      selectProvider(p){
+        Wallet.provider = p;
+        document.getElementById("payProvider").textContent = p;
+        Wallet.renderFee();
+      },
+      renderFee(){
+        const feePct = Wallet.feeFor(Wallet.provider);
+        document.getElementById("payFee").textContent = new Intl.NumberFormat(locale(), { style:"percent", maximumFractionDigits:1 }).format(feePct);
+      },
+      depositDemo(){
+        const wallet = Store.wallet();
+        wallet.balanceUSD += 250;
+        wallet.ledger.unshift({ id: crypto.randomUUID(), type:"credit", provider:"Deposit", amountUSD: 250, note:"Demo deposit", ts: Date.now() });
+        Store.setWallet(wallet);
+        Game.addXP(15, "Deposit");
+        Wallet.render();
+        Dashboard.render();
+        showToast("Deposit successful", "success");
+      },
+      sendMoney(){
+        const phone = (document.getElementById("payPhone").value || "").trim();
+        const amt = Number(document.getElementById("payAmount").value);
+        const v = document.getElementById("payValidation");
+
+        const showErr = (m)=>{ v.style.display="block"; v.textContent=m; };
+        v.style.display="none"; v.textContent="";
+
+        if(!phone || phone.length < 8) return showErr("Enter a valid phone number.");
+        if(!Number.isFinite(amt) || amt <= 0) return showErr("Enter a valid amount.");
+
+        const wallet = Store.wallet();
+        const feePct = Wallet.feeFor(Wallet.provider);
+        const feeUSD = amt * feePct;
+        const totalUSD = amt + feeUSD;
+
+        if(totalUSD > wallet.balanceUSD) return showErr("Insufficient balance.");
+
+        wallet.balanceUSD -= totalUSD;
+        wallet.ledger.unshift({
+          id: crypto.randomUUID(),
+          type:"debit",
+          provider: Wallet.provider,
+          amountUSD: amt,
+          note: `Send to ${phone} (fee ${feeUSD.toFixed(2)} USD)`,
+          ts: Date.now()
+        });
+
+        Store.setWallet(wallet);
+        Game.addXP(20, "Send payment");
+        Wallet.render();
+        Dashboard.render();
+        document.getElementById("payAmount").value = "";
+        showToast("Payment sent", "success");
+      },
+      reset(){
+        if(!confirm("Reset wallet + ledger?")) return;
+        Store.setWallet(defaultWallet);
+        Wallet.render();
+        Dashboard.render();
+        showToast("Wallet reset", "success");
+      },
+      render(){
+        const wallet = Store.wallet();
+        document.getElementById("walletBalance").textContent = moneyFromUSD(wallet.balanceUSD);
+
+        const rows = wallet.ledger.map(x=>{
+          const when = new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(x.ts));
+          const sign = x.type==="credit" ? "+" : "−";
+          const color = x.type==="credit" ? "#166534" : "#991b1b";
+          return `
+            <tr>
+              <td>${when}</td>
+              <td><strong>${x.provider}</strong><div class="muted" style="font-size:.85rem;">${x.note}</div></td>
+              <td style="color:${color}; font-weight:900;">${sign}${moneyFromUSD(x.amountUSD)}</td>
+            </tr>
+          `;
+        }).join("");
+
+        document.getElementById("ledgerTable").innerHTML = `
+          <table>
+            <thead><tr><th>Date</th><th>Details</th><th>Amount</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+
+        Wallet.renderFee();
+      }
+    };
+
+    const Orders = {
+      seedOne(){
+        const listings = Store.listings();
+        if(!listings.length) return showToast("Create a market listing first.", "error");
+        const l = listings[Math.floor(Math.random()*listings.length)];
+        const qty = Math.max(50, Math.min(300, l.qtyKg));
+        const id = "ORD-" + String(Math.floor(10000 + Math.random()*89999));
+        const orders = Store.orders();
+        orders.unshift({ id, crop:l.crop, qtyKg:qty, priceUSD:l.pricePerKgUSD, buyer:"Simulated Buyer", status:"Pending", ts: Date.now() });
+        Store.setOrders(orders);
+        Game.addXP(25, "Simulated order");
+        Orders.render();
+        Dashboard.render();
+        showToast("Order simulated", "success");
+      },
+      setStatus(id, status){
+        const orders = Store.orders();
+        const o = orders.find(x=> x.id===id);
+        if(!o) return;
+        o.status = status;
+        Store.setOrders(orders);
+        Game.addXP(10, "Order update");
+        Orders.render();
+        showToast("Order updated", "success");
+      },
+      reset(){
+        if(!confirm("Clear all orders?")) return;
+        Store.setOrders([]);
+        Orders.render();
+        Dashboard.render();
+        showToast("Orders cleared", "success");
+      },
+      render(){
+        const wrap = document.getElementById("ordersTable");
+        if(!wrap) return;
+        const orders = Store.orders();
+        if(!orders.length){
+          wrap.innerHTML = `<div class="muted">No orders yet. Place an order from Market.</div>`;
+          return;
+        }
+        const rows = orders.map(o=>{
+          const when = new Intl.DateTimeFormat(locale(), { dateStyle:"medium", timeStyle:"short" }).format(new Date(o.ts));
+          const totalUSD = o.qtyKg * o.priceUSD;
+          return `
+            <tr>
+              <td><strong>${o.id}</strong><div class="muted" style="font-size:.85rem;">${when}</div></td>
+              <td>${o.crop}</td>
+              <td>${o.qtyKg.toLocaleString(locale())}</td>
+              <td>${moneyFromUSD(o.priceUSD)}</td>
+              <td><strong>${moneyFromUSD(totalUSD)}</strong><div class="muted" style="font-size:.85rem;">${o.buyer}</div></td>
+              <td>
+                <select onchange="Orders.setStatus('${o.id}', this.value)">
+                  <option ${o.status==="Pending"?"selected":""}>Pending</option>
+                  <option ${o.status==="In Transit"?"selected":""}>In Transit</option>
+                  <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+                  <option ${o.status==="Disputed"?"selected":""}>Disputed</option>
+                </select>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        wrap.innerHTML = `
+          <table>
+            <thead><tr><th>Order</th><th>Crop</th><th>Qty</th><th>Price/kg</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+    };
+
+    const AI = {
+      ask(){
+        const input = document.getElementById("aiPrompt");
+        const out = document.getElementById("aiAnswerText");
+        const q = (input.value || "").trim();
+        if(!q) return showToast("Enter a question.", "error");
+
+        // Demo response logic (not “placeholder”, it responds based on intent)
+        const qq = q.toLowerCase();
+        let answer = "";
+        if(qq.includes("wallet") || qq.includes("balance")){
+          const w = Store.wallet();
+          answer = `Your available balance is ${moneyFromUSD(w.balanceUSD)}.`;
+        } else if(qq.includes("maize") || qq.includes("corn")){
+          answer = "For maize deals, target buyers near Nairobi and offer 2–4% discount for 1000kg+. Use escrow for first-time buyers.";
+        } else if(qq.includes("logistics") || qq.includes("delivery")){
+          answer = "Recommend split routing: farm → warehouse → hub. Add insurance on long-haul segments and confirm GPS check-ins every 2 hours.";
+        } else {
+          answer = "I can help with pricing, buyer targeting, contracts, and logistics. Try: “Estimate maize Grade A price for 800kg”.";
+        }
+
+        out.textContent = answer;
+        input.value = "";
+        Game.addXP(10, "Used AI");
+      },
+      calcPrice(){
+        const crop = document.getElementById("priceCrop").value;
+        const grade = document.getElementById("priceGrade").value;
+        const qty = Number(document.getElementById("priceQty").value);
+        if(!Number.isFinite(qty) || qty<=0) return showToast("Enter qty (kg).", "error");
+
+        // base per-kg USD model
+        const base = { maize:0.45, beans:0.95, coffee:3.20, cassava:0.25 }[crop] || 0.5;
+        const gradeMul = { A:1.12, B:1.00, C:0.90 }[grade] || 1.0;
+
+        // bulk discount
+        const discount = qty >= 1000 ? 0.04 : qty >= 500 ? 0.02 : 0.0;
+
+        const priceUSD = base * gradeMul * (1 - discount);
+        const totalUSD = priceUSD * qty;
+
+        document.getElementById("priceOut").textContent = moneyFromUSD(totalUSD);
+        document.getElementById("priceNote").textContent =
+          `Per-kg: ${moneyFromUSD(priceUSD)} • Bulk discount: ${(discount*100).toFixed(0)}% • Grade: ${grade.toUpperCase()}`;
+
+        Game.addXP(12, "Price estimate");
+      },
+      soilAnalyze(){
+        const f = document.getElementById("soilFile").files[0];
+        if(!f) return showToast("Upload a report (image/PDF).", "error");
+
+        // simulated results based on file size (deterministic-ish)
+        const n = f.size % 1000;
+        const ph = (6.0 + (n/1000)*1.2).toFixed(1);
+        const nppm = 45 + (n % 40);
+        const pppm = 12 + (n % 18);
+        const kppm = 80 + (n % 60);
+
+        document.getElementById("soilResult").innerHTML = `
+          <div><strong>Soil Summary</strong></div>
+          <div class="muted">File: ${f.name}</div>
+          <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
+          <div>pH: <strong>${ph}</strong></div>
+          <div>N (ppm): <strong>${nppm}</strong></div>
+          <div>P (ppm): <strong>${pppm}</strong></div>
+          <div>K (ppm): <strong>${kppm}</strong></div>
+          <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
+          <div><strong>Recommendation</strong></div>
+          <div class="muted" style="line-height:1.7;">
+            Apply balanced fertilizer, add compost for organic matter, and irrigate lightly after application.
+          </div>
+        `;
+        Game.addXP(18, "Soil analysis");
+      },
+      diseaseScan(){
+        const f = document.getElementById("diseaseFile").files[0];
+        if(!f) return showToast("Upload a crop photo.", "error");
+
+        // deterministic “confidence” (demo)
+        const c = 86 + (f.size % 12);
+        const healthy = (f.size % 3) !== 0;
+
+        document.getElementById("diseaseResult").innerHTML = healthy
+          ? `<div><strong>Healthy Crop Detected</strong></div>
+             <div class="muted">Confidence: <strong>${c}%</strong></div>
+             <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
+             <div class="muted" style="line-height:1.7;">No disease patterns detected. Continue current care schedule and monitor weekly.</div>`
+          : `<div><strong>Potential Risk Detected</strong></div>
+             <div class="muted">Confidence: <strong>${c}%</strong></div>
+             <hr style="border:none;border-top:1px solid rgba(11,18,32,.10); margin:10px 0;">
+             <div class="muted" style="line-height:1.7;">Consider isolating affected plants and applying recommended treatment. Retest with a clearer photo under daylight.</div>`;
+
+        Game.addXP(20, "Disease scan");
+      }
+    };
+
+    const Chat = {
+      tab: "buyers",
+      switch(tab){
+        const c = Store.chat();
+        c.tab = tab;
+        Store.setChat(c);
+        document.querySelectorAll(".tab").forEach(x=> x.classList.remove("active"));
+        document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add("active");
+        Chat.render();
+      },
+      send(){
+        const input = document.getElementById("chatInput");
+        const text = (input.value || "").trim();
+        if(!text) return;
+        const c = Store.chat();
+        c.messages.push({ role:"me", tab: c.tab, text, ts: Date.now() });
+
+        // AI response rules
+        const lower = text.toLowerCase();
+        let reply = "";
+        if(c.tab === "ai"){
+          if(lower.includes("wallet") || lower.includes("balance")){
+            reply = `Balance: ${moneyFromUSD(Store.wallet().balanceUSD)}.`;
+          } else if(lower.includes("order")){
+            reply = "To create an order: open Market → click Order on a listing → choose qty and buyer.";
+          } else if(lower.includes("disease")){
+            reply = "Open Disease Scanner → upload a crop photo → Scan Crop.";
+          } else {
+            reply = "Try: “Estimate maize Grade A price for 800kg” or “Find buyers near Nairobi”.";
+          }
+        } else if(c.tab === "buyers"){
+          reply = "Buyer lead: Nairobi Foods Ltd — prefers weekly supply, Grade A, 500–1500kg. Ask for delivery timeline and payment terms.";
+        } else {
+          reply = "Seller lead: Co-op in Nakuru — consistent maize supply. Ask for moisture %, grade certificate, and pickup window.";
+        }
+
+        c.messages.push({ role:"ai", tab: c.tab, text: reply, ts: Date.now() });
+        Store.setChat(c);
+
+        input.value = "";
+        Chat.render();
+        Game.addXP(8, "Chat message");
+      },
+      render(){
+        const c = Store.chat();
+        Chat.tab = c.tab || "buyers";
+        const box = document.getElementById("chatMessages");
+        const msgs = c.messages.filter(m => m.tab === c.tab || m.role === "me" && m.tab === c.tab);
+
+        const html = msgs.map(m=>{
+          const own = m.role === "me";
+          return `
+            <div class="message ${own ? "own" : ""}">
+              ${own ? "" : `<div class="avatar">AI</div>`}
+              <div class="bubble ${own ? "own" : ""}">
+                ${escapeHtml(m.text)}
+              </div>
+              ${own ? `<div class="avatar">ME</div>` : ""}
+            </div>
+          `;
+        }).join("");
+
+        box.innerHTML = html || `<div class="muted">No messages yet.</div>`;
+        box.scrollTop = box.scrollHeight;
+      }
+    };
+
+    const Game = {
+      thresholds: [0, 200, 450, 800, 1200, 1700, 2300],
+      badges: [
+        { key:"trader", name:"Trader", need: 100 },
+        { key:"quality", name:"Quality", need: 250 },
+        { key:"pioneer", name:"Pioneer", need: 450 },
+        { key:"export", name:"Export", need: 800 },
+        { key:"green", name:"Green", need: 1200 },
+        { key:"mentor", name:"Mentor", need: 1700 }
+      ],
+      addXP(amount, reason){
+        const g = Store.game();
+        g.xp += amount;
+        Game.recalc(g);
+        Store.setGame(g);
+        Game.render();
+      },
+      recalc(g){
+        let lvl = 1;
+        for(let i=1;i<Game.thresholds.length;i++){
+          if(g.xp >= Game.thresholds[i]) lvl = i+1;
+        }
+        g.level = lvl;
+
+        // unlock badges
+        for(const b of Game.badges){
+          if(g.xp >= b.need) g.unlocked[b.key] = true;
+        }
+      },
+      unlockProgress(){
+        // This is the “button to unlock progress” you asked for.
+        // It awards XP based on actual platform activity (listings/orders/chat/wallet).
+        const listings = Store.listings().length;
+        const orders = Store.orders().length;
+        const ledger = Store.wallet().ledger.length;
+
+        let gain = 0;
+        gain += Math.min(60, listings * 10);
+        gain += Math.min(80, orders * 15);
+        gain += Math.min(40, ledger * 5);
+        gain += 25; // base reward for checking in
+
+        const g = Store.game();
+        g.xp += gain;
+        Game.recalc(g);
+        Store.setGame(g);
+        Game.render();
+        showToast(`Progress unlocked: +${gain} XP`, "success");
+      },
+      reset(){
+        if(!confirm("Reset XP + badges?")) return;
+        Store.setGame(defaultGame);
+        Game.render();
+        showToast("Progress reset", "success");
+      },
+      render(){
+        const g = Store.game();
+        Game.recalc(g);
+
+        document.getElementById("xp").textContent = String(g.xp);
+        document.getElementById("lvl").textContent = String(g.level);
+
+        const next = Game.thresholds.find(x => x > g.xp) || (g.xp + 200);
+        document.getElementById("nextReward").textContent = String(next) + " XP";
+
+        const prev = Game.thresholds[g.level-1] || 0;
+        const span = Math.max(1, next - prev);
+        const pct = Math.max(0, Math.min(100, ((g.xp - prev) / span) * 100));
+        document.getElementById("xpBar").style.width = pct.toFixed(0) + "%";
+
+        const badgesWrap = document.getElementById("badges");
+        badgesWrap.innerHTML = Game.badges.map(b=>{
+          const on = !!g.unlocked[b.key];
+          return `
+            <div class="card" style="border-color:${on ? "rgba(22,163,74,.28)" : "rgba(11,18,32,.12)"};">
+              <div class="content-pad">
+                <div class="row" style="justify-content:space-between;">
+                  <strong>${b.name}</strong>
+                  <span class="badge">${on ? "Unlocked" : `${b.need} XP`}</span>
+                </div>
+                <div class="muted" style="margin-top:6px; line-height:1.6;">
+                  ${on ? "Benefit: higher trust + better buyer matching." : "Complete actions in Market/Wallet/AI to unlock."}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+    };
+
+    // ---------- MAPS ----------
+    const Maps = {
+      map:null,
+      mirror:null,
+      initMain(){
+        const el = document.getElementById("map");
+        if(!el) return;
+        if(typeof window.L === "undefined"){
+          document.getElementById("mapFallback").style.display = "block";
+          return;
+        }
+        try{
+          if(Maps.map){
+            Maps.map.invalidateSize();
+            return;
+          }
+          Maps.map = L.map("map").setView([-1.2921, 36.8219], 6);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(Maps.map);
+
+          const markers = [
+            { pos: [-1.2921, 36.8219], title: "Nairobi - Warehouse" },
+            { pos: [-0.0236, 37.9062], title: "Mt. Kenya - Farm" },
+            { pos: [-1.2864, 36.8172], title: "In Transit" }
+          ];
+          markers.forEach(m => L.marker(m.pos).addTo(Maps.map).bindPopup(m.title));
+          setTimeout(()=> Maps.map.invalidateSize(), 300);
+          setTimeout(()=> Maps.map.invalidateSize(), 900);
+        }catch{
+          document.getElementById("mapFallback").style.display = "block";
+        }
+      },
+      initMirror(){
+        const el = document.getElementById("mapMirror");
+        const fb = document.getElementById("mapMirrorFallback");
+        if(!el) return;
+        if(typeof window.L === "undefined"){
+          fb.style.display = "block";
+          return;
+        }
+        try{
+          if(Maps.mirror){
+            Maps.mirror.invalidateSize();
+            return;
+          }
+          Maps.mirror = L.map("mapMirror").setView([-1.2921, 36.8219], 6);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(Maps.mirror);
+          [
+            { pos: [-1.2921, 36.8219], title: "Nairobi - Hub" },
+            { pos: [-0.0236, 37.9062], title: "Farm Pickup" },
+            { pos: [-1.2864, 36.8172], title: "Truck Checkpoint" }
+          ].forEach(m => L.marker(m.pos).addTo(Maps.mirror).bindPopup(m.title));
+          setTimeout(()=> Maps.mirror.invalidateSize(), 300);
+          setTimeout(()=> Maps.mirror.invalidateSize(), 900);
+        }catch{
+          fb.style.display = "block";
+        }
+      }
+    };
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // ---------- Expose modules globally for onclick ----------
+    window.Market = Market;
+    window.Wallet = Wallet;
+    window.Orders = Orders;
+    window.AI = AI;
+    window.Chat = Chat;
+    window.Game = Game;
+    window.Maps = Maps;
+
+    // ---------- INIT ----------
+    document.addEventListener("DOMContentLoaded", ()=>{
+      setDir();
+
+      // wire dropdowns
+      const langSel = document.getElementById("langSelect");
+      const curSel = document.getElementById("currency");
+
+      langSel.value = state.lang;
+      curSel.value = state.currency;
+
+      langSel.addEventListener("change", ()=>{
+        state.lang = langSel.value;
+        localStorage.setItem(LS.lang, state.lang);
+        setDir();
+        applyTranslations();
+        Market.render(); Orders.render(); Wallet.render(); Dashboard.render(); Chat.render(); Game.render();
+        showToast("Language updated", "success");
+      });
+
+      curSel.addEventListener("change", ()=>{
+        state.currency = curSel.value;
+        localStorage.setItem(LS.currency, state.currency);
+        Market.render(); Orders.render(); Wallet.render(); Dashboard.render(); Game.render();
+        showToast("Currency updated", "success");
+      });
+
+      // market search
+      document.getElementById("marketSearch").addEventListener("input", ()=> Market.render());
+
+      // defaults persist
+      if(!localStorage.getItem(LS.listings)) Store.setListings(defaultListings);
+      if(!localStorage.getItem(LS.wallet)) Store.setWallet(defaultWallet);
+      if(!localStorage.getItem(LS.orders)) Store.setOrders(defaultOrders);
+      if(!localStorage.getItem(LS.game)) Store.setGame(defaultGame);
+      if(!localStorage.getItem(LS.chat)) Store.setChat(defaultChat);
+
+      applyTranslations();
+      Wallet.selectProvider("M-Pesa");
+      Wallet.render();
+      Market.render();
+      Orders.render();
+      Dashboard.render();
+      Chat.render();
+      Game.render();
+
+      // restore section
+      __agri_nav(state.section);
+
+      // init map after first paint
+      setTimeout(()=> Maps.initMain(), 400);
     });
-  }
-
-  // ---- Ensure your common sections exist ----
-  function ensureCommonSections(){
-    ["dashboard","market","wallet","ai","listings","orders","logistics","disease"].forEach(ensureSection);
-  }
-
-  // ---- Run after page loads ----
-  document.addEventListener("DOMContentLoaded", ()=>{
-    ensureCommonSections();
-    bindAllNav();
-
-    // Restore last section (if not dashboard)
-    const last = localStorage.getItem("agri_section") || "dashboard";
-    window.__agri_nav(last);
-  });
-})();
-</script>
+  })();
+  </script>
 </body>
 </html>
