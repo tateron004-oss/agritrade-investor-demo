@@ -1471,6 +1471,227 @@
 
     init();
   })();
+/* =========================
+   GAMIFICATION (WORKING)
+   ========================= */
+const GKEY = "agri_gamification_v1";
+const GAM = (() => {
+  try { return JSON.parse(localStorage.getItem(GKEY) || "null") || null; } catch { return null; }
+})() || {
+  xp: 0,
+  level: 1,
+  actions: { chats:0, quickPays:0, diseaseScans:0, soilRuns:0, priceRuns:0, navMarket:0, navLogistics:0, aiChats:0 },
+  badges: {
+    trader:false, quality:false, pioneer:false, export:false, green:false, digital:false, mentor:false, leader:false
+  }
+};
+
+function saveGAM(){ localStorage.setItem(GKEY, JSON.stringify(GAM)); }
+
+function xpForNextLevel(lv){ return 200 + (lv-1)*120; }
+
+function addXP(amount, reason){
+  GAM.xp += amount;
+  while(GAM.xp >= xpForNextLevel(GAM.level)){
+    GAM.xp -= xpForNextLevel(GAM.level);
+    GAM.level += 1;
+    showToast(`Level up! Level ${GAM.level}`, "success");
+  }
+  saveGAM();
+  renderGamification();
+  if(reason) showToast(`+${amount} XP — ${reason}`, "info");
+}
+
+function unlockBadge(key, label){
+  if(GAM.badges[key]) return;
+  GAM.badges[key] = true;
+  saveGAM();
+  renderGamification();
+  showToast(`Badge unlocked: ${label}`, "success");
+}
+
+function evaluateBadges(){
+  // thresholds
+  if(GAM.actions.chats >= 3) unlockBadge("trader", "Trader");
+  if((GAM.actions.diseaseScans + GAM.actions.soilRuns) >= 2) unlockBadge("quality", "Quality");
+  if(GAM.actions.priceRuns >= 2) unlockBadge("pioneer", "Pioneer");
+  if(GAM.actions.navMarket >= 1 && GAM.actions.navLogistics >= 1) unlockBadge("export", "Export");
+  if(GAM.actions.soilRuns >= 1) unlockBadge("green", "Green");
+  if(GAM.actions.quickPays >= 1) unlockBadge("digital", "Digital");
+  if(GAM.actions.aiChats >= 5) unlockBadge("mentor", "Mentor");
+
+  const unlockedCount = Object.values(GAM.badges).filter(Boolean).length;
+  if(unlockedCount >= 4) unlockBadge("leader", "Leader");
+}
+
+function renderGamification(){
+  // Adds/updates a mini panel on the right if present; otherwise does nothing.
+  let host = document.getElementById("gamificationPanel");
+  if(!host){
+    const right = document.querySelector(".sidebar-right .chat-wrap");
+    if(!right) return;
+    host = document.createElement("div");
+    host.id = "gamificationPanel";
+    host.className = "card";
+    host.style.marginTop = "12px";
+    right.appendChild(host);
+  }
+
+  const next = xpForNextLevel(GAM.level);
+  const pct = Math.max(0, Math.min(100, Math.round((GAM.xp/next)*100)));
+
+  const badgeList = [
+    ["trader","Trader"],["quality","Quality"],["pioneer","Pioneer"],["export","Export"],
+    ["green","Green"],["digital","Digital"],["mentor","Mentor"],["leader","Leader"]
+  ];
+
+  host.innerHTML = `
+    <div class="card-header">
+      <div class="card-title"><i class="fa-solid fa-trophy"></i> Achievements</div>
+      <div class="badge">Level ${GAM.level}</div>
+    </div>
+    <div class="content-pad">
+      <div style="display:flex; justify-content:space-between; gap:10px;">
+        <div style="font-weight:900;">XP Progress</div>
+        <div class="badge">${GAM.xp} / ${next}</div>
+      </div>
+      <div style="height:10px; background: rgba(255,255,255,.08); border:1px solid var(--border); border-radius:999px; overflow:hidden; margin-top:8px;">
+        <div style="height:100%; width:${pct}%; background: linear-gradient(90deg, var(--accent), var(--accent2));"></div>
+      </div>
+
+      <div style="margin-top:12px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;">
+        ${badgeList.map(([k,label])=>`
+          <div style="border:1px solid var(--border); background: rgba(255,255,255,.06); border-radius:14px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+              <div style="font-weight:900;">${label}</div>
+              <span class="badge" style="${GAM.badges[k] ? "outline:2px solid rgba(34,197,94,.25)" : "opacity:.7"}">
+                ${GAM.badges[k] ? "Unlocked" : "Locked"}
+              </span>
+            </div>
+            <div style="margin-top:6px; color:var(--text-light); font-size:.85rem;">
+              ${badgeHint(k)}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function badgeHint(k){
+  const a = GAM.actions;
+  const hints = {
+    trader: `Send 3 messages (${a.chats}/3)`,
+    quality: `Run 2 scans (Disease/Soil) (${(a.diseaseScans+a.soilRuns)}/2)`,
+    pioneer: `Run Price AI 2x (${a.priceRuns}/2)`,
+    export: `Visit Market + Logistics (${Math.min(1,a.navMarket) + Math.min(1,a.navLogistics)}/2)`,
+    green: `Run Soil Analysis 1x (${a.soilRuns}/1)`,
+    digital: `Use Quick Pay 1x (${a.quickPays}/1)`,
+    mentor: `Chat with AI 5x (${a.aiChats}/5)`,
+    leader: `Unlock 4 badges (${Object.values(GAM.badges).filter(Boolean).length}/4)`
+  };
+  return hints[k] || "";
+}
+
+/* ---- Hook into existing actions ---- */
+// 1) Navigation
+const _showSection = window.showSection;
+window.showSection = function(name){
+  if(name === "market") { GAM.actions.navMarket += 1; addXP(10, "Visited Market"); }
+  if(name === "logistics") { GAM.actions.navLogistics += 1; addXP(10, "Visited Logistics"); }
+  saveGAM(); evaluateBadges();
+  return _showSection(name);
+};
+
+// 2) Chat send + AI replies
+const _sendChat = window.sendChat;
+window.sendChat = function(){
+  GAM.actions.chats += 1;
+  addXP(8, "Sent a message");
+  saveGAM(); evaluateBadges();
+  return _sendChat();
+};
+
+// Increase AI chat count when AI replies append (we can detect by time)
+const origPush = DB.chat.push.bind(DB.chat);
+DB.chat.push = function(...args){
+  const msg = args[0];
+  if(msg && msg.from === "AI"){
+    GAM.actions.aiChats += 1;
+    addXP(6, "AI interaction");
+    saveGAM(); evaluateBadges();
+  }
+  return origPush(...args);
+};
+
+// 3) Quick Pay
+const _sendMoneyQuickPay = sendMoneyQuickPay;
+sendMoneyQuickPay = function(){
+  GAM.actions.quickPays += 1;
+  addXP(15, "Used Quick Pay");
+  saveGAM(); evaluateBadges();
+  return _sendMoneyQuickPay();
+};
+
+// 4) Disease scan
+const _renderDiseaseHistory = renderDiseaseHistory;
+renderDiseaseHistory = function(){
+  // if history increases, count a scan
+  // (safe: count when new item is first)
+  if(DB.diseaseHistory && DB.diseaseHistory.length){
+    // only award xp once per file change is handled in scanner; so just update view
+  }
+  return _renderDiseaseHistory();
+};
+
+// award XP when new scan added (override bind)
+const _bindDiseaseScanner = bindDiseaseScanner;
+bindDiseaseScanner = function(){
+  _bindDiseaseScanner();
+  const file = document.getElementById("diseaseFile");
+  if(file && !file.__gam){
+    file.__gam = true;
+    file.addEventListener("change", ()=>{
+      GAM.actions.diseaseScans += 1;
+      addXP(18, "Ran Disease Scan");
+      saveGAM(); evaluateBadges();
+    });
+  }
+};
+
+// 5) Soil upload
+const _bindSoilAI = bindSoilAI;
+bindSoilAI = function(){
+  _bindSoilAI();
+  const file = document.getElementById("soilFile");
+  if(file && !file.__gam){
+    file.__gam = true;
+    file.addEventListener("change", ()=>{
+      GAM.actions.soilRuns += 1;
+      addXP(18, "Ran Soil Analysis");
+      saveGAM(); evaluateBadges();
+    });
+  }
+};
+
+// 6) Price AI
+const _bindPriceAI = bindPriceAI;
+bindPriceAI = function(){
+  _bindPriceAI();
+  const btn = document.getElementById("runPriceAI");
+  if(btn && !btn.__gam){
+    btn.__gam = true;
+    btn.addEventListener("click", ()=>{
+      GAM.actions.priceRuns += 1;
+      addXP(16, "Ran Price AI");
+      saveGAM(); evaluateBadges();
+    });
+  }
+};
+
+// Render on load
+renderGamification();
+evaluateBadges();
   </script>
 </body>
 </html>
